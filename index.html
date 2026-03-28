@@ -2728,54 +2728,84 @@ function renderMathBreakdown(buildOrder) {
 
   const itemName = (id) => ITEMS[id]?.name || id;
 
-  // Build the overview section explaining the general formulas
+  // Build the overview section explaining how the formulas connect
   let html = `
     <div class="math-overview">
       <h3>How the Calculator Works</h3>
       <p>
-        You asked for <em style="color:var(--neon-cyan)">${fmt(targetRate)}/min</em> of
-        <em style="color:var(--neon-cyan)">${targetItem?.name || state.selectedItem}</em>.
-        The calculator walks backward through every recipe in the production chain, using three core formulas
-        to figure out how many buildings you need at each step.
+        You asked for <em style="color:var(--neon-gold)">${fmt(targetRate)}/min</em> of
+        <em style="color:var(--neon-gold)">${targetItem?.name || state.selectedItem}</em>.
+        The calculator chains four formulas together in a loop, starting from your target and working
+        backward through every ingredient until it hits raw resources. Here&rsquo;s how they connect:
       </p>
+
+      <div class="formula-block" style="text-align:center; font-size:15px; line-height: 2.2;">
+        <span style="color:var(--neon-gold)">You want X/min of an item</span><br>
+        &darr;&ensp;<span style="color:var(--text-muted); font-size:13px">feeds into</span><br>
+        <span style="color:var(--neon-cyan)">Formula 1</span> &rarr; how many craft cycles/min the factory needs<br>
+        &darr;&ensp;<span style="color:var(--text-muted); font-size:13px">compared against</span><br>
+        <span style="color:var(--neon-cyan)">Formula 2</span> &rarr; how many cycles one building can do/min<br>
+        &darr;&ensp;<span style="color:var(--text-muted); font-size:13px">divided to get</span><br>
+        <span style="color:var(--neon-green)">Formula 3</span> &rarr; <strong>how many buildings to place</strong><br>
+        &darr;&ensp;<span style="color:var(--text-muted); font-size:13px">and simultaneously</span><br>
+        <span style="color:var(--neon-magenta)">Formula 4</span> &rarr; how much of each input ingredient/min<br>
+        &darr;&ensp;<span style="color:var(--text-muted); font-size:13px">each input rate <em>becomes a new &ldquo;X/min&rdquo;</em> &mdash; loop back to top</span><br>
+        <span style="color:var(--neon-purple)">&uarr; repeat until raw resources</span>
+      </div>
+
+      <h3 style="margin-top:20px">The Four Formulas</h3>
+
       <div class="formula-block">
         <span class="label">Formula 1 &mdash; Crafts needed per minute</span>
         crafts/min = desired_rate &divide; output_qty_per_craft
       </div>
       <p>
-        Each recipe produces a certain number of items per craft cycle.
-        For example, Circuit Board produces <em>2</em> per craft, so to get 60/min you only need 30 crafts/min.
+        <strong>What it does:</strong> Converts your desired item rate into craft cycles.
+        A recipe that outputs 2 items per craft only needs half as many cycles as one that outputs 1.
+        <br><strong>Feeds into:</strong> Formula 3 (numerator) and Formula 4 (drives input demand).
       </p>
+
       <div class="formula-block">
         <span class="label">Formula 2 &mdash; Crafts one building can do per minute</span>
-        building_crafts/min = (60 &divide; craft_time_seconds) &times; building_speed_multiplier
+        building_crafts/min = (60 &divide; craft_time_seconds) &times; speed_multiplier
       </div>
       <p>
-        A building with a speed multiplier of 1.0x running a 2-second recipe does 60&divide;2 = 30 crafts/min.
-        A faster building (e.g. Assembler Mk.III at 1.5x) would do 45 crafts/min on the same recipe.
+        <strong>What it does:</strong> Tells you the throughput capacity of a single building.
+        A 2-second recipe at 1.0x speed = 30 crafts/min. At 1.5x (Mk.III) = 45 crafts/min.
+        <br><strong>Feeds into:</strong> Formula 3 (denominator). This is the &ldquo;how fast is one building&rdquo; half of the equation.
       </p>
+
       <div class="formula-block">
         <span class="label">Formula 3 &mdash; Number of buildings required</span>
         buildings = &lceil; crafts/min &divide; building_crafts/min &rceil;
-        <br><span style="color:var(--text-muted); font-size:0.8rem">(always rounded up &mdash; you can't build half a smelter)</span>
       </div>
       <p>
-        Input demand is calculated by scaling the recipe&rsquo;s input quantities by the total crafts/min:
+        <strong>What it does:</strong> Divides total demand (Formula 1) by single-building capacity (Formula 2)
+        and rounds up. This is the <em>answer</em> &mdash; how many of this building to place.
+        <br><strong>Depends on:</strong> Formula 1 output &divide; Formula 2 output.
       </p>
+
       <div class="formula-block">
-        <span class="label">Formula 4 &mdash; Input item rate</span>
-        input_rate = (input_qty_per_craft &divide; output_qty_per_craft) &times; desired_rate
+        <span class="label">Formula 4 &mdash; Input item rate (the recursive link)</span>
+        input_rate = (input_qty &divide; output_qty) &times; desired_rate
       </div>
       <p>
-        This input rate then becomes the <em>desired rate</em> for that ingredient, and the same
-        four formulas are applied recursively all the way down to raw resources.
-        When multiple recipes need the same intermediate (e.g. Iron Ingot), their rates are summed.
+        <strong>What it does:</strong> For each ingredient in the recipe, calculates how much of it
+        you need per minute. This is the formula that <em>creates the chain</em>.
+        <br><strong>Key connection:</strong> Each input_rate becomes a brand new <em>desired_rate</em> for that ingredient,
+        and the whole loop (Formulas 1&rarr;2&rarr;3&rarr;4) runs again for it. If Magnetic Coil needs
+        Magnet and Copper Ingot, each of those gets its own desired_rate, which triggers its own
+        set of building calculations and its own inputs, all the way down.
+        <br><strong>Merging:</strong> When two different recipes both need the same ingredient
+        (e.g. Iron Ingot is needed by Gears <em>and</em> Circuit Boards), their rates are <em>summed</em>
+        before the formulas run for that ingredient. That&rsquo;s why you see one combined Iron Ingot
+        entry, not two separate ones.
       </p>
     </div>
 
     <div class="math-overview" style="border-color: rgba(179, 102, 255, 0.15); margin-bottom: 16px;">
       <h3>Per-Item Breakdown</h3>
-      <p>Click any item below to expand the full step-by-step math for that item.</p>
+      <p>Click any item below to see exactly how the four formulas were applied with your actual numbers.</p>
     </div>
 
     <div class="math-breakdown">
