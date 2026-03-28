@@ -165,14 +165,13 @@ html {
   font-weight: 900;
   letter-spacing: 3px;
   background: linear-gradient(135deg,
-    var(--neon-cyan), var(--neon-green), var(--neon-yellow),
-    var(--neon-orange), var(--neon-red), var(--neon-magenta),
-    var(--neon-purple), var(--neon-blue), var(--neon-cyan));
-  background-size: 600% 600%;
+    var(--neon-cyan), var(--neon-purple), var(--neon-magenta),
+    var(--neon-cyan));
+  background-size: 300% 300%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: gradient-shift 8s ease infinite;
+  animation: gradient-shift 10s ease infinite;
   text-shadow: none;
   position: relative;
 }
@@ -537,9 +536,13 @@ select:focus {
 }
 
 .result-card:hover {
-  border-color: rgba(0, 255, 255, 0.35);
+  border-color: rgba(0, 255, 255, 0.3);
   transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px var(--border-glow), 0 0 40px rgba(255, 0, 255, 0.08);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.4),
+    0 0 15px rgba(0, 255, 200, 0.12),
+    0 0 30px rgba(140, 0, 255, 0.08),
+    inset 0 0 20px rgba(0, 255, 255, 0.03);
 }
 
 @keyframes card-entrance {
@@ -552,15 +555,12 @@ select:focus {
   top: 0; left: 0; right: 0;
   height: 3px;
   border-radius: 12px 12px 0 0;
-  animation: glow-hue-cycle 12s linear infinite;
+  animation: glow-breathe 6s ease-in-out infinite;
 }
 
-@keyframes glow-hue-cycle {
-  0% { filter: hue-rotate(0deg) brightness(1); }
-  25% { filter: hue-rotate(60deg) brightness(1.2); }
-  50% { filter: hue-rotate(120deg) brightness(1); }
-  75% { filter: hue-rotate(180deg) brightness(1.2); }
-  100% { filter: hue-rotate(360deg) brightness(1); }
+@keyframes glow-breathe {
+  0%, 100% { opacity: 0.6; filter: brightness(0.8); }
+  50% { opacity: 1; filter: brightness(1.4); }
 }
 
 .result-card .item-name {
@@ -667,15 +667,14 @@ select:focus {
   position: absolute;
   top: 0; bottom: 0;
   left: 23px;
-  width: 3px;
+  width: 2px;
   background: linear-gradient(180deg,
-    var(--neon-cyan), var(--neon-green), var(--neon-yellow),
-    var(--neon-orange), var(--neon-red), var(--neon-magenta),
-    var(--neon-purple), var(--neon-blue), var(--neon-cyan));
-  background-size: 100% 400%;
-  animation: gradient-shift 8s ease infinite;
+    var(--neon-cyan), var(--neon-purple), var(--neon-magenta),
+    var(--neon-purple), var(--neon-cyan));
+  background-size: 100% 300%;
+  animation: gradient-shift 12s ease infinite;
   border-radius: 2px;
-  box-shadow: 0 0 8px rgba(0, 255, 255, 0.2);
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.15), 0 0 24px rgba(180, 0, 255, 0.08);
 }
 
 .build-step {
@@ -1149,13 +1148,7 @@ select:focus {
   font-weight: 600;
 }
 
-/* Psychedelic border animation on input panel */
-@property --angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
-}
-
+/* DMT-space border — breathing layered glows */
 .input-panel {
   background: var(--bg-secondary);
   position: relative;
@@ -1166,25 +1159,32 @@ select:focus {
   position: absolute;
   inset: -2px;
   border-radius: 18px;
-  background: conic-gradient(from var(--angle, 0deg),
-    var(--neon-cyan),
-    var(--neon-blue),
-    var(--neon-purple),
-    var(--neon-magenta),
-    var(--neon-pink),
-    var(--neon-red),
-    var(--neon-orange),
-    var(--neon-yellow),
-    var(--neon-green),
-    var(--neon-cyan)
-  );
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(0, 255, 200, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(180, 0, 255, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 0%, rgba(0, 180, 255, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(255, 0, 160, 0.2) 0%, transparent 50%);
   z-index: -2;
-  opacity: 0.4;
-  animation: border-rotate 6s linear infinite;
+  opacity: 0.5;
+  animation: dmt-border-breathe 8s ease-in-out infinite;
 }
 
-@keyframes border-rotate {
-  to { --angle: 360deg; }
+@keyframes dmt-border-breathe {
+  0%, 100% {
+    opacity: 0.35;
+    filter: hue-rotate(0deg) blur(3px);
+    transform: scale(1);
+  }
+  33% {
+    opacity: 0.55;
+    filter: hue-rotate(-30deg) blur(4px);
+    transform: scale(1.01);
+  }
+  66% {
+    opacity: 0.45;
+    filter: hue-rotate(20deg) blur(2px);
+    transform: scale(0.995);
+  }
 }
 
 /* Glowing selection highlight */
@@ -2469,31 +2469,47 @@ function initStarfield() {
       return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
     }
 
-    // 9 nebula clouds, each with its own hue cycle speed and position drift
+    // DMT-space nebula system — deep jewel tones, slow organic breathing
+    // Hue ranges favor deep teals, indigos, violets, magentas, and sacred greens
+    // Narrower hue ranges = more cohesive; slower speeds = more organic
+    const breathe = Math.sin(t * 0.3) * 0.02; // global breathing intensity
+
     const nebulae = [
-      // Large background washes
-      { xBase: 0.25, yBase: 0.20, xAmp: 0.10, yAmp: 0.06, xFreq: 1.0,  yFreq: 0.7,  r: 400, hueBase: 270, hueRange: 80,  hueSpeed: 0.3,  alpha: 0.07 },
-      { xBase: 0.75, yBase: 0.30, xAmp: 0.08, yAmp: 0.05, xFreq: 0.8,  yFreq: 1.1,  r: 380, hueBase: 180, hueRange: 60,  hueSpeed: 0.5,  alpha: 0.06 },
-      { xBase: 0.50, yBase: 0.75, xAmp: 0.09, yAmp: 0.07, xFreq: 0.6,  yFreq: 0.9,  r: 350, hueBase: 320, hueRange: 70,  hueSpeed: 0.4,  alpha: 0.06 },
-      // Medium accent clouds
-      { xBase: 0.15, yBase: 0.55, xAmp: 0.06, yAmp: 0.08, xFreq: 1.2,  yFreq: 0.5,  r: 260, hueBase: 120, hueRange: 50,  hueSpeed: 0.7,  alpha: 0.055 },
-      { xBase: 0.85, yBase: 0.65, xAmp: 0.05, yAmp: 0.06, xFreq: 0.9,  yFreq: 1.3,  r: 240, hueBase: 30,  hueRange: 40,  hueSpeed: 0.6,  alpha: 0.05 },
-      { xBase: 0.40, yBase: 0.45, xAmp: 0.07, yAmp: 0.04, xFreq: 1.1,  yFreq: 0.8,  r: 280, hueBase: 210, hueRange: 90,  hueSpeed: 0.35, alpha: 0.05 },
-      // Smaller vivid pops
-      { xBase: 0.60, yBase: 0.15, xAmp: 0.04, yAmp: 0.05, xFreq: 1.4,  yFreq: 1.0,  r: 180, hueBase: 0,   hueRange: 360, hueSpeed: 0.2,  alpha: 0.045 },
-      { xBase: 0.30, yBase: 0.85, xAmp: 0.05, yAmp: 0.03, xFreq: 0.7,  yFreq: 1.5,  r: 200, hueBase: 60,  hueRange: 360, hueSpeed: 0.15, alpha: 0.04 },
-      { xBase: 0.70, yBase: 0.90, xAmp: 0.06, yAmp: 0.04, xFreq: 1.3,  yFreq: 0.6,  r: 220, hueBase: 150, hueRange: 100, hueSpeed: 0.55, alpha: 0.04 },
+      // Deep space foundation washes — indigo / violet / deep teal
+      { xBase: 0.22, yBase: 0.18, xAmp: 0.08, yAmp: 0.05, xFreq: 0.4,  yFreq: 0.3,  r: 450, hueBase: 260, hueRange: 40,  hueSpeed: 0.12, alpha: 0.075 + breathe, sat: 0.7, lit: 0.35 },
+      { xBase: 0.78, yBase: 0.25, xAmp: 0.06, yAmp: 0.04, xFreq: 0.35, yFreq: 0.5,  r: 420, hueBase: 190, hueRange: 35,  hueSpeed: 0.15, alpha: 0.065 + breathe, sat: 0.65, lit: 0.3 },
+      { xBase: 0.50, yBase: 0.72, xAmp: 0.07, yAmp: 0.06, xFreq: 0.3,  yFreq: 0.4,  r: 400, hueBase: 300, hueRange: 45,  hueSpeed: 0.1,  alpha: 0.06 + breathe, sat: 0.75, lit: 0.35 },
+
+      // Mid-layer — sacred emerald / deep cyan / violet-rose
+      { xBase: 0.15, yBase: 0.50, xAmp: 0.05, yAmp: 0.07, xFreq: 0.5,  yFreq: 0.25, r: 300, hueBase: 160, hueRange: 30,  hueSpeed: 0.2,  alpha: 0.055, sat: 0.8, lit: 0.35 },
+      { xBase: 0.85, yBase: 0.58, xAmp: 0.04, yAmp: 0.05, xFreq: 0.45, yFreq: 0.55, r: 280, hueBase: 280, hueRange: 50,  hueSpeed: 0.18, alpha: 0.05, sat: 0.7, lit: 0.4 },
+      { xBase: 0.42, yBase: 0.40, xAmp: 0.06, yAmp: 0.03, xFreq: 0.55, yFreq: 0.35, r: 320, hueBase: 220, hueRange: 40,  hueSpeed: 0.14, alpha: 0.05, sat: 0.65, lit: 0.35 },
+
+      // Detail layer — tighter, brighter accents that drift and pulse
+      { xBase: 0.35, yBase: 0.15, xAmp: 0.04, yAmp: 0.04, xFreq: 0.7,  yFreq: 0.45, r: 200, hueBase: 175, hueRange: 25,  hueSpeed: 0.25, alpha: 0.045, sat: 0.85, lit: 0.45 },
+      { xBase: 0.65, yBase: 0.82, xAmp: 0.05, yAmp: 0.03, xFreq: 0.35, yFreq: 0.65, r: 220, hueBase: 310, hueRange: 30,  hueSpeed: 0.22, alpha: 0.04, sat: 0.8, lit: 0.4 },
+      { xBase: 0.50, yBase: 0.50, xAmp: 0.03, yAmp: 0.03, xFreq: 0.6,  yFreq: 0.4,  r: 250, hueBase: 240, hueRange: 60,  hueSpeed: 0.08, alpha: 0.035, sat: 0.6, lit: 0.3 },
+
+      // Rare warm accents — deep amber / rose, very subtle
+      { xBase: 0.70, yBase: 0.35, xAmp: 0.03, yAmp: 0.04, xFreq: 0.5,  yFreq: 0.3,  r: 180, hueBase: 340, hueRange: 20,  hueSpeed: 0.3,  alpha: 0.03, sat: 0.7, lit: 0.4 },
+      { xBase: 0.25, yBase: 0.75, xAmp: 0.04, yAmp: 0.03, xFreq: 0.4,  yFreq: 0.5,  r: 160, hueBase: 25,  hueRange: 15,  hueSpeed: 0.25, alpha: 0.025, sat: 0.6, lit: 0.4 },
     ];
 
     for (const neb of nebulae) {
       const nx = w * (neb.xBase + Math.sin(t * neb.xFreq) * neb.xAmp);
       const ny = h * (neb.yBase + Math.cos(t * neb.yFreq) * neb.yAmp);
       const hue = (neb.hueBase + Math.sin(t * neb.hueSpeed) * neb.hueRange + 360) % 360;
-      const [cr, cg, cb] = hsl2rgb(hue, 0.8, 0.5);
+      // Per-cloud saturation and lightness for richer, deeper tones
+      const sat = neb.sat || 0.7;
+      const lit = neb.lit || 0.35;
+      const [cr, cg, cb] = hsl2rgb(hue, sat, lit);
+      const a = neb.alpha;
+      // Softer radial falloff — more organic blending
       const gradient = ctx.createRadialGradient(nx, ny, 0, nx, ny, neb.r);
-      gradient.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, ${neb.alpha})`);
-      gradient.addColorStop(0.35, `rgba(${cr}, ${cg}, ${cb}, ${neb.alpha * 0.5})`);
-      gradient.addColorStop(0.7, `rgba(${cr}, ${cg}, ${cb}, ${neb.alpha * 0.15})`);
+      gradient.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, ${a})`);
+      gradient.addColorStop(0.25, `rgba(${cr}, ${cg}, ${cb}, ${a * 0.65})`);
+      gradient.addColorStop(0.55, `rgba(${cr}, ${cg}, ${cb}, ${a * 0.25})`);
+      gradient.addColorStop(0.8, `rgba(${cr}, ${cg}, ${cb}, ${a * 0.06})`);
       gradient.addColorStop(1, "transparent");
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, w, h);
