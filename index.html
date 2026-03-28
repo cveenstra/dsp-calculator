@@ -53,6 +53,86 @@ body {
   line-height: 1.6;
 }
 
+/* ---- Custom Titlebar (VS Code style) ---- */
+.titlebar {
+  display: none; /* hidden in browser, shown in Electron */
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 32px;
+  z-index: 9999;
+  background: #15152b;
+  -webkit-app-region: drag;
+  user-select: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  border-bottom: 1px solid #1F1F41;
+  font-family: var(--font-body);
+}
+
+.titlebar.electron-active {
+  display: flex;
+}
+
+.titlebar-title {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: #A599E9;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+}
+
+.titlebar-drag-spacer {
+  width: 70px; /* balance the buttons on the right */
+}
+
+.titlebar-controls {
+  display: flex;
+  -webkit-app-region: no-drag;
+  height: 100%;
+}
+
+.titlebar-btn {
+  width: 46px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: #A599E9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.titlebar-btn:hover {
+  background: rgba(105, 67, 255, 0.2);
+}
+
+.titlebar-btn.close-btn:hover {
+  background: #e81123;
+  color: #fff;
+}
+
+.titlebar-btn svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 1.2;
+  fill: none;
+}
+
+/* Push body content down when titlebar is visible */
+body.has-titlebar {
+  padding-top: 32px;
+}
+
+body.has-titlebar #starfield {
+  top: 32px;
+}
+
 /* Canvas starfield — single unified background */
 #starfield {
   position: fixed;
@@ -1313,6 +1393,23 @@ select:focus {
 </style>
 </head>
 <body>
+
+<!-- Custom titlebar (visible in Electron only) -->
+<div class="titlebar" id="titlebar">
+  <div class="titlebar-drag-spacer"></div>
+  <span class="titlebar-title">DSP Production Calculator</span>
+  <div class="titlebar-controls">
+    <button class="titlebar-btn" id="btn-minimize" title="Minimize">
+      <svg viewBox="0 0 16 16"><line x1="3" y1="8" x2="13" y2="8"/></svg>
+    </button>
+    <button class="titlebar-btn" id="btn-maximize" title="Maximize">
+      <svg viewBox="0 0 16 16"><rect x="3" y="3" width="10" height="10" rx="1"/></svg>
+    </button>
+    <button class="titlebar-btn close-btn" id="btn-close" title="Close">
+      <svg viewBox="0 0 16 16"><line x1="4" y1="4" x2="12" y2="12"/><line x1="12" y1="4" x2="4" y2="12"/></svg>
+    </button>
+  </div>
+</div>
 
 <canvas id="starfield"></canvas>
 
@@ -2689,6 +2786,15 @@ document.addEventListener("DOMContentLoaded", () => {
       card.style.setProperty("--mouse-y", y + "%");
     });
   });
+
+  // Electron titlebar setup
+  if (window.electronAPI) {
+    document.getElementById("titlebar").classList.add("electron-active");
+    document.body.classList.add("has-titlebar");
+    document.getElementById("btn-minimize").addEventListener("click", () => window.electronAPI.minimize());
+    document.getElementById("btn-maximize").addEventListener("click", () => window.electronAPI.maximize());
+    document.getElementById("btn-close").addEventListener("click", () => window.electronAPI.close());
+  }
 });
 </script>
 </body>
