@@ -2750,7 +2750,10 @@ function renderMathBreakdown(buildOrder) {
         &darr;&ensp;<span style="color:var(--text-muted); font-size:13px">and simultaneously</span><br>
         <span style="color:var(--neon-magenta)">Formula 4</span> &rarr; how much of each input ingredient/min<br>
         &darr;&ensp;<span style="color:var(--text-muted); font-size:13px">each input rate <em>becomes a new &ldquo;X/min&rdquo;</em> &mdash; loop back to top</span><br>
-        <span style="color:var(--neon-purple)">&uarr; repeat until raw resources</span>
+        <span style="color:var(--neon-purple)">&uarr; this loop runs once for every crafted ingredient in the chain.</span><br>
+        <span style="color:var(--neon-purple)">It stops when it reaches raw ores/liquids (Iron Ore, Copper Ore, etc.)</span><br>
+        <span style="color:var(--neon-purple)">because those are mined directly &mdash; they have no recipe inputs, so</span><br>
+        <span style="color:var(--neon-purple)">there&rsquo;s nothing left to recurse into. You just need miners.</span>
       </div>
 
       <h3 style="margin-top:20px">The Four Formulas</h3>
