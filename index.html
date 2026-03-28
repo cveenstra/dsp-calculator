@@ -1293,6 +1293,166 @@ select:focus {
   100% { background-position: 200% center; }
 }
 
+/* ---- Dependency Tree ---- */
+.dep-tree {
+  padding: 8px 0;
+}
+
+.tree-node {
+  position: relative;
+  padding-left: 28px;
+}
+
+.tree-node .tree-branch {
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, var(--neon-purple), rgba(105, 67, 255, 0.15));
+}
+
+/* Hide branch line on last child */
+.tree-node:last-child > .tree-branch {
+  height: 20px;
+}
+
+.tree-node .tree-connector {
+  position: absolute;
+  left: 8px;
+  top: 18px;
+  width: 18px;
+  height: 2px;
+  background: var(--neon-purple);
+  opacity: 0.5;
+}
+
+.tree-node-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  margin: 3px 0;
+  border-radius: 8px;
+  background: var(--bg-card);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(105, 67, 255, 0.1);
+  cursor: default;
+  transition: all 0.25s;
+  animation: card-entrance 0.3s ease-out both;
+}
+
+.tree-node-content:hover {
+  border-color: rgba(105, 67, 255, 0.25);
+  box-shadow: 0 0 15px rgba(105, 67, 255, 0.08);
+}
+
+.tree-node-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.tree-node-name {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.tree-node-rate {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--neon-gold);
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.tree-node-buildings {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--neon-purple);
+  white-space: nowrap;
+}
+
+.tree-node-recipe {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-left: 8px;
+}
+
+.tree-node-recipe .tree-qty {
+  color: var(--neon-gold);
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.tree-node-recipe .tree-sep {
+  color: rgba(179, 98, 255, 0.4);
+  margin: 0 2px;
+}
+
+.tree-toggle {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid rgba(105, 67, 255, 0.25);
+  background: rgba(105, 67, 255, 0.08);
+  color: var(--neon-purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.tree-toggle:hover {
+  background: rgba(105, 67, 255, 0.2);
+  color: var(--neon-gold);
+}
+
+.tree-children {
+  display: block;
+}
+
+.tree-children.collapsed {
+  display: none;
+}
+
+/* Depth-based branch colors */
+.tree-node[data-depth="0"] > .tree-branch { background: linear-gradient(180deg, var(--neon-gold), rgba(250, 208, 0, 0.15)); }
+.tree-node[data-depth="0"] > .tree-connector { background: var(--neon-gold); }
+.tree-node[data-depth="1"] > .tree-branch { background: linear-gradient(180deg, var(--neon-purple), rgba(179, 98, 255, 0.15)); }
+.tree-node[data-depth="1"] > .tree-connector { background: var(--neon-purple); }
+.tree-node[data-depth="2"] > .tree-branch { background: linear-gradient(180deg, var(--neon-green), rgba(165, 255, 144, 0.15)); }
+.tree-node[data-depth="2"] > .tree-connector { background: var(--neon-green); }
+.tree-node[data-depth="3"] > .tree-branch { background: linear-gradient(180deg, var(--neon-cyan), rgba(158, 255, 255, 0.15)); }
+.tree-node[data-depth="3"] > .tree-connector { background: var(--neon-cyan); }
+.tree-node[data-depth="4"] > .tree-branch { background: linear-gradient(180deg, var(--neon-magenta), rgba(251, 148, 255, 0.15)); }
+.tree-node[data-depth="4"] > .tree-connector { background: var(--neon-magenta); }
+
+/* Root node special styling */
+.tree-node.tree-root > .tree-node-content {
+  background: rgba(250, 208, 0, 0.06);
+  border-color: rgba(250, 208, 0, 0.2);
+}
+
+.tree-node.tree-root > .tree-node-content .tree-node-name {
+  color: var(--neon-gold);
+  font-size: 1.2rem;
+}
+
 /* ---- Math Breakdown ---- */
 .math-breakdown {
   display: flex;
@@ -1898,6 +2058,7 @@ select:focus {
       <button class="tab-btn active" data-tab="chain">Production Chain</button>
       <button class="tab-btn" data-tab="sequence">Build Sequence</button>
       <button class="tab-btn" data-tab="raw">Raw Resources</button>
+      <button class="tab-btn" data-tab="tree">Dependency Tree</button>
       <button class="tab-btn" data-tab="math">Math Breakdown</button>
     </div>
 
@@ -1911,6 +2072,10 @@ select:focus {
 
     <div id="tab-raw" class="tab-content">
       <div class="raw-summary" id="raw-summary"></div>
+    </div>
+
+    <div id="tab-tree" class="tab-content">
+      <div id="dep-tree"></div>
     </div>
 
     <div id="tab-math" class="tab-content">
@@ -2541,6 +2706,7 @@ function renderResults(requirements) {
   renderChainCards(buildOrder);
   renderBuildTimeline(buildOrder);
   renderRawSummary(buildOrder);
+  renderDepTree(requirements);
   renderMathBreakdown(buildOrder);
 }
 
@@ -2713,6 +2879,72 @@ function renderRawSummary(buildOrder) {
   }
 
   container.innerHTML = html;
+}
+
+function renderDepTree(requirements) {
+  const container = document.getElementById("dep-tree");
+  const targetItem = state.selectedItem;
+  const targetRate = parseFloat(document.getElementById("rate-input").value);
+
+  // Build a tree recursively from the target item
+  function buildNode(itemId, rate, depth, visited) {
+    const item = ITEMS[itemId];
+    if (!item) return '';
+    const req = requirements[itemId];
+    const recipe = req ? req.recipe : null;
+    const building = req ? req.building : null;
+    const buildingsNeeded = req ? Math.ceil(req.buildings) : 0;
+    const isRaw = !recipe || recipe.inputs.length === 0;
+    const hasChildren = !isRaw && recipe.inputs.length > 0;
+    const visitKey = itemId + ':' + depth;
+    const isCircular = visited.has(itemId) && depth > 0;
+
+    // Build the per-craft recipe summary for this node
+    let recipeHtml = '';
+    if (recipe && recipe.inputs.length > 0) {
+      const outputQty = recipe.outputs.find(o => o.item === itemId)?.qty || 1;
+      const parts = recipe.inputs.map(inp => {
+        const iItem = ITEMS[inp.item];
+        return `<span class="tree-qty">${inp.qty}</span> ${iItem ? iItem.name : inp.item}`;
+      });
+      recipeHtml = `<span class="tree-node-recipe"><span class="tree-sep">(</span>${parts.join('<span class="tree-sep"> + </span>')}<span class="tree-sep"> &rarr; ${outputQty})</span></span>`;
+    }
+
+    let childrenHtml = '';
+    if (hasChildren && !isCircular) {
+      const newVisited = new Set(visited);
+      newVisited.add(itemId);
+      const outputQty = recipe.outputs.find(o => o.item === itemId)?.qty || 1;
+      const childNodes = recipe.inputs.map(inp => {
+        const childRate = (inp.qty / outputQty) * rate;
+        return buildNode(inp.item, childRate, depth + 1, newVisited);
+      });
+      childrenHtml = `<div class="tree-children" id="tree-children-${itemId}-${depth}">${childNodes.join('')}</div>`;
+    }
+
+    const toggleBtn = hasChildren && !isCircular
+      ? `<span class="tree-toggle" onclick="this.textContent=this.textContent==='−'?'+':'−';document.getElementById('tree-children-${itemId}-${depth}').classList.toggle('collapsed')">−</span>`
+      : '';
+
+    const depthCapped = Math.min(depth, 4);
+
+    return `
+      <div class="tree-node ${depth === 0 ? 'tree-root' : ''}" data-depth="${depthCapped}" style="animation-delay: ${depth * 0.05}s">
+        ${depth > 0 ? '<div class="tree-branch"></div><div class="tree-connector"></div>' : ''}
+        <div class="tree-node-content">
+          ${toggleBtn}
+          <div class="tree-node-dot" style="background:${item.color}; color:${item.color}"></div>
+          <span class="tree-node-name">${item.name}</span>
+          ${recipeHtml}
+          <span class="tree-node-rate">${rate.toFixed(1)}/min</span>
+          <span class="tree-node-buildings">${buildingsNeeded}x ${building ? building.name : 'Extractor'}</span>
+        </div>
+        ${childrenHtml}
+      </div>
+    `;
+  }
+
+  container.innerHTML = `<div class="dep-tree">${buildNode(targetItem, targetRate, 0, new Set())}</div>`;
 }
 
 function renderMathBreakdown(buildOrder) {
