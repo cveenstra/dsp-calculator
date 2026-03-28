@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DSP Production Calculator</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 /* ============================================
    CSS DESIGN SYSTEM — Space Cadet / Psychedelic
@@ -30,12 +30,12 @@
   --neon-gold: #FAD000;
   --neon-deep-purple: #4D21FC;
   /* Text from SoP */
-  --text-primary: #E1EFFF;
-  --text-muted: #A599E9;
+  --text-primary: #EEEEFF;
+  --text-muted: #C0B8E8;
   --text-bright: #ffffff;
   --border-glow: rgba(105, 67, 255, 0.35);
   --font-display: 'Orbitron', sans-serif;
-  --font-body: 'Rajdhani', sans-serif;
+  --font-body: 'Nunito', sans-serif;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -44,8 +44,8 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--font-body);
-  font-weight: 500;
-  font-size: 17px;
+  font-weight: 600;
+  font-size: 18px;
   color: var(--text-primary);
   background: transparent;
   min-height: 100vh;
@@ -310,31 +310,15 @@ html {
 
 /* ---- Input Panel ---- */
 .input-panel {
-  background: var(--bg-secondary);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(105, 67, 255, 0.15);
-  border-radius: 16px;
-  padding: 30px;
-  margin-bottom: 30px;
+  background: transparent;
+  padding: 10px 0 20px;
+  margin-bottom: 20px;
   position: relative;
-  overflow: hidden;
-  box-shadow: 0 0 30px rgba(105, 67, 255, 0.05), inset 0 0 30px rgba(105, 67, 255, 0.02);
-}
-
-.input-panel::before {
-  content: '';
-  position: absolute;
-  top: -1px; left: -1px; right: -1px; bottom: -1px;
-  border-radius: 16px;
-  background: linear-gradient(135deg, rgba(179, 98, 255, 0.15), transparent 40%, transparent 60%, rgba(250, 208, 0, 0.1));
-  z-index: -1;
-  pointer-events: none;
 }
 
 .input-panel h2 {
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   color: var(--neon-gold);
   margin-bottom: 20px;
   letter-spacing: 2px;
@@ -361,7 +345,7 @@ html {
 
 .input-group label {
   font-family: var(--font-display);
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   color: var(--neon-purple);
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -380,7 +364,7 @@ html {
   border-radius: 8px;
   color: var(--text-primary);
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 500;
   outline: none;
   transition: all 0.3s;
@@ -453,7 +437,7 @@ input[type="number"] {
   border-radius: 8px;
   color: var(--text-primary);
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 500;
   outline: none;
   transition: all 0.3s;
@@ -479,7 +463,7 @@ select {
   border-radius: 8px;
   color: var(--text-primary);
   font-family: var(--font-body);
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 500;
   outline: none;
   cursor: pointer;
@@ -510,8 +494,8 @@ select:focus {
   border-radius: 6px;
   color: var(--text-muted);
   font-family: var(--font-body);
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.95rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.3s;
 }
@@ -538,7 +522,7 @@ select:focus {
 
 .calc-btn {
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 700;
   letter-spacing: 3px;
   text-transform: uppercase;
@@ -588,7 +572,7 @@ select:focus {
 
 .tab-btn {
   font-family: var(--font-display);
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -670,7 +654,7 @@ select:focus {
 
 .result-card .item-name {
   font-family: var(--font-display);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: 1px;
   margin-bottom: 8px;
@@ -679,7 +663,7 @@ select:focus {
 .result-card .badge {
   display: inline-block;
   font-family: var(--font-display);
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   letter-spacing: 1px;
   text-transform: uppercase;
   padding: 2px 8px;
@@ -699,7 +683,7 @@ select:focus {
 }
 
 .result-card .stat-label {
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   color: var(--text-muted);
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -707,7 +691,7 @@ select:focus {
 
 .result-card .stat-value {
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 700;
 }
 
@@ -715,7 +699,7 @@ select:focus {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   color: var(--text-muted);
   line-height: 1.6;
 }
@@ -934,14 +918,14 @@ select:focus {
 
 .build-step .step-title {
   font-family: var(--font-display);
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 1px;
   margin-bottom: 6px;
 }
 
 .build-step .step-detail {
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: var(--text-muted);
   line-height: 1.6;
 }
@@ -963,10 +947,10 @@ select:focus {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 10px;
+  padding: 4px 11px;
   border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.92rem;
+  font-weight: 700;
   border: 1px solid rgba(105, 67, 255, 0.2);
   background: rgba(105, 67, 255, 0.08);
 }
@@ -1039,9 +1023,9 @@ select:focus {
 }
 
 .raw-bar .raw-name {
-  width: 160px;
-  font-size: 1rem;
-  font-weight: 600;
+  width: 170px;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--text-primary);
   flex-shrink: 0;
 }
@@ -1070,10 +1054,10 @@ select:focus {
 }
 
 .raw-bar .raw-rate {
-  width: 110px;
+  width: 120px;
   text-align: right;
   font-family: var(--font-display);
-  font-size: 0.85rem;
+  font-size: 0.92rem;
   font-weight: 700;
   color: var(--neon-gold);
   flex-shrink: 0;
@@ -1093,7 +1077,7 @@ select:focus {
 }
 
 .empty-state p {
-  font-size: 1rem;
+  font-size: 1.05rem;
   max-width: 400px;
   margin: 0 auto;
   line-height: 1.6;
@@ -1313,44 +1297,6 @@ select:focus {
   font-weight: 600;
 }
 
-/* DMT-space border — breathing layered glows */
-.input-panel {
-  background: var(--bg-secondary);
-  position: relative;
-}
-
-.input-panel::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: 18px;
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(165, 255, 144, 0.2) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 50%, rgba(179, 98, 255, 0.25) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 0%, rgba(250, 208, 0, 0.18) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 100%, rgba(105, 67, 255, 0.2) 0%, transparent 50%);
-  z-index: -2;
-  opacity: 0.5;
-  animation: dmt-border-breathe 8s ease-in-out infinite;
-}
-
-@keyframes dmt-border-breathe {
-  0%, 100% {
-    opacity: 0.35;
-    filter: hue-rotate(0deg) blur(3px);
-    transform: scale(1);
-  }
-  33% {
-    opacity: 0.55;
-    filter: hue-rotate(-30deg) blur(4px);
-    transform: scale(1.01);
-  }
-  66% {
-    opacity: 0.45;
-    filter: hue-rotate(20deg) blur(2px);
-    transform: scale(0.995);
-  }
-}
 
 /* Glowing selection highlight */
 ::selection {
