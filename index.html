@@ -1,0 +1,2544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DSP Production Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   CSS DESIGN SYSTEM — Space Cadet / Psychedelic
+   ============================================ */
+:root {
+  --bg-primary: #05050f;
+  --bg-secondary: #0a0a20;
+  --bg-card: #10103a;
+  --bg-card-hover: #1a1a4e;
+  --neon-cyan: #00ffff;
+  --neon-magenta: #ff00ff;
+  --neon-purple: #cc77ff;
+  --neon-blue: #5577ff;
+  --neon-green: #00ff99;
+  --neon-orange: #ff9922;
+  --neon-red: #ff4477;
+  --neon-yellow: #ffee33;
+  --neon-pink: #ff77dd;
+  --neon-lime: #aaff00;
+  --text-primary: #eeeeff;
+  --text-muted: #9999cc;
+  --text-bright: #ffffff;
+  --border-glow: rgba(0, 255, 255, 0.35);
+  --font-display: 'Orbitron', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 17px;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* Canvas starfield */
+#starfield {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--neon-cyan), var(--neon-purple));
+  border-radius: 4px;
+}
+
+/* ---- Header ---- */
+.header {
+  position: relative;
+  text-align: center;
+  padding: 40px 20px 30px;
+  overflow: hidden;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(120, 0, 255, 0.2) 0%, transparent 55%),
+              radial-gradient(ellipse at 20% 90%, rgba(0, 255, 255, 0.12) 0%, transparent 45%),
+              radial-gradient(ellipse at 85% 70%, rgba(255, 0, 200, 0.1) 0%, transparent 45%),
+              radial-gradient(ellipse at 50% 50%, rgba(255, 100, 0, 0.04) 0%, transparent 60%);
+  pointer-events: none;
+  animation: header-hue 20s ease-in-out infinite alternate;
+}
+
+@keyframes header-hue {
+  0% { filter: hue-rotate(0deg); }
+  50% { filter: hue-rotate(30deg); }
+  100% { filter: hue-rotate(-20deg); }
+}
+
+/* DSP Logo — CSS Dyson Sphere */
+.dsp-logo {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 20px;
+  animation: logo-float 6s ease-in-out infinite;
+}
+
+@keyframes logo-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.dsp-logo .star {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 30px; height: 30px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, #ffe066 30%, #ff8800 70%, #ff4400 100%);
+  box-shadow: 0 0 20px #ff8800, 0 0 40px #ff6600, 0 0 60px rgba(255, 136, 0, 0.4);
+  animation: star-pulse 3s ease-in-out infinite;
+}
+
+@keyframes star-pulse {
+  0%, 100% { box-shadow: 0 0 20px #ff8800, 0 0 40px #ff6600, 0 0 60px rgba(255, 136, 0, 0.4); }
+  50% { box-shadow: 0 0 30px #ffaa00, 0 0 60px #ff8800, 0 0 90px rgba(255, 136, 0, 0.5); }
+}
+
+.dsp-logo .ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  border: 2px solid;
+  border-radius: 50%;
+  transform-origin: center;
+}
+
+.dsp-logo .ring-1 {
+  width: 80px; height: 80px;
+  margin-top: -40px; margin-left: -40px;
+  border-color: rgba(0, 245, 255, 0.6);
+  transform: rotateX(70deg) rotateZ(0deg);
+  animation: ring-spin-1 12s linear infinite;
+  box-shadow: 0 0 8px rgba(0, 245, 255, 0.3);
+}
+
+.dsp-logo .ring-2 {
+  width: 100px; height: 100px;
+  margin-top: -50px; margin-left: -50px;
+  border-color: rgba(255, 0, 255, 0.5);
+  transform: rotateX(70deg) rotateZ(60deg);
+  animation: ring-spin-2 15s linear infinite;
+  box-shadow: 0 0 8px rgba(255, 0, 255, 0.3);
+}
+
+.dsp-logo .ring-3 {
+  width: 110px; height: 110px;
+  margin-top: -55px; margin-left: -55px;
+  border-color: rgba(179, 102, 255, 0.4);
+  transform: rotateX(70deg) rotateZ(120deg);
+  animation: ring-spin-3 18s linear infinite;
+  box-shadow: 0 0 8px rgba(179, 102, 255, 0.3);
+}
+
+@keyframes ring-spin-1 { to { transform: rotateX(70deg) rotateZ(360deg); } }
+@keyframes ring-spin-2 { to { transform: rotateX(70deg) rotateZ(420deg); } }
+@keyframes ring-spin-3 { to { transform: rotateX(70deg) rotateZ(480deg); } }
+
+.dsp-game-logo {
+  max-width: 340px;
+  width: 80%;
+  height: auto;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 20px rgba(0, 245, 255, 0.3)) drop-shadow(0 0 40px rgba(255, 0, 255, 0.15));
+  position: relative;
+  animation: logo-glow 4s ease-in-out infinite alternate;
+}
+
+@keyframes logo-glow {
+  0% { filter: drop-shadow(0 0 15px rgba(0, 245, 255, 0.2)) drop-shadow(0 0 30px rgba(255, 0, 255, 0.1)); }
+  100% { filter: drop-shadow(0 0 25px rgba(0, 245, 255, 0.4)) drop-shadow(0 0 50px rgba(255, 0, 255, 0.2)); }
+}
+
+.header h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 4vw, 2.8rem);
+  font-weight: 900;
+  letter-spacing: 3px;
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta), var(--neon-purple), var(--neon-cyan));
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 8s ease infinite;
+  text-shadow: none;
+  position: relative;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.header .subtitle {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  margin-top: 8px;
+  letter-spacing: 2px;
+  animation: pulse-opacity 4s ease-in-out infinite;
+}
+
+@keyframes pulse-opacity {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* ---- Main Layout ---- */
+.main-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+}
+
+/* ---- Input Panel ---- */
+.input-panel {
+  background: var(--bg-secondary);
+  border: 1px solid rgba(0, 245, 255, 0.15);
+  border-radius: 16px;
+  padding: 30px;
+  margin-bottom: 30px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(0, 245, 255, 0.05), inset 0 0 30px rgba(0, 245, 255, 0.02);
+}
+
+.input-panel::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: -1px; right: -1px; bottom: -1px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(0, 245, 255, 0.2), transparent 40%, transparent 60%, rgba(255, 0, 255, 0.2));
+  z-index: -1;
+  pointer-events: none;
+}
+
+.input-panel h2 {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  color: var(--neon-cyan);
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .input-grid { grid-template-columns: 1fr; }
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.input-group label {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  color: var(--neon-purple);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* Searchable dropdown */
+.search-select-wrapper {
+  position: relative;
+}
+
+.search-select-wrapper input {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 245, 255, 0.2);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.3s;
+}
+
+.search-select-wrapper input:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
+}
+
+.search-select-wrapper input::placeholder {
+  color: var(--text-muted);
+}
+
+.dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0; right: 0;
+  max-height: 300px;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 245, 255, 0.3);
+  border-radius: 0 0 8px 8px;
+  z-index: 100;
+  display: none;
+}
+
+.dropdown-list.active { display: block; }
+
+.dropdown-category {
+  padding: 6px 12px;
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  color: var(--neon-magenta);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(255, 0, 255, 0.1);
+  background: rgba(255, 0, 255, 0.05);
+}
+
+.dropdown-item {
+  padding: 8px 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.dropdown-item:hover {
+  background: rgba(0, 245, 255, 0.1);
+  color: var(--text-bright);
+}
+
+.dropdown-item .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Number input */
+input[type="number"] {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 245, 255, 0.2);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.3s;
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+input[type="number"]:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
+}
+
+/* Select */
+select {
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 245, 255, 0.2);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2300f5ff' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+select:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
+}
+
+/* Tier selectors */
+.tier-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tier-btn {
+  padding: 8px 14px;
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 245, 255, 0.2);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.tier-btn:hover {
+  border-color: var(--neon-cyan);
+  color: var(--text-primary);
+}
+
+.tier-btn.active {
+  background: rgba(0, 245, 255, 0.1);
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(0, 245, 255, 0.2);
+}
+
+/* Calculate button */
+.calc-btn-wrapper {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  padding-top: 10px;
+}
+
+.calc-btn {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 14px 50px;
+  border: 2px solid var(--neon-cyan);
+  border-radius: 50px;
+  background: transparent;
+  color: var(--neon-cyan);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s;
+}
+
+.calc-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 0; height: 0;
+  background: radial-gradient(circle, rgba(0, 245, 255, 0.3), transparent);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.5s;
+}
+
+.calc-btn:hover::before {
+  width: 300px; height: 300px;
+}
+
+.calc-btn:hover {
+  color: var(--text-bright);
+  box-shadow: 0 0 20px rgba(0, 245, 255, 0.4), 0 0 40px rgba(0, 245, 255, 0.2);
+  text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+}
+
+.calc-btn:active {
+  transform: scale(0.97);
+}
+
+/* ---- Tabs ---- */
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(0, 245, 255, 0.1);
+}
+
+.tab-btn {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.tab-btn:hover { color: var(--text-primary); }
+
+.tab-btn.active {
+  color: var(--neon-cyan);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
+  box-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ---- Results Grid ---- */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.result-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 245, 255, 0.12);
+  border-radius: 12px;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s;
+  animation: card-entrance 0.5s ease-out both;
+}
+
+.result-card:hover {
+  border-color: rgba(0, 255, 255, 0.35);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4), 0 0 20px var(--border-glow), 0 0 40px rgba(255, 0, 255, 0.08);
+}
+
+@keyframes card-entrance {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-card .card-glow {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 12px 12px 0 0;
+}
+
+.result-card .item-name {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.result-card .badge {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.result-card .stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.result-card .stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.result-card .stat-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.result-card .stat-value {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.result-card .recipe-info {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.result-card .recipe-info .input-item {
+  color: var(--text-primary);
+}
+
+/* Category colors */
+.cat-raw .card-glow { background: linear-gradient(90deg, var(--neon-orange), var(--neon-yellow)); }
+.cat-raw .item-name { color: var(--neon-orange); }
+.cat-raw .badge { background: rgba(255, 136, 0, 0.15); color: var(--neon-orange); border: 1px solid rgba(255, 136, 0, 0.3); }
+
+.cat-smelting .card-glow { background: linear-gradient(90deg, var(--neon-red), var(--neon-orange)); }
+.cat-smelting .item-name { color: var(--neon-red); }
+.cat-smelting .badge { background: rgba(255, 51, 102, 0.15); color: var(--neon-red); border: 1px solid rgba(255, 51, 102, 0.3); }
+
+.cat-assembling .card-glow { background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue)); }
+.cat-assembling .item-name { color: var(--neon-cyan); }
+.cat-assembling .badge { background: rgba(0, 245, 255, 0.1); color: var(--neon-cyan); border: 1px solid rgba(0, 245, 255, 0.3); }
+
+.cat-chemical .card-glow { background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan)); }
+.cat-chemical .item-name { color: var(--neon-green); }
+.cat-chemical .badge { background: rgba(0, 255, 136, 0.1); color: var(--neon-green); border: 1px solid rgba(0, 255, 136, 0.3); }
+
+.cat-refining .card-glow { background: linear-gradient(90deg, var(--neon-yellow), var(--neon-green)); }
+.cat-refining .item-name { color: var(--neon-yellow); }
+.cat-refining .badge { background: rgba(255, 238, 0, 0.1); color: var(--neon-yellow); border: 1px solid rgba(255, 238, 0, 0.3); }
+
+.cat-research .card-glow { background: linear-gradient(90deg, var(--neon-magenta), var(--neon-purple)); }
+.cat-research .item-name { color: var(--neon-magenta); }
+.cat-research .badge { background: rgba(255, 0, 255, 0.1); color: var(--neon-magenta); border: 1px solid rgba(255, 0, 255, 0.3); }
+
+.cat-collider .card-glow { background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue)); }
+.cat-collider .item-name { color: var(--neon-purple); }
+.cat-collider .badge { background: rgba(179, 102, 255, 0.1); color: var(--neon-purple); border: 1px solid rgba(179, 102, 255, 0.3); }
+
+.cat-fractionation .card-glow { background: linear-gradient(90deg, var(--neon-pink), var(--neon-magenta)); }
+.cat-fractionation .item-name { color: var(--neon-pink); }
+.cat-fractionation .badge { background: rgba(255, 102, 204, 0.1); color: var(--neon-pink); border: 1px solid rgba(255, 102, 204, 0.3); }
+
+.cat-building .card-glow { background: linear-gradient(90deg, var(--neon-yellow), var(--neon-cyan)); }
+.cat-building .item-name { color: var(--neon-yellow); }
+.cat-building .badge { background: rgba(255, 238, 0, 0.1); color: var(--neon-yellow); border: 1px solid rgba(255, 238, 0, 0.3); }
+
+/* ---- Build Sequence Timeline ---- */
+.build-timeline {
+  position: relative;
+  padding-left: 50px;
+}
+
+.build-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 23px;
+  width: 2px;
+  background: linear-gradient(180deg, var(--neon-cyan), var(--neon-magenta), var(--neon-purple), var(--neon-cyan));
+  background-size: 100% 400%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+.build-step {
+  position: relative;
+  margin-bottom: 16px;
+  animation: card-entrance 0.4s ease-out both;
+}
+
+.build-step .step-number {
+  position: absolute;
+  left: -50px;
+  top: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 2px solid var(--neon-cyan);
+  background: var(--bg-primary);
+  color: var(--neon-cyan);
+  box-shadow: 0 0 10px rgba(0, 245, 255, 0.2);
+}
+
+.build-step .step-content {
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 245, 255, 0.1);
+  border-radius: 10px;
+  padding: 16px 20px;
+  transition: all 0.4s;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.build-step .step-content:hover {
+  border-color: rgba(0, 245, 255, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Checkbox */
+.build-step .step-check {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin-top: 2px;
+  border: 2px solid var(--neon-cyan);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.build-step .step-check:hover {
+  box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
+  border-color: var(--neon-magenta);
+}
+
+.build-step .step-check:checked {
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+  border-color: transparent;
+  box-shadow: 0 0 14px rgba(0, 255, 255, 0.4);
+}
+
+.build-step .step-check:checked::after {
+  content: '\2714';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--bg-primary);
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.build-step.completed .step-content {
+  opacity: 0.4;
+  border-color: rgba(0, 255, 255, 0.05);
+}
+
+.build-step.completed .step-number {
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+  border-color: transparent;
+  color: var(--bg-primary);
+  box-shadow: 0 0 14px rgba(0, 255, 255, 0.3);
+}
+
+.build-step.completed .step-title,
+.build-step.completed .step-detail {
+  text-decoration: line-through;
+  text-decoration-color: rgba(0, 255, 255, 0.3);
+}
+
+.build-step .step-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Progress bar */
+.build-progress {
+  margin-bottom: 20px;
+  padding: 16px 20px;
+  background: var(--bg-secondary);
+  border: 1px solid rgba(0, 255, 255, 0.1);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.build-progress .progress-label {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--neon-cyan);
+  white-space: nowrap;
+}
+
+.build-progress .progress-track {
+  flex: 1;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.build-progress .progress-fill {
+  height: 100%;
+  border-radius: 5px;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta), var(--neon-purple));
+  background-size: 200% 100%;
+  animation: shimmer 3s ease infinite;
+  transition: width 0.5s ease;
+}
+
+.build-progress .progress-text {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-bright);
+  white-space: nowrap;
+}
+
+.build-step .step-title {
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.build-step .step-detail {
+  font-size: 1rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.build-step .step-detail .highlight {
+  color: var(--neon-cyan);
+  font-weight: 600;
+}
+
+/* ---- Raw Resources Summary ---- */
+.raw-summary {
+  background: var(--bg-secondary);
+  border: 1px solid rgba(255, 136, 0, 0.15);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.raw-summary h3 {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--neon-orange);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.raw-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.raw-bar .raw-name {
+  width: 160px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.raw-bar .bar-track {
+  flex: 1;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.raw-bar .bar-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.8s ease;
+  position: relative;
+}
+
+.raw-bar .bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15));
+}
+
+.raw-bar .raw-rate {
+  width: 110px;
+  text-align: right;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--neon-orange);
+  flex-shrink: 0;
+}
+
+/* ---- Empty State ---- */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+}
+
+.empty-state .icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  animation: pulse-opacity 3s ease-in-out infinite;
+}
+
+.empty-state p {
+  font-size: 1rem;
+  max-width: 400px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ---- Alt Recipe Panel ---- */
+.alt-recipes-panel {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 245, 255, 0.08);
+  grid-column: 1 / -1;
+}
+
+.alt-recipes-panel h3 {
+  font-family: var(--font-display);
+  font-size: 0.7rem;
+  color: var(--neon-purple);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.alt-recipe-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.alt-recipe-row .alt-item-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 160px;
+}
+
+.alt-recipe-row select {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Animations */
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* ---- Math Breakdown ---- */
+.math-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.math-overview {
+  background: var(--bg-secondary);
+  border: 1px solid rgba(0, 245, 255, 0.15);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 8px;
+}
+
+.math-overview h3 {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  color: var(--neon-cyan);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.math-overview p {
+  color: var(--text-muted);
+  line-height: 1.8;
+  font-size: 0.95rem;
+}
+
+.math-overview .formula-block {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 245, 255, 0.1);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin: 12px 0;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9rem;
+  color: var(--neon-cyan);
+  line-height: 1.7;
+  overflow-x: auto;
+}
+
+.math-overview .formula-block .label {
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.math-overview .formula-block .result {
+  color: var(--neon-green);
+  font-weight: 700;
+}
+
+.math-item {
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 245, 255, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  animation: card-entrance 0.4s ease-out both;
+}
+
+.math-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+  user-select: none;
+}
+
+.math-item-header:hover {
+  background: rgba(0, 245, 255, 0.04);
+}
+
+.math-item-header .item-label {
+  font-family: var(--font-display);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.math-item-header .item-summary {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.math-item-header .item-summary .val {
+  color: var(--neon-cyan);
+  font-weight: 600;
+}
+
+.math-item-header .toggle-icon {
+  color: var(--neon-cyan);
+  font-size: 1.2rem;
+  transition: transform 0.3s;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.math-item.open .toggle-icon {
+  transform: rotate(180deg);
+}
+
+.math-item-body {
+  display: none;
+  padding: 0 20px 20px;
+  border-top: 1px solid rgba(0, 245, 255, 0.06);
+}
+
+.math-item.open .math-item-body {
+  display: block;
+}
+
+.math-step {
+  margin-top: 14px;
+}
+
+.math-step .step-label {
+  font-family: var(--font-display);
+  font-size: 0.65rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--neon-purple);
+  margin-bottom: 6px;
+}
+
+.math-step .step-formula {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 245, 255, 0.08);
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  line-height: 1.8;
+  overflow-x: auto;
+}
+
+.math-step .step-formula .op {
+  color: var(--neon-magenta);
+}
+
+.math-step .step-formula .num {
+  color: var(--neon-cyan);
+  font-weight: 700;
+}
+
+.math-step .step-formula .eq {
+  color: var(--neon-green);
+  font-weight: 700;
+}
+
+.math-step .step-explanation {
+  margin-top: 6px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+.math-step .step-explanation em {
+  color: var(--text-primary);
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* Psychedelic border animation on input panel */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.input-panel {
+  background: var(--bg-secondary);
+  position: relative;
+}
+
+.input-panel::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 18px;
+  background: conic-gradient(from var(--angle, 0deg),
+    var(--neon-cyan),
+    var(--neon-blue),
+    var(--neon-purple),
+    var(--neon-magenta),
+    var(--neon-pink),
+    var(--neon-red),
+    var(--neon-orange),
+    var(--neon-yellow),
+    var(--neon-green),
+    var(--neon-cyan)
+  );
+  z-index: -2;
+  opacity: 0.4;
+  animation: border-rotate 6s linear infinite;
+}
+
+@keyframes border-rotate {
+  to { --angle: 360deg; }
+}
+
+/* Glowing selection highlight */
+::selection {
+  background: rgba(0, 245, 255, 0.3);
+  color: var(--text-bright);
+}
+
+/* Animated gradient on result cards on hover */
+.result-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  opacity: 0;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(0, 245, 255, 0.06) 0%,
+    transparent 60%
+  );
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.result-card:hover::after {
+  opacity: 1;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 30px 20px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  border-top: 1px solid rgba(0, 245, 255, 0.05);
+}
+
+.footer a {
+  color: var(--neon-cyan);
+  text-decoration: none;
+}
+</style>
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+
+<div class="header">
+  <div class="dsp-logo">
+    <div class="ring ring-1"></div>
+    <div class="ring ring-2"></div>
+    <div class="ring ring-3"></div>
+    <div class="star"></div>
+  </div>
+  <img src="https://cdn.akamai.steamstatic.com/steam/apps/1366540/logo.png" alt="Dyson Sphere Program" class="dsp-game-logo" onerror="this.style.display='none'">
+  <h1>Production Calculator</h1>
+  <p class="subtitle">Engineer the stars. Calculate the cosmos.</p>
+</div>
+
+<div class="main-container">
+  <!-- Input Panel -->
+  <div class="input-panel">
+    <h2>Configuration</h2>
+    <div class="input-grid">
+      <div class="input-group">
+        <label>Target Item</label>
+        <div class="search-select-wrapper">
+          <input type="text" id="item-search" placeholder="Search for an item..." autocomplete="off">
+          <div class="dropdown-list" id="item-dropdown"></div>
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Production Rate (items/min)</label>
+        <input type="number" id="rate-input" value="30" min="0.1" step="0.1">
+      </div>
+      <div class="input-group">
+        <label>Assembler Tier</label>
+        <div class="tier-group" data-tier="assembler">
+          <button class="tier-btn" data-value="assemblerMk1">Mk.I</button>
+          <button class="tier-btn active" data-value="assemblerMk2">Mk.II</button>
+          <button class="tier-btn" data-value="assemblerMk3">Mk.III</button>
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Smelter Tier</label>
+        <div class="tier-group" data-tier="smelter">
+          <button class="tier-btn active" data-value="arcSmelter">Arc Smelter</button>
+          <button class="tier-btn" data-value="planeSmelter">Plane Smelter</button>
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Chemical Plant Tier</label>
+        <div class="tier-group" data-tier="chemical">
+          <button class="tier-btn active" data-value="chemicalPlant">Chemical</button>
+          <button class="tier-btn" data-value="quantumChemPlant">Quantum</button>
+        </div>
+      </div>
+      <div class="input-group">
+        <label>Deuterium Source</label>
+        <div class="tier-group" data-tier="deuterium">
+          <button class="tier-btn active" data-value="fractionator">Fractionator</button>
+          <button class="tier-btn" data-value="collider">Collider</button>
+        </div>
+      </div>
+      <div id="alt-recipes-container" class="alt-recipes-panel" style="display:none;">
+        <h3>Alternative Recipes</h3>
+        <div id="alt-recipes-list"></div>
+      </div>
+      <div class="calc-btn-wrapper">
+        <button class="calc-btn" id="calc-btn">Calculate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="results-section" style="display:none;">
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="chain">Production Chain</button>
+      <button class="tab-btn" data-tab="sequence">Build Sequence</button>
+      <button class="tab-btn" data-tab="raw">Raw Resources</button>
+      <button class="tab-btn" data-tab="math">Math Breakdown</button>
+    </div>
+
+    <div id="tab-chain" class="tab-content active">
+      <div class="results-grid" id="results-grid"></div>
+    </div>
+
+    <div id="tab-sequence" class="tab-content">
+      <div class="build-timeline" id="build-timeline"></div>
+    </div>
+
+    <div id="tab-raw" class="tab-content">
+      <div class="raw-summary" id="raw-summary"></div>
+    </div>
+
+    <div id="tab-math" class="tab-content">
+      <div id="math-breakdown"></div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div id="empty-state" class="empty-state">
+    <div class="icon">&#x1F30C;</div>
+    <p>Select an item and production rate to calculate the full production chain and recommended build sequence.</p>
+  </div>
+</div>
+
+<div class="footer">
+  Dyson Sphere Program Production Calculator &mdash; Fan-made tool for DSP
+</div>
+
+<script>
+// =====================================================
+// SECTION 1: GAME DATA — Items, Buildings, Recipes
+// =====================================================
+
+const ITEMS = {
+  // Raw Resources
+  ironOre:         { name: "Iron Ore",          category: "raw",      color: "#a0522d" },
+  copperOre:       { name: "Copper Ore",        category: "raw",      color: "#b87333" },
+  stone:           { name: "Stone",             category: "raw",      color: "#888888" },
+  coal:            { name: "Coal",              category: "raw",      color: "#333333" },
+  siliconOre:      { name: "Silicon Ore",       category: "raw",      color: "#aabbcc" },
+  titaniumOre:     { name: "Titanium Ore",      category: "raw",      color: "#8899aa" },
+  water:           { name: "Water",             category: "raw",      color: "#4488cc" },
+  crudeOil:        { name: "Crude Oil",         category: "raw",      color: "#1a1a1a" },
+  hydrogen:        { name: "Hydrogen",          category: "raw",      color: "#00ccff" },
+  fireIce:         { name: "Fire Ice",          category: "raw",      color: "#ff4466" },
+  kimberliteOre:   { name: "Kimberlite Ore",    category: "raw",      color: "#88ddff" },
+  fractalSilicon:  { name: "Fractal Silicon",   category: "raw",      color: "#77aadd" },
+  organicCrystalRaw:{ name: "Organic Crystal (Natural)", category: "raw", color: "#44cc88" },
+  opticalGratingCrystal: { name: "Optical Grating Crystal", category: "raw", color: "#ccaa55" },
+  spiniformCrystal:{ name: "Spiniform Stalagmite Crystal", category: "raw", color: "#55cc99" },
+  unipolarMagnet:  { name: "Unipolar Magnet",   category: "raw",      color: "#cc55ff" },
+
+  // Smelting
+  ironIngot:       { name: "Iron Ingot",        category: "smelting",  color: "#c0c0c0" },
+  copperIngot:     { name: "Copper Ingot",      category: "smelting",  color: "#dd8844" },
+  magnet:          { name: "Magnet",            category: "smelting",  color: "#cc3333" },
+  stoneBrick:      { name: "Stone Brick",       category: "smelting",  color: "#aa9977" },
+  glass:           { name: "Glass",             category: "smelting",  color: "#aaddff" },
+  energeticGraphite:{ name: "Energetic Graphite",category: "smelting", color: "#666699" },
+  highPuritySilicon:{ name: "High-Purity Silicon",category: "smelting",color: "#99bbdd" },
+  titaniumIngot:   { name: "Titanium Ingot",    category: "smelting",  color: "#99aabb" },
+  steel:           { name: "Steel",             category: "smelting",  color: "#aaaacc" },
+  diamond:         { name: "Diamond",           category: "smelting",  color: "#ccddff" },
+  crystalSilicon:  { name: "Crystal Silicon",   category: "smelting",  color: "#88aacc" },
+  titaniumAlloy:   { name: "Titanium Alloy",    category: "smelting",  color: "#bbccdd" },
+
+  // Refining
+  refinedOil:      { name: "Refined Oil",       category: "refining",  color: "#cc8800" },
+
+  // Chemical
+  plastic:         { name: "Plastic",           category: "chemical",  color: "#cccc88" },
+  graphene:        { name: "Graphene",          category: "chemical",  color: "#555577" },
+  sulfuricAcid:    { name: "Sulfuric Acid",     category: "chemical",  color: "#aacc00" },
+  organicCrystal:  { name: "Organic Crystal",   category: "chemical",  color: "#44cc88" },
+  carbonNanotube:  { name: "Carbon Nanotube",   category: "chemical",  color: "#444466" },
+
+  // Assembling
+  gear:            { name: "Gear",              category: "assembling", color: "#cccccc" },
+  magneticCoil:    { name: "Magnetic Coil",     category: "assembling", color: "#cc6633" },
+  circuitBoard:    { name: "Circuit Board",     category: "assembling", color: "#33aa66" },
+  prism:           { name: "Prism",             category: "assembling", color: "#ff99cc" },
+  electricMotor:   { name: "Electric Motor",    category: "assembling", color: "#6699cc" },
+  electromagneticTurbine: { name: "Electromagnetic Turbine", category: "assembling", color: "#3366cc" },
+  microcrystallineComp: { name: "Microcrystalline Component", category: "assembling", color: "#88bbcc" },
+  plasmaExciter:   { name: "Plasma Exciter",    category: "assembling", color: "#ff66aa" },
+  photonCombiner:  { name: "Photon Combiner",   category: "assembling", color: "#ffaa33" },
+  superMagneticRing:{ name: "Super-Magnetic Ring",category: "assembling",color: "#cc33ff" },
+  processor:       { name: "Processor",         category: "assembling", color: "#33ccaa" },
+  titaniumCrystal: { name: "Titanium Crystal",  category: "assembling", color: "#aabbcc" },
+  casimirCrystal:  { name: "Casimir Crystal",   category: "assembling", color: "#aa88ff" },
+  titaniumGlass:   { name: "Titanium Glass",    category: "assembling", color: "#99ddee" },
+  particleContainer:{ name: "Particle Container",category: "assembling",color: "#6677cc" },
+  particleBroadband:{ name: "Particle Broadband",category: "assembling",color: "#7788bb" },
+  planeFilter:     { name: "Plane Filter",      category: "assembling", color: "#bb99ff" },
+  quantumChip:     { name: "Quantum Chip",      category: "assembling", color: "#55ddbb" },
+  frameMaterial:   { name: "Frame Material",    category: "assembling", color: "#889999" },
+  dysonSphereComp: { name: "Dyson Sphere Component",category: "assembling",color: "#ffcc44" },
+  solarSail:       { name: "Solar Sail",        category: "assembling", color: "#ffdd66" },
+  smallCarrierRocket:{ name: "Small Carrier Rocket",category: "assembling",color: "#ff6644" },
+  thruster:        { name: "Thruster",          category: "assembling", color: "#7799aa" },
+  reinforcedThruster:{ name: "Reinforced Thruster",category: "assembling",color: "#667788" },
+  logisticsDrone:  { name: "Logistics Drone",   category: "assembling", color: "#55aadd" },
+  logisticsVessel: { name: "Logistics Vessel",  category: "assembling", color: "#4488bb" },
+  foundation:      { name: "Foundation",        category: "assembling", color: "#997755" },
+  hydrogenFuelRod: { name: "Hydrogen Fuel Rod", category: "assembling", color: "#33bbee" },
+  deuteronFuelRod: { name: "Deuteron Fuel Rod", category: "assembling", color: "#44aacc" },
+  antimatterFuelRod:{ name: "Antimatter Fuel Rod",category: "assembling",color: "#ff33aa" },
+  gravitonLens:    { name: "Graviton Lens",     category: "assembling", color: "#8866cc" },
+  annihilationSphere:{ name: "Annihilation Constraint Sphere",category: "assembling",color: "#aa44cc" },
+  spaceWarper:     { name: "Space Warper",      category: "assembling", color: "#6655bb" },
+  proliferatorMk1: { name: "Proliferator Mk.I", category: "assembling", color: "#66bb66" },
+  proliferatorMk2: { name: "Proliferator Mk.II",category: "assembling", color: "#44aa44" },
+  proliferatorMk3: { name: "Proliferator Mk.III",category: "assembling",color: "#228822" },
+
+  // Collider
+  strangeMatter:   { name: "Strange Matter",    category: "collider",  color: "#9944ff" },
+  deuterium:       { name: "Deuterium",         category: "fractionation", color: "#55bbdd" },
+  antimatter:      { name: "Antimatter",        category: "collider",  color: "#ff44cc" },
+
+  // Research
+  emMatrix:        { name: "Electromagnetic Matrix",category: "research",color: "#3388ff" },
+  energyMatrix:    { name: "Energy Matrix",     category: "research",  color: "#ff4444" },
+  structureMatrix: { name: "Structure Matrix",  category: "research",  color: "#ffaa33" },
+  infoMatrix:      { name: "Information Matrix", category: "research", color: "#44ccff" },
+  gravityMatrix:   { name: "Gravity Matrix",    category: "research",  color: "#cc44ff" },
+  universeMatrix:  { name: "Universe Matrix",   category: "research",  color: "#ffffff" },
+
+  // Buildings — Power
+  teslaTower:      { name: "Tesla Tower",       category: "building",  color: "#55ddff" },
+  wirelessTower:   { name: "Wireless Power Tower", category: "building", color: "#44bbee" },
+  satelliteSubstation: { name: "Satellite Substation", category: "building", color: "#3399dd" },
+  windTurbine:     { name: "Wind Turbine",      category: "building",  color: "#66ccaa" },
+  thermalPower:    { name: "Thermal Power Station", category: "building", color: "#ff8844" },
+  solarPanel:      { name: "Solar Panel",       category: "building",  color: "#ffcc44" },
+  accumulator:     { name: "Accumulator",       category: "building",  color: "#88cc44" },
+  accumulatorFull: { name: "Full Accumulator",  category: "building",  color: "#aadd44" },
+  miniatureFusion: { name: "Mini Fusion Power Station", category: "building", color: "#ff66aa" },
+  energyExchanger: { name: "Energy Exchanger",  category: "building",  color: "#cc88ff" },
+  rayReceiver:     { name: "Ray Receiver",      category: "building",  color: "#ffdd88" },
+
+  // Buildings — Logistics
+  conveyorMk1:     { name: "Conveyor Belt Mk.I",  category: "building", color: "#aaaaaa" },
+  conveyorMk2:     { name: "Conveyor Belt Mk.II", category: "building", color: "#44ddff" },
+  conveyorMk3:     { name: "Conveyor Belt Mk.III",category: "building", color: "#ffcc00" },
+  sorterMk1:       { name: "Sorter Mk.I",       category: "building",  color: "#aaaaaa" },
+  sorterMk2:       { name: "Sorter Mk.II",      category: "building",  color: "#44ddff" },
+  sorterMk3:       { name: "Sorter Mk.III",     category: "building",  color: "#ffcc00" },
+  splitter:        { name: "Splitter",           category: "building",  color: "#8899aa" },
+  trafficMonitor:  { name: "Traffic Monitor",    category: "building",  color: "#77aacc" },
+  sprayCoater:     { name: "Spray Coater",       category: "building",  color: "#55bb77" },
+  depot:           { name: "Storage Mk.I",       category: "building",  color: "#8888aa" },
+  storageTank:     { name: "Storage Tank",       category: "building",  color: "#6688aa" },
+  storageMk2:      { name: "Storage Mk.II",      category: "building", color: "#7799bb" },
+  planetaryLogisticsStation: { name: "Planetary Logistics Station", category: "building", color: "#44aadd" },
+  interstellarLogisticsStation: { name: "Interstellar Logistics Station", category: "building", color: "#cc66ff" },
+  orbitalCollector:{ name: "Orbital Collector",  category: "building",  color: "#ffaa44" },
+
+  // Buildings — Production
+  beltMiningMachine: { name: "Mining Machine",  category: "building",  color: "#cc8844" },
+  beltWaterPump:   { name: "Water Pump",         category: "building",  color: "#4488cc" },
+  beltOilExtractor:{ name: "Oil Extractor",      category: "building",  color: "#cc8800" },
+  beltArcSmelter:  { name: "Arc Smelter",        category: "building",  color: "#ff6633" },
+  beltPlaneSmelter:{ name: "Plane Smelter",      category: "building",  color: "#ff8855" },
+  beltAssemblerMk1:{ name: "Assembler Mk.I",     category: "building", color: "#55aacc" },
+  beltAssemblerMk2:{ name: "Assembler Mk.II",    category: "building", color: "#44bbdd" },
+  beltAssemblerMk3:{ name: "Assembler Mk.III",   category: "building", color: "#33ccee" },
+  beltChemicalPlant:{ name: "Chemical Plant",    category: "building",  color: "#55cc88" },
+  beltOilRefinery: { name: "Oil Refinery",       category: "building",  color: "#ccaa44" },
+  beltMatrixLab:   { name: "Matrix Lab",         category: "building",  color: "#cc44ff" },
+  beltParticleCollider: { name: "Miniature Particle Collider", category: "building", color: "#9944ff" },
+  beltFractionator:{ name: "Fractionator",       category: "building",  color: "#ff66cc" },
+  emRailEjector:   { name: "EM-Rail Ejector",    category: "building",  color: "#ff5533" },
+  verticalLaunchSilo: { name: "Vertical Launching Silo", category: "building", color: "#ff4422" },
+};
+
+const BUILDINGS = {
+  miningMachine:    { name: "Mining Machine",        category: "extraction",     speed: 1.0 },
+  waterPump:        { name: "Water Pump",            category: "extraction",     speed: 1.0 },
+  oilExtractor:     { name: "Oil Extractor",         category: "extraction",     speed: 1.0 },
+  arcSmelter:       { name: "Arc Smelter",           category: "smelting",       speed: 1.0 },
+  planeSmelter:     { name: "Plane Smelter",         category: "smelting",       speed: 2.0 },
+  assemblerMk1:     { name: "Assembler Mk.I",        category: "assembling",    speed: 0.75 },
+  assemblerMk2:     { name: "Assembler Mk.II",       category: "assembling",    speed: 1.0 },
+  assemblerMk3:     { name: "Assembler Mk.III",      category: "assembling",    speed: 1.5 },
+  chemicalPlant:    { name: "Chemical Plant",         category: "chemical",      speed: 1.0 },
+  quantumChemPlant: { name: "Quantum Chemical Plant", category: "chemical",      speed: 2.0 },
+  oilRefinery:      { name: "Oil Refinery",           category: "refining",      speed: 1.0 },
+  matrixLab:        { name: "Matrix Lab",             category: "research",      speed: 1.0 },
+  particleCollider: { name: "Particle Collider",      category: "collider",      speed: 1.0 },
+  fractionator:     { name: "Fractionator",           category: "fractionation", speed: 1.0 },
+};
+
+// Each recipe: { id, name, building, time (seconds), inputs, outputs, category, default }
+const RECIPES = {
+  // === RAW RESOURCE EXTRACTION ===
+  ironOre:          { id: "ironOre",      name: "Iron Ore",      building: "miningMachine", time: 2,  inputs: [], outputs: [{ item: "ironOre", qty: 1 }], category: "raw", default: true },
+  copperOre:        { id: "copperOre",    name: "Copper Ore",    building: "miningMachine", time: 2,  inputs: [], outputs: [{ item: "copperOre", qty: 1 }], category: "raw", default: true },
+  stone:            { id: "stone",        name: "Stone",         building: "miningMachine", time: 2,  inputs: [], outputs: [{ item: "stone", qty: 1 }], category: "raw", default: true },
+  coal:             { id: "coal",         name: "Coal",          building: "miningMachine", time: 2,  inputs: [], outputs: [{ item: "coal", qty: 1 }], category: "raw", default: true },
+  siliconOre:       { id: "siliconOre",   name: "Silicon Ore",   building: "miningMachine", time: 2,  inputs: [], outputs: [{ item: "siliconOre", qty: 1 }], category: "raw", default: true },
+  titaniumOre:      { id: "titaniumOre",  name: "Titanium Ore",  building: "miningMachine", time: 2,  inputs: [], outputs: [{ item: "titaniumOre", qty: 1 }], category: "raw", default: true },
+  water:            { id: "water",        name: "Water",         building: "waterPump",     time: 1.2,inputs: [], outputs: [{ item: "water", qty: 1 }], category: "raw", default: true },
+  crudeOil:         { id: "crudeOil",     name: "Crude Oil",     building: "oilExtractor",  time: 2,  inputs: [], outputs: [{ item: "crudeOil", qty: 1 }], category: "raw", default: true },
+  hydrogen:         { id: "hydrogen",     name: "Hydrogen",      building: "miningMachine", time: 1,  inputs: [], outputs: [{ item: "hydrogen", qty: 1 }], category: "raw", default: true },
+  fireIce:          { id: "fireIce",      name: "Fire Ice",      building: "miningMachine", time: 2,  inputs: [], outputs: [{ item: "fireIce", qty: 1 }], category: "raw", default: true },
+  kimberliteOre:    { id: "kimberliteOre",name: "Kimberlite Ore",building: "miningMachine", time: 2,  inputs: [], outputs: [{ item: "kimberliteOre", qty: 1 }], category: "raw", default: true },
+  spiniformCrystal: { id: "spiniformCrystal", name: "Spiniform Stalagmite Crystal", building: "miningMachine", time: 2, inputs: [], outputs: [{ item: "spiniformCrystal", qty: 1 }], category: "raw", default: true },
+
+  // === SMELTING ===
+  ironIngot:        { id: "ironIngot",       name: "Iron Ingot",          building: "arcSmelter", time: 1,   inputs: [{ item: "ironOre", qty: 1 }],                                                    outputs: [{ item: "ironIngot", qty: 1 }],        category: "smelting", default: true },
+  copperIngot:      { id: "copperIngot",     name: "Copper Ingot",        building: "arcSmelter", time: 1,   inputs: [{ item: "copperOre", qty: 1 }],                                                   outputs: [{ item: "copperIngot", qty: 1 }],      category: "smelting", default: true },
+  magnet:           { id: "magnet",          name: "Magnet",              building: "arcSmelter", time: 1.5, inputs: [{ item: "ironOre", qty: 1 }],                                                     outputs: [{ item: "magnet", qty: 1 }],           category: "smelting", default: true },
+  stoneBrick:       { id: "stoneBrick",      name: "Stone Brick",         building: "arcSmelter", time: 1,   inputs: [{ item: "stone", qty: 1 }],                                                      outputs: [{ item: "stoneBrick", qty: 1 }],       category: "smelting", default: true },
+  glass:            { id: "glass",           name: "Glass",               building: "arcSmelter", time: 2,   inputs: [{ item: "stone", qty: 2 }],                                                      outputs: [{ item: "glass", qty: 1 }],            category: "smelting", default: true },
+  energeticGraphite:{ id: "energeticGraphite",name: "Energetic Graphite", building: "arcSmelter", time: 2,   inputs: [{ item: "coal", qty: 2 }],                                                       outputs: [{ item: "energeticGraphite", qty: 1 }],category: "smelting", default: true },
+  highPuritySilicon:{ id: "highPuritySilicon",name: "High-Purity Silicon",building: "arcSmelter", time: 2,   inputs: [{ item: "siliconOre", qty: 2 }],                                                  outputs: [{ item: "highPuritySilicon", qty: 1 }],category: "smelting", default: true },
+  titaniumIngot:    { id: "titaniumIngot",   name: "Titanium Ingot",      building: "arcSmelter", time: 2,   inputs: [{ item: "titaniumOre", qty: 2 }],                                                 outputs: [{ item: "titaniumIngot", qty: 1 }],    category: "smelting", default: true },
+  steel:            { id: "steel",           name: "Steel",               building: "arcSmelter", time: 3,   inputs: [{ item: "ironIngot", qty: 3 }],                                                   outputs: [{ item: "steel", qty: 1 }],            category: "smelting", default: true },
+  diamond:          { id: "diamond",         name: "Diamond",             building: "arcSmelter", time: 2,   inputs: [{ item: "energeticGraphite", qty: 1 }],                                           outputs: [{ item: "diamond", qty: 1 }],          category: "smelting", default: true },
+  diamondKimberlite:{ id: "diamondKimberlite",name: "Diamond (Kimberlite)",building: "arcSmelter", time: 1.5, inputs: [{ item: "kimberliteOre", qty: 1 }],                                              outputs: [{ item: "diamond", qty: 2 }],          category: "smelting", default: false },
+  crystalSilicon:   { id: "crystalSilicon",  name: "Crystal Silicon",     building: "arcSmelter", time: 2,   inputs: [{ item: "highPuritySilicon", qty: 1 }],                                           outputs: [{ item: "crystalSilicon", qty: 1 }],   category: "smelting", default: true },
+  titaniumAlloy:    { id: "titaniumAlloy",   name: "Titanium Alloy",      building: "arcSmelter", time: 12,  inputs: [{ item: "titaniumIngot", qty: 4 }, { item: "steel", qty: 4 }, { item: "sulfuricAcid", qty: 8 }], outputs: [{ item: "titaniumAlloy", qty: 4 }], category: "smelting", default: true },
+
+  // === REFINING ===
+  refinedOil:       { id: "refinedOil",  name: "Plasma Refining",    building: "oilRefinery", time: 4, inputs: [{ item: "crudeOil", qty: 2 }], outputs: [{ item: "refinedOil", qty: 2 }, { item: "hydrogen", qty: 1 }], category: "refining", default: true },
+
+  // === CHEMICAL ===
+  plastic:          { id: "plastic",         name: "Plastic",            building: "chemicalPlant", time: 3, inputs: [{ item: "refinedOil", qty: 2 }, { item: "energeticGraphite", qty: 1 }],            outputs: [{ item: "plastic", qty: 1 }],          category: "chemical", default: true },
+  sulfuricAcid:     { id: "sulfuricAcid",    name: "Sulfuric Acid",      building: "chemicalPlant", time: 6, inputs: [{ item: "refinedOil", qty: 6 }, { item: "stone", qty: 8 }, { item: "water", qty: 4 }], outputs: [{ item: "sulfuricAcid", qty: 4 }], category: "chemical", default: true },
+  organicCrystal:   { id: "organicCrystal",  name: "Organic Crystal",    building: "chemicalPlant", time: 6, inputs: [{ item: "plastic", qty: 2 }, { item: "refinedOil", qty: 1 }, { item: "water", qty: 1 }], outputs: [{ item: "organicCrystal", qty: 1 }], category: "chemical", default: true },
+  graphene:         { id: "graphene",        name: "Graphene",           building: "chemicalPlant", time: 3, inputs: [{ item: "energeticGraphite", qty: 3 }, { item: "sulfuricAcid", qty: 1 }],          outputs: [{ item: "graphene", qty: 2 }],         category: "chemical", default: true },
+  grapheneFireIce:  { id: "grapheneFireIce", name: "Graphene (Fire Ice)",building: "chemicalPlant", time: 2, inputs: [{ item: "fireIce", qty: 2 }],                                                     outputs: [{ item: "graphene", qty: 2 }, { item: "hydrogen", qty: 1 }], category: "chemical", default: false },
+  carbonNanotube:   { id: "carbonNanotube",  name: "Carbon Nanotube",    building: "chemicalPlant", time: 4, inputs: [{ item: "graphene", qty: 3 }, { item: "titaniumIngot", qty: 1 }],                  outputs: [{ item: "carbonNanotube", qty: 2 }],   category: "chemical", default: true },
+  carbonNanotubeSpin:{ id: "carbonNanotubeSpin", name: "Carbon Nanotube (Spiniform)", building: "chemicalPlant", time: 4, inputs: [{ item: "spiniformCrystal", qty: 6 }],                               outputs: [{ item: "carbonNanotube", qty: 2 }],   category: "chemical", default: false },
+
+  // === ASSEMBLING ===
+  gear:             { id: "gear",            name: "Gear",               building: "assemblerMk2", time: 1,  inputs: [{ item: "ironIngot", qty: 1 }],                                                   outputs: [{ item: "gear", qty: 1 }],             category: "assembling", default: true },
+  magneticCoil:     { id: "magneticCoil",    name: "Magnetic Coil",      building: "assemblerMk2", time: 1,  inputs: [{ item: "magnet", qty: 2 }, { item: "copperIngot", qty: 1 }],                     outputs: [{ item: "magneticCoil", qty: 2 }],     category: "assembling", default: true },
+  circuitBoard:     { id: "circuitBoard",    name: "Circuit Board",      building: "assemblerMk2", time: 1,  inputs: [{ item: "ironIngot", qty: 2 }, { item: "copperIngot", qty: 1 }],                  outputs: [{ item: "circuitBoard", qty: 2 }],     category: "assembling", default: true },
+  prism:            { id: "prism",           name: "Prism",              building: "assemblerMk2", time: 2,  inputs: [{ item: "glass", qty: 3 }],                                                       outputs: [{ item: "prism", qty: 2 }],            category: "assembling", default: true },
+  electricMotor:    { id: "electricMotor",   name: "Electric Motor",     building: "assemblerMk2", time: 2,  inputs: [{ item: "ironIngot", qty: 2 }, { item: "gear", qty: 1 }, { item: "magneticCoil", qty: 1 }], outputs: [{ item: "electricMotor", qty: 1 }], category: "assembling", default: true },
+  electromagneticTurbine: { id: "electromagneticTurbine", name: "Electromagnetic Turbine", building: "assemblerMk2", time: 2, inputs: [{ item: "electricMotor", qty: 2 }, { item: "magneticCoil", qty: 2 }], outputs: [{ item: "electromagneticTurbine", qty: 1 }], category: "assembling", default: true },
+  microcrystallineComp: { id: "microcrystallineComp", name: "Microcrystalline Component", building: "assemblerMk2", time: 2, inputs: [{ item: "highPuritySilicon", qty: 2 }, { item: "copperIngot", qty: 1 }], outputs: [{ item: "microcrystallineComp", qty: 1 }], category: "assembling", default: true },
+  plasmaExciter:    { id: "plasmaExciter",   name: "Plasma Exciter",     building: "assemblerMk2", time: 2,  inputs: [{ item: "magneticCoil", qty: 4 }, { item: "prism", qty: 2 }],                     outputs: [{ item: "plasmaExciter", qty: 1 }],    category: "assembling", default: true },
+  photonCombiner:   { id: "photonCombiner",  name: "Photon Combiner",    building: "assemblerMk2", time: 3,  inputs: [{ item: "prism", qty: 2 }, { item: "circuitBoard", qty: 1 }],                     outputs: [{ item: "photonCombiner", qty: 1 }],   category: "assembling", default: true },
+  superMagneticRing:{ id: "superMagneticRing",name: "Super-Magnetic Ring",building: "assemblerMk2", time: 3, inputs: [{ item: "electromagneticTurbine", qty: 2 }, { item: "magnet", qty: 3 }, { item: "energeticGraphite", qty: 1 }], outputs: [{ item: "superMagneticRing", qty: 1 }], category: "assembling", default: true },
+  processor:        { id: "processor",       name: "Processor",          building: "assemblerMk2", time: 3,  inputs: [{ item: "circuitBoard", qty: 2 }, { item: "microcrystallineComp", qty: 2 }],      outputs: [{ item: "processor", qty: 1 }],        category: "assembling", default: true },
+  titaniumCrystal:  { id: "titaniumCrystal", name: "Titanium Crystal",   building: "assemblerMk2", time: 4,  inputs: [{ item: "organicCrystal", qty: 1 }, { item: "titaniumIngot", qty: 3 }],           outputs: [{ item: "titaniumCrystal", qty: 1 }],  category: "assembling", default: true },
+  casimirCrystal:   { id: "casimirCrystal",  name: "Casimir Crystal",    building: "assemblerMk2", time: 4,  inputs: [{ item: "titaniumCrystal", qty: 1 }, { item: "graphene", qty: 2 }, { item: "hydrogen", qty: 12 }], outputs: [{ item: "casimirCrystal", qty: 1 }], category: "assembling", default: true },
+  titaniumGlass:    { id: "titaniumGlass",   name: "Titanium Glass",     building: "assemblerMk2", time: 5,  inputs: [{ item: "glass", qty: 2 }, { item: "titaniumIngot", qty: 2 }, { item: "water", qty: 2 }], outputs: [{ item: "titaniumGlass", qty: 2 }], category: "assembling", default: true },
+  particleContainer:{ id: "particleContainer",name: "Particle Container",building: "assemblerMk2", time: 4,  inputs: [{ item: "electromagneticTurbine", qty: 2 }, { item: "copperIngot", qty: 2 }, { item: "graphene", qty: 2 }], outputs: [{ item: "particleContainer", qty: 1 }], category: "assembling", default: true },
+  particleContainerAlt: { id: "particleContainerAlt", name: "Particle Container (Unipolar)", building: "assemblerMk2", time: 4, inputs: [{ item: "unipolarMagnet", qty: 10 }, { item: "copperIngot", qty: 2 }], outputs: [{ item: "particleContainer", qty: 1 }], category: "assembling", default: false },
+  particleBroadband:{ id: "particleBroadband",name: "Particle Broadband",building: "assemblerMk2", time: 8,  inputs: [{ item: "carbonNanotube", qty: 2 }, { item: "crystalSilicon", qty: 2 }, { item: "plastic", qty: 1 }], outputs: [{ item: "particleBroadband", qty: 1 }], category: "assembling", default: true },
+  planeFilter:      { id: "planeFilter",     name: "Plane Filter",       building: "assemblerMk2", time: 12, inputs: [{ item: "casimirCrystal", qty: 1 }, { item: "titaniumGlass", qty: 2 }],           outputs: [{ item: "planeFilter", qty: 1 }],      category: "assembling", default: true },
+  quantumChip:      { id: "quantumChip",     name: "Quantum Chip",       building: "assemblerMk2", time: 6,  inputs: [{ item: "processor", qty: 2 }, { item: "planeFilter", qty: 2 }],                  outputs: [{ item: "quantumChip", qty: 1 }],      category: "assembling", default: true },
+  frameMaterial:    { id: "frameMaterial",   name: "Frame Material",     building: "assemblerMk2", time: 6,  inputs: [{ item: "carbonNanotube", qty: 4 }, { item: "titaniumAlloy", qty: 1 }, { item: "highPuritySilicon", qty: 1 }], outputs: [{ item: "frameMaterial", qty: 1 }], category: "assembling", default: true },
+  dysonSphereComp:  { id: "dysonSphereComp", name: "Dyson Sphere Component", building: "assemblerMk2", time: 8, inputs: [{ item: "frameMaterial", qty: 3 }, { item: "solarSail", qty: 3 }, { item: "processor", qty: 3 }], outputs: [{ item: "dysonSphereComp", qty: 1 }], category: "assembling", default: true },
+  solarSail:        { id: "solarSail",       name: "Solar Sail",         building: "assemblerMk2", time: 4,  inputs: [{ item: "graphene", qty: 1 }, { item: "photonCombiner", qty: 1 }],                outputs: [{ item: "solarSail", qty: 2 }],        category: "assembling", default: true },
+  smallCarrierRocket:{ id: "smallCarrierRocket", name: "Small Carrier Rocket", building: "assemblerMk2", time: 6, inputs: [{ item: "dysonSphereComp", qty: 2 }, { item: "deuteronFuelRod", qty: 4 }, { item: "quantumChip", qty: 2 }], outputs: [{ item: "smallCarrierRocket", qty: 1 }], category: "assembling", default: true },
+  thruster:         { id: "thruster",        name: "Thruster",           building: "assemblerMk2", time: 4,  inputs: [{ item: "steel", qty: 2 }, { item: "copperIngot", qty: 3 }],                      outputs: [{ item: "thruster", qty: 1 }],         category: "assembling", default: true },
+  reinforcedThruster:{ id: "reinforcedThruster", name: "Reinforced Thruster", building: "assemblerMk2", time: 6, inputs: [{ item: "titaniumAlloy", qty: 5 }, { item: "electromagneticTurbine", qty: 5 }], outputs: [{ item: "reinforcedThruster", qty: 1 }], category: "assembling", default: true },
+  logisticsDrone:   { id: "logisticsDrone",  name: "Logistics Drone",    building: "assemblerMk2", time: 4,  inputs: [{ item: "ironIngot", qty: 5 }, { item: "processor", qty: 2 }, { item: "thruster", qty: 2 }], outputs: [{ item: "logisticsDrone", qty: 1 }], category: "assembling", default: true },
+  logisticsVessel:  { id: "logisticsVessel", name: "Logistics Vessel",  building: "assemblerMk2", time: 6,  inputs: [{ item: "titaniumAlloy", qty: 10 }, { item: "processor", qty: 10 }, { item: "reinforcedThruster", qty: 2 }], outputs: [{ item: "logisticsVessel", qty: 1 }], category: "assembling", default: true },
+  foundation:       { id: "foundation",      name: "Foundation",         building: "assemblerMk2", time: 1,  inputs: [{ item: "stoneBrick", qty: 3 }, { item: "steel", qty: 1 }],                       outputs: [{ item: "foundation", qty: 1 }],       category: "assembling", default: true },
+  hydrogenFuelRod:  { id: "hydrogenFuelRod", name: "Hydrogen Fuel Rod",  building: "assemblerMk2", time: 6,  inputs: [{ item: "titaniumIngot", qty: 1 }, { item: "hydrogen", qty: 10 }],                outputs: [{ item: "hydrogenFuelRod", qty: 2 }],  category: "assembling", default: true },
+  deuteronFuelRod:  { id: "deuteronFuelRod", name: "Deuteron Fuel Rod",  building: "assemblerMk2", time: 12, inputs: [{ item: "titaniumAlloy", qty: 1 }, { item: "deuterium", qty: 20 }, { item: "superMagneticRing", qty: 1 }], outputs: [{ item: "deuteronFuelRod", qty: 2 }], category: "assembling", default: true },
+  antimatterFuelRod:{ id: "antimatterFuelRod",name: "Antimatter Fuel Rod",building: "assemblerMk2", time: 24, inputs: [{ item: "antimatter", qty: 12 }, { item: "hydrogen", qty: 12 }, { item: "annihilationSphere", qty: 1 }, { item: "titaniumAlloy", qty: 1 }], outputs: [{ item: "antimatterFuelRod", qty: 2 }], category: "assembling", default: true },
+  gravitonLens:     { id: "gravitonLens",    name: "Graviton Lens",      building: "assemblerMk2", time: 6,  inputs: [{ item: "diamond", qty: 4 }, { item: "strangeMatter", qty: 1 }],                  outputs: [{ item: "gravitonLens", qty: 1 }],     category: "assembling", default: true },
+  annihilationSphere:{ id: "annihilationSphere", name: "Annihilation Constraint Sphere", building: "assemblerMk2", time: 20, inputs: [{ item: "particleContainer", qty: 1 }, { item: "processor", qty: 1 }], outputs: [{ item: "annihilationSphere", qty: 1 }], category: "assembling", default: true },
+  spaceWarper:      { id: "spaceWarper",     name: "Space Warper",       building: "assemblerMk2", time: 10, inputs: [{ item: "gravitonLens", qty: 1 }],                                                outputs: [{ item: "spaceWarper", qty: 1 }],      category: "assembling", default: true },
+  proliferatorMk1:  { id: "proliferatorMk1", name: "Proliferator Mk.I",  building: "assemblerMk2", time: 0.5,inputs: [{ item: "coal", qty: 1 }],                                                       outputs: [{ item: "proliferatorMk1", qty: 1 }],  category: "assembling", default: true },
+  proliferatorMk2:  { id: "proliferatorMk2", name: "Proliferator Mk.II", building: "assemblerMk2", time: 1,  inputs: [{ item: "proliferatorMk1", qty: 2 }, { item: "diamond", qty: 1 }],                outputs: [{ item: "proliferatorMk2", qty: 1 }],  category: "assembling", default: true },
+  proliferatorMk3:  { id: "proliferatorMk3", name: "Proliferator Mk.III",building: "assemblerMk2", time: 2,  inputs: [{ item: "proliferatorMk2", qty: 2 }, { item: "carbonNanotube", qty: 1 }],         outputs: [{ item: "proliferatorMk3", qty: 1 }],  category: "assembling", default: true },
+
+  // === BUILDINGS — Power ===
+  teslaTower:       { id: "teslaTower",      name: "Tesla Tower",        building: "assemblerMk2", time: 1,  inputs: [{ item: "ironIngot", qty: 2 }, { item: "magneticCoil", qty: 1 }],                   outputs: [{ item: "teslaTower", qty: 1 }],       category: "building", default: true },
+  wirelessTower:    { id: "wirelessTower",   name: "Wireless Power Tower", building: "assemblerMk2", time: 3, inputs: [{ item: "teslaTower", qty: 1 }, { item: "plasmaExciter", qty: 3 }],                outputs: [{ item: "wirelessTower", qty: 1 }],    category: "building", default: true },
+  satelliteSubstation: { id: "satelliteSubstation", name: "Satellite Substation", building: "assemblerMk2", time: 5, inputs: [{ item: "wirelessTower", qty: 1 }, { item: "superMagneticRing", qty: 10 }, { item: "frameMaterial", qty: 2 }], outputs: [{ item: "satelliteSubstation", qty: 1 }], category: "building", default: true },
+  windTurbine:      { id: "windTurbine",     name: "Wind Turbine",       building: "assemblerMk2", time: 4,  inputs: [{ item: "ironIngot", qty: 6 }, { item: "gear", qty: 1 }, { item: "magneticCoil", qty: 3 }], outputs: [{ item: "windTurbine", qty: 1 }], category: "building", default: true },
+  thermalPower:     { id: "thermalPower",    name: "Thermal Power Station", building: "assemblerMk2", time: 5, inputs: [{ item: "ironIngot", qty: 10 }, { item: "stoneBrick", qty: 4 }, { item: "gear", qty: 4 }, { item: "magneticCoil", qty: 4 }], outputs: [{ item: "thermalPower", qty: 1 }], category: "building", default: true },
+  solarPanel:       { id: "solarPanel",      name: "Solar Panel",        building: "assemblerMk2", time: 5,  inputs: [{ item: "copperIngot", qty: 6 }, { item: "highPuritySilicon", qty: 6 }, { item: "circuitBoard", qty: 4 }], outputs: [{ item: "solarPanel", qty: 1 }], category: "building", default: true },
+  accumulator:      { id: "accumulator",     name: "Accumulator",        building: "assemblerMk2", time: 5,  inputs: [{ item: "ironIngot", qty: 6 }, { item: "superMagneticRing", qty: 1 }, { item: "crystalSilicon", qty: 6 }], outputs: [{ item: "accumulator", qty: 1 }], category: "building", default: true },
+  accumulatorFull:  { id: "accumulatorFull", name: "Full Accumulator",   building: "assemblerMk2", time: 1,  inputs: [{ item: "accumulator", qty: 1 }],                                                   outputs: [{ item: "accumulatorFull", qty: 1 }],  category: "building", default: true },
+  miniatureFusion:  { id: "miniatureFusion", name: "Mini Fusion Power Station", building: "assemblerMk2", time: 10, inputs: [{ item: "titaniumAlloy", qty: 12 }, { item: "superMagneticRing", qty: 10 }, { item: "carbonNanotube", qty: 8 }, { item: "processor", qty: 4 }], outputs: [{ item: "miniatureFusion", qty: 1 }], category: "building", default: true },
+  energyExchanger:  { id: "energyExchanger", name: "Energy Exchanger",   building: "assemblerMk2", time: 15, inputs: [{ item: "titaniumAlloy", qty: 40 }, { item: "steel", qty: 40 }, { item: "processor", qty: 40 }, { item: "particleContainer", qty: 8 }], outputs: [{ item: "energyExchanger", qty: 1 }], category: "building", default: true },
+  rayReceiver:      { id: "rayReceiver",     name: "Ray Receiver",       building: "assemblerMk2", time: 8,  inputs: [{ item: "steel", qty: 20 }, { item: "highPuritySilicon", qty: 20 }, { item: "photonCombiner", qty: 10 }, { item: "processor", qty: 5 }, { item: "superMagneticRing", qty: 20 }], outputs: [{ item: "rayReceiver", qty: 1 }], category: "building", default: true },
+
+  // === BUILDINGS — Logistics ===
+  conveyorMk1:      { id: "conveyorMk1",     name: "Conveyor Belt Mk.I",  building: "assemblerMk2", time: 1,  inputs: [{ item: "ironIngot", qty: 2 }, { item: "gear", qty: 1 }],                          outputs: [{ item: "conveyorMk1", qty: 3 }],      category: "building", default: true },
+  conveyorMk2:      { id: "conveyorMk2",     name: "Conveyor Belt Mk.II", building: "assemblerMk2", time: 1,  inputs: [{ item: "conveyorMk1", qty: 3 }, { item: "electromagneticTurbine", qty: 1 }],      outputs: [{ item: "conveyorMk2", qty: 3 }],      category: "building", default: true },
+  conveyorMk3:      { id: "conveyorMk3",     name: "Conveyor Belt Mk.III",building: "assemblerMk2", time: 1,  inputs: [{ item: "conveyorMk2", qty: 3 }, { item: "superMagneticRing", qty: 1 }, { item: "graphene", qty: 1 }], outputs: [{ item: "conveyorMk3", qty: 3 }], category: "building", default: true },
+  sorterMk1:        { id: "sorterMk1",       name: "Sorter Mk.I",        building: "assemblerMk2", time: 1,  inputs: [{ item: "ironIngot", qty: 1 }, { item: "circuitBoard", qty: 1 }],                   outputs: [{ item: "sorterMk1", qty: 1 }],        category: "building", default: true },
+  sorterMk2:        { id: "sorterMk2",       name: "Sorter Mk.II",       building: "assemblerMk2", time: 1,  inputs: [{ item: "sorterMk1", qty: 2 }, { item: "electricMotor", qty: 1 }],                  outputs: [{ item: "sorterMk2", qty: 2 }],        category: "building", default: true },
+  sorterMk3:        { id: "sorterMk3",       name: "Sorter Mk.III",      building: "assemblerMk2", time: 1,  inputs: [{ item: "sorterMk2", qty: 2 }, { item: "electromagneticTurbine", qty: 1 }],         outputs: [{ item: "sorterMk3", qty: 2 }],        category: "building", default: true },
+  splitter:         { id: "splitter",        name: "Splitter",            building: "assemblerMk2", time: 2,  inputs: [{ item: "ironIngot", qty: 3 }, { item: "gear", qty: 2 }, { item: "circuitBoard", qty: 1 }], outputs: [{ item: "splitter", qty: 1 }], category: "building", default: true },
+  trafficMonitor:   { id: "trafficMonitor",  name: "Traffic Monitor",     building: "assemblerMk2", time: 2,  inputs: [{ item: "ironIngot", qty: 3 }, { item: "gear", qty: 2 }, { item: "glass", qty: 1 }, { item: "circuitBoard", qty: 2 }], outputs: [{ item: "trafficMonitor", qty: 1 }], category: "building", default: true },
+  sprayCoater:      { id: "sprayCoater",     name: "Spray Coater",        building: "assemblerMk2", time: 3,  inputs: [{ item: "steel", qty: 4 }, { item: "plasmaExciter", qty: 2 }, { item: "circuitBoard", qty: 2 }, { item: "microcrystallineComp", qty: 2 }], outputs: [{ item: "sprayCoater", qty: 1 }], category: "building", default: true },
+  depot:            { id: "depot",           name: "Storage Mk.I",        building: "assemblerMk2", time: 2,  inputs: [{ item: "ironIngot", qty: 4 }, { item: "stoneBrick", qty: 4 }],                     outputs: [{ item: "depot", qty: 1 }],            category: "building", default: true },
+  storageTank:      { id: "storageTank",     name: "Storage Tank",        building: "assemblerMk2", time: 2,  inputs: [{ item: "ironIngot", qty: 8 }, { item: "stoneBrick", qty: 4 }, { item: "glass", qty: 4 }], outputs: [{ item: "storageTank", qty: 1 }], category: "building", default: true },
+  storageMk2:       { id: "storageMk2",      name: "Storage Mk.II",       building: "assemblerMk2", time: 4,  inputs: [{ item: "steel", qty: 8 }, { item: "stoneBrick", qty: 8 }],                        outputs: [{ item: "storageMk2", qty: 1 }],       category: "building", default: true },
+  planetaryLogisticsStation: { id: "planetaryLogisticsStation", name: "Planetary Logistics Station", building: "assemblerMk2", time: 20, inputs: [{ item: "steel", qty: 40 }, { item: "titaniumIngot", qty: 40 }, { item: "processor", qty: 40 }, { item: "particleContainer", qty: 20 }], outputs: [{ item: "planetaryLogisticsStation", qty: 1 }], category: "building", default: true },
+  interstellarLogisticsStation: { id: "interstellarLogisticsStation", name: "Interstellar Logistics Station", building: "assemblerMk2", time: 30, inputs: [{ item: "planetaryLogisticsStation", qty: 1 }, { item: "titaniumAlloy", qty: 40 }, { item: "particleContainer", qty: 20 }], outputs: [{ item: "interstellarLogisticsStation", qty: 1 }], category: "building", default: true },
+  orbitalCollector: { id: "orbitalCollector", name: "Orbital Collector",  building: "assemblerMk2", time: 30, inputs: [{ item: "interstellarLogisticsStation", qty: 1 }, { item: "superMagneticRing", qty: 50 }, { item: "reinforcedThruster", qty: 20 }, { item: "accumulator", qty: 20 }], outputs: [{ item: "orbitalCollector", qty: 1 }], category: "building", default: true },
+
+  // === BUILDINGS — Production ===
+  beltMiningMachine: { id: "beltMiningMachine", name: "Mining Machine",   building: "assemblerMk2", time: 3,  inputs: [{ item: "ironIngot", qty: 4 }, { item: "circuitBoard", qty: 2 }, { item: "magneticCoil", qty: 2 }, { item: "gear", qty: 2 }], outputs: [{ item: "beltMiningMachine", qty: 1 }], category: "building", default: true },
+  beltWaterPump:    { id: "beltWaterPump",   name: "Water Pump",          building: "assemblerMk2", time: 4,  inputs: [{ item: "ironIngot", qty: 8 }, { item: "stoneBrick", qty: 4 }, { item: "electricMotor", qty: 4 }, { item: "circuitBoard", qty: 2 }], outputs: [{ item: "beltWaterPump", qty: 1 }], category: "building", default: true },
+  beltOilExtractor: { id: "beltOilExtractor", name: "Oil Extractor",     building: "assemblerMk2", time: 6,  inputs: [{ item: "steel", qty: 12 }, { item: "stoneBrick", qty: 12 }, { item: "circuitBoard", qty: 6 }, { item: "plasmaExciter", qty: 4 }], outputs: [{ item: "beltOilExtractor", qty: 1 }], category: "building", default: true },
+  beltArcSmelter:   { id: "beltArcSmelter",  name: "Arc Smelter",         building: "assemblerMk2", time: 3,  inputs: [{ item: "ironIngot", qty: 4 }, { item: "stoneBrick", qty: 2 }, { item: "circuitBoard", qty: 4 }, { item: "magneticCoil", qty: 2 }], outputs: [{ item: "beltArcSmelter", qty: 1 }], category: "building", default: true },
+  beltPlaneSmelter: { id: "beltPlaneSmelter", name: "Plane Smelter",      building: "assemblerMk2", time: 4,  inputs: [{ item: "beltArcSmelter", qty: 1 }, { item: "frameMaterial", qty: 5 }, { item: "planeFilter", qty: 4 }, { item: "processor", qty: 2 }], outputs: [{ item: "beltPlaneSmelter", qty: 1 }], category: "building", default: true },
+  beltAssemblerMk1: { id: "beltAssemblerMk1", name: "Assembler Mk.I",    building: "assemblerMk2", time: 2,  inputs: [{ item: "ironIngot", qty: 4 }, { item: "gear", qty: 8 }, { item: "circuitBoard", qty: 4 }], outputs: [{ item: "beltAssemblerMk1", qty: 1 }], category: "building", default: true },
+  beltAssemblerMk2: { id: "beltAssemblerMk2", name: "Assembler Mk.II",   building: "assemblerMk2", time: 3,  inputs: [{ item: "beltAssemblerMk1", qty: 1 }, { item: "graphene", qty: 8 }, { item: "processor", qty: 4 }], outputs: [{ item: "beltAssemblerMk2", qty: 1 }], category: "building", default: true },
+  beltAssemblerMk3: { id: "beltAssemblerMk3", name: "Assembler Mk.III",  building: "assemblerMk2", time: 4,  inputs: [{ item: "beltAssemblerMk2", qty: 1 }, { item: "particleBroadband", qty: 8 }, { item: "quantumChip", qty: 2 }], outputs: [{ item: "beltAssemblerMk3", qty: 1 }], category: "building", default: true },
+  beltChemicalPlant: { id: "beltChemicalPlant", name: "Chemical Plant",   building: "assemblerMk2", time: 5,  inputs: [{ item: "steel", qty: 8 }, { item: "stoneBrick", qty: 8 }, { item: "glass", qty: 8 }, { item: "circuitBoard", qty: 2 }], outputs: [{ item: "beltChemicalPlant", qty: 1 }], category: "building", default: true },
+  beltOilRefinery:  { id: "beltOilRefinery", name: "Oil Refinery",        building: "assemblerMk2", time: 6,  inputs: [{ item: "steel", qty: 10 }, { item: "stoneBrick", qty: 10 }, { item: "circuitBoard", qty: 6 }, { item: "plasmaExciter", qty: 6 }], outputs: [{ item: "beltOilRefinery", qty: 1 }], category: "building", default: true },
+  beltMatrixLab:    { id: "beltMatrixLab",   name: "Matrix Lab",          building: "assemblerMk2", time: 3,  inputs: [{ item: "ironIngot", qty: 8 }, { item: "glass", qty: 4 }, { item: "circuitBoard", qty: 4 }, { item: "magneticCoil", qty: 4 }], outputs: [{ item: "beltMatrixLab", qty: 1 }], category: "building", default: true },
+  beltParticleCollider: { id: "beltParticleCollider", name: "Miniature Particle Collider", building: "assemblerMk2", time: 15, inputs: [{ item: "titaniumAlloy", qty: 20 }, { item: "frameMaterial", qty: 20 }, { item: "superMagneticRing", qty: 50 }, { item: "graphene", qty: 10 }, { item: "processor", qty: 8 }], outputs: [{ item: "beltParticleCollider", qty: 1 }], category: "building", default: true },
+  beltFractionator: { id: "beltFractionator", name: "Fractionator",       building: "assemblerMk2", time: 3,  inputs: [{ item: "steel", qty: 8 }, { item: "stoneBrick", qty: 4 }, { item: "glass", qty: 4 }, { item: "processor", qty: 1 }], outputs: [{ item: "beltFractionator", qty: 1 }], category: "building", default: true },
+  emRailEjector:    { id: "emRailEjector",   name: "EM-Rail Ejector",     building: "assemblerMk2", time: 6,  inputs: [{ item: "steel", qty: 20 }, { item: "gear", qty: 20 }, { item: "processor", qty: 5 }, { item: "superMagneticRing", qty: 10 }], outputs: [{ item: "emRailEjector", qty: 1 }], category: "building", default: true },
+  verticalLaunchSilo: { id: "verticalLaunchSilo", name: "Vertical Launching Silo", building: "assemblerMk2", time: 30, inputs: [{ item: "titaniumAlloy", qty: 80 }, { item: "frameMaterial", qty: 30 }, { item: "gravitonLens", qty: 20 }, { item: "quantumChip", qty: 10 }], outputs: [{ item: "verticalLaunchSilo", qty: 1 }], category: "building", default: true },
+
+  // === COLLIDER ===
+  strangeMatter:    { id: "strangeMatter",   name: "Strange Matter",     building: "particleCollider", time: 8,  inputs: [{ item: "particleContainer", qty: 2 }, { item: "ironIngot", qty: 2 }, { item: "deuterium", qty: 10 }], outputs: [{ item: "strangeMatter", qty: 1 }], category: "collider", default: true },
+  deuteriumCollider:{ id: "deuteriumCollider",name: "Deuterium (Collider)",building: "particleCollider", time: 2.5, inputs: [{ item: "hydrogen", qty: 10 }], outputs: [{ item: "deuterium", qty: 5 }], category: "collider", default: false },
+  antimatter:       { id: "antimatter",      name: "Antimatter",         building: "particleCollider", time: 2,  inputs: [{ item: "hydrogen", qty: 2 }], outputs: [{ item: "antimatter", qty: 2 }, { item: "hydrogen", qty: 2 }], category: "collider", default: true },
+
+  // === FRACTIONATION ===
+  deuteriumFrac:    { id: "deuteriumFrac",   name: "Deuterium (Fractionation)", building: "fractionator", time: 1, inputs: [{ item: "hydrogen", qty: 100 }], outputs: [{ item: "deuterium", qty: 1 }], category: "fractionation", default: true },
+
+  // === RESEARCH ===
+  emMatrix:         { id: "emMatrix",        name: "Electromagnetic Matrix",building: "matrixLab", time: 3,  inputs: [{ item: "magneticCoil", qty: 1 }, { item: "circuitBoard", qty: 1 }],              outputs: [{ item: "emMatrix", qty: 1 }],         category: "research", default: true },
+  energyMatrix:     { id: "energyMatrix",    name: "Energy Matrix",      building: "matrixLab",     time: 6,  inputs: [{ item: "energeticGraphite", qty: 2 }, { item: "hydrogen", qty: 2 }],             outputs: [{ item: "energyMatrix", qty: 1 }],     category: "research", default: true },
+  structureMatrix:  { id: "structureMatrix", name: "Structure Matrix",   building: "matrixLab",     time: 8,  inputs: [{ item: "diamond", qty: 1 }, { item: "titaniumCrystal", qty: 1 }],               outputs: [{ item: "structureMatrix", qty: 1 }],  category: "research", default: true },
+  infoMatrix:       { id: "infoMatrix",      name: "Information Matrix", building: "matrixLab",     time: 10, inputs: [{ item: "processor", qty: 2 }, { item: "particleBroadband", qty: 1 }],            outputs: [{ item: "infoMatrix", qty: 1 }],       category: "research", default: true },
+  gravityMatrix:    { id: "gravityMatrix",   name: "Gravity Matrix",     building: "matrixLab",     time: 24, inputs: [{ item: "gravitonLens", qty: 1 }, { item: "quantumChip", qty: 1 }],               outputs: [{ item: "gravityMatrix", qty: 2 }],    category: "research", default: true },
+  universeMatrix:   { id: "universeMatrix",  name: "Universe Matrix",    building: "matrixLab",     time: 15, inputs: [{ item: "emMatrix", qty: 1 }, { item: "energyMatrix", qty: 1 }, { item: "structureMatrix", qty: 1 }, { item: "infoMatrix", qty: 1 }, { item: "gravityMatrix", qty: 1 }, { item: "antimatter", qty: 1 }], outputs: [{ item: "universeMatrix", qty: 1 }], category: "research", default: true },
+};
+
+// Build lookup: for each output item, which recipes produce it?
+const recipesByOutput = {};
+for (const [recipeId, recipe] of Object.entries(RECIPES)) {
+  for (const out of recipe.outputs) {
+    if (!recipesByOutput[out.item]) recipesByOutput[out.item] = [];
+    recipesByOutput[out.item].push(recipeId);
+  }
+}
+
+// Active recipe overrides (for alternative recipes)
+const activeRecipes = {};
+
+function getActiveRecipe(itemId) {
+  if (activeRecipes[itemId]) return RECIPES[activeRecipes[itemId]];
+  const candidates = recipesByOutput[itemId] || [];
+  const defaultRecipe = candidates.find(rid => RECIPES[rid].default);
+  return defaultRecipe ? RECIPES[defaultRecipe] : (candidates.length > 0 ? RECIPES[candidates[0]] : null);
+}
+
+// =====================================================
+// SECTION 2: CALCULATOR ENGINE
+// =====================================================
+
+// Get the actual building to use based on user tier selections
+function getBuilding(recipe) {
+  const cat = BUILDINGS[recipe.building]?.category;
+  if (cat === "assembling") return BUILDINGS[state.assemblerTier];
+  if (cat === "smelting") return BUILDINGS[state.smelterTier];
+  if (cat === "chemical") return BUILDINGS[state.chemicalTier];
+  return BUILDINGS[recipe.building];
+}
+
+function calculateChain(targetItem, targetRate) {
+  const requirements = {};
+  const queue = [{ item: targetItem, rate: targetRate }];
+  const visited = new Set();
+  let safetyCounter = 0;
+
+  while (queue.length > 0 && safetyCounter < 5000) {
+    safetyCounter++;
+    const { item, rate } = queue.shift();
+
+    // Handle deuterium source selection
+    let recipe;
+    if (item === "deuterium") {
+      recipe = state.deuteriumSource === "fractionator"
+        ? RECIPES["deuteriumFrac"]
+        : RECIPES["deuteriumCollider"];
+    } else {
+      recipe = getActiveRecipe(item);
+    }
+
+    if (!recipe) continue;
+
+    const outputEntry = recipe.outputs.find(o => o.item === item);
+    if (!outputEntry) continue;
+
+    const outputQty = outputEntry.qty;
+    const craftsPerMinNeeded = (rate / outputQty);
+    const building = getBuilding(recipe);
+    const buildingSpeed = building ? building.speed : 1;
+    const craftsPerMinPerBuilding = (60 / recipe.time) * buildingSpeed;
+    const numBuildings = craftsPerMinNeeded / craftsPerMinPerBuilding;
+
+    if (requirements[item]) {
+      requirements[item].rate += rate;
+      const totalCraftsPerMin = requirements[item].rate / outputQty;
+      requirements[item].buildings = Math.ceil(totalCraftsPerMin / craftsPerMinPerBuilding * 100) / 100;
+    } else {
+      requirements[item] = {
+        item,
+        recipe,
+        building: building,
+        rate,
+        buildings: Math.ceil(numBuildings * 100) / 100,
+        category: recipe.category,
+      };
+    }
+
+    // Queue inputs
+    if (recipe.inputs.length > 0) {
+      for (const input of recipe.inputs) {
+        const inputRate = (input.qty / outputQty) * rate;
+        queue.push({ item: input.item, rate: inputRate });
+      }
+    }
+  }
+
+  return requirements;
+}
+
+// =====================================================
+// SECTION 3: BUILD SEQUENCE RECOMMENDER
+// =====================================================
+
+function assignDepths(requirements) {
+  const depths = {};
+  const rawItems = new Set();
+
+  // Identify raw items (extraction recipes with no inputs)
+  for (const [itemId, req] of Object.entries(requirements)) {
+    if (req.recipe && req.recipe.inputs.length === 0) {
+      depths[itemId] = 0;
+      rawItems.add(itemId);
+    }
+  }
+
+  // BFS to assign depths
+  let changed = true;
+  let iterations = 0;
+  while (changed && iterations < 100) {
+    changed = false;
+    iterations++;
+    for (const [itemId, req] of Object.entries(requirements)) {
+      if (depths[itemId] !== undefined) continue;
+      const recipe = req.recipe;
+      if (!recipe) continue;
+
+      let maxInputDepth = -1;
+      let allResolved = true;
+      for (const input of recipe.inputs) {
+        if (requirements[input.item]) {
+          if (depths[input.item] === undefined) {
+            allResolved = false;
+            break;
+          }
+          maxInputDepth = Math.max(maxInputDepth, depths[input.item]);
+        } else {
+          // Item not in requirements = external/raw
+          maxInputDepth = Math.max(maxInputDepth, 0);
+        }
+      }
+
+      if (allResolved) {
+        depths[itemId] = maxInputDepth + 1;
+        changed = true;
+      }
+    }
+  }
+
+  // Handle any remaining unresolved (cycles)
+  for (const itemId of Object.keys(requirements)) {
+    if (depths[itemId] === undefined) depths[itemId] = 99;
+  }
+
+  return depths;
+}
+
+const categoryOrder = {
+  raw: 0, extraction: 0,
+  smelting: 1,
+  refining: 2,
+  chemical: 3,
+  assembling: 4,
+  building: 5,
+  fractionation: 6,
+  collider: 7,
+  research: 8,
+};
+
+function generateBuildOrder(requirements) {
+  const depths = assignDepths(requirements);
+  const entries = Object.entries(requirements).map(([itemId, req]) => ({
+    itemId,
+    ...req,
+    depth: depths[itemId] || 0,
+  }));
+
+  entries.sort((a, b) => {
+    if (a.depth !== b.depth) return a.depth - b.depth;
+    const catA = categoryOrder[a.category] ?? 50;
+    const catB = categoryOrder[b.category] ?? 50;
+    return catA - catB;
+  });
+
+  return entries;
+}
+
+// =====================================================
+// SECTION 4: UI CONTROLLER
+// =====================================================
+
+const state = {
+  selectedItem: null,
+  assemblerTier: "assemblerMk2",
+  smelterTier: "arcSmelter",
+  chemicalTier: "chemicalPlant",
+  deuteriumSource: "fractionator",
+};
+
+// Build the searchable item dropdown
+function buildDropdown() {
+  const dropdown = document.getElementById("item-dropdown");
+  const input = document.getElementById("item-search");
+
+  // Get producible items (exclude raw-only items from main list, but include them for completeness)
+  const categories = {};
+  for (const [itemId, item] of Object.entries(ITEMS)) {
+    if (item.category === "raw") continue; // Skip raw resources as targets
+    const cat = item.category;
+    if (!categories[cat]) categories[cat] = [];
+    categories[cat].push({ id: itemId, ...item });
+  }
+
+  const catNames = {
+    smelting: "Smelting",
+    refining: "Refining",
+    chemical: "Chemical",
+    assembling: "Assembling",
+    building: "Buildings & Logistics",
+    collider: "Particle Collider",
+    fractionation: "Fractionation",
+    research: "Research",
+  };
+
+  const catOrder = ["smelting", "refining", "chemical", "assembling", "building", "collider", "fractionation", "research"];
+
+  function renderDropdown(filter = "") {
+    dropdown.innerHTML = "";
+    const lf = filter.toLowerCase();
+
+    for (const cat of catOrder) {
+      const items = categories[cat];
+      if (!items) continue;
+      const filtered = lf ? items.filter(i => i.name.toLowerCase().includes(lf)) : items;
+      if (filtered.length === 0) continue;
+
+      const catDiv = document.createElement("div");
+      catDiv.className = "dropdown-category";
+      catDiv.textContent = catNames[cat] || cat;
+      dropdown.appendChild(catDiv);
+
+      for (const item of filtered) {
+        const div = document.createElement("div");
+        div.className = "dropdown-item";
+        div.innerHTML = `<span class="dot" style="background:${item.color}"></span>${item.name}`;
+        div.addEventListener("click", () => {
+          state.selectedItem = item.id;
+          input.value = item.name;
+          dropdown.classList.remove("active");
+        });
+        dropdown.appendChild(div);
+      }
+    }
+  }
+
+  input.addEventListener("focus", () => {
+    renderDropdown(input.value);
+    dropdown.classList.add("active");
+  });
+
+  input.addEventListener("input", () => {
+    renderDropdown(input.value);
+    dropdown.classList.add("active");
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".search-select-wrapper")) {
+      dropdown.classList.remove("active");
+    }
+  });
+}
+
+// Tier buttons
+function setupTierButtons() {
+  document.querySelectorAll(".tier-group").forEach(group => {
+    const tier = group.dataset.tier;
+    group.querySelectorAll(".tier-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        group.querySelectorAll(".tier-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        if (tier === "assembler") state.assemblerTier = btn.dataset.value;
+        else if (tier === "smelter") state.smelterTier = btn.dataset.value;
+        else if (tier === "chemical") state.chemicalTier = btn.dataset.value;
+        else if (tier === "deuterium") state.deuteriumSource = btn.dataset.value;
+      });
+    });
+  });
+}
+
+// Tabs
+function setupTabs() {
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(`tab-${btn.dataset.tab}`).classList.add("active");
+    });
+  });
+}
+
+// Render results
+function renderResults(requirements) {
+  const buildOrder = generateBuildOrder(requirements);
+
+  // Show results section, hide empty state
+  document.getElementById("results-section").style.display = "";
+  document.getElementById("empty-state").style.display = "none";
+
+  renderChainCards(buildOrder);
+  renderBuildTimeline(buildOrder);
+  renderRawSummary(buildOrder);
+  renderMathBreakdown(buildOrder);
+}
+
+function renderChainCards(buildOrder) {
+  const grid = document.getElementById("results-grid");
+  grid.innerHTML = "";
+
+  buildOrder.forEach((entry, index) => {
+    const item = ITEMS[entry.itemId];
+    if (!item) return;
+    const recipe = entry.recipe;
+    const building = entry.building;
+    const buildingsNeeded = Math.ceil(entry.buildings);
+
+    const card = document.createElement("div");
+    card.className = `result-card cat-${entry.category}`;
+    card.style.animationDelay = `${index * 0.05}s`;
+
+    let inputsHtml = "";
+    if (recipe.inputs.length > 0) {
+      const inputStrs = recipe.inputs.map(inp => {
+        const inputItem = ITEMS[inp.item];
+        const outputQty = recipe.outputs.find(o => o.item === entry.itemId)?.qty || 1;
+        const ratePerMin = (inp.qty / outputQty) * entry.rate;
+        return `<span class="input-item">${inputItem ? inputItem.name : inp.item}</span> (${ratePerMin.toFixed(1)}/min)`;
+      });
+      inputsHtml = `<div class="recipe-info">Inputs: ${inputStrs.join(", ")}</div>`;
+    }
+
+    card.innerHTML = `
+      <div class="card-glow"></div>
+      <div class="item-name">${item.name}</div>
+      <span class="badge">${entry.category}</span>
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-label">Rate</span>
+          <span class="stat-value" style="color: var(--neon-cyan)">${entry.rate.toFixed(1)}/min</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Buildings</span>
+          <span class="stat-value" style="color: var(--neon-magenta)">${buildingsNeeded}x</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Building Type</span>
+          <span class="stat-value" style="font-size: 0.75rem; color: var(--text-primary)">${building ? building.name : "N/A"}</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Craft Time</span>
+          <span class="stat-value" style="font-size: 0.85rem; color: var(--neon-purple)">${recipe.time}s</span>
+        </div>
+      </div>
+      ${inputsHtml}
+    `;
+
+    grid.appendChild(card);
+  });
+}
+
+function renderBuildTimeline(buildOrder) {
+  const timeline = document.getElementById("build-timeline");
+  timeline.innerHTML = "";
+
+  const totalSteps = buildOrder.filter(e => ITEMS[e.itemId]).length;
+
+  // Progress bar
+  const progressDiv = document.createElement("div");
+  progressDiv.className = "build-progress";
+  progressDiv.id = "build-progress";
+  progressDiv.innerHTML = `
+    <span class="progress-label">Progress</span>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+    </div>
+    <span class="progress-text" id="progress-text">0 / ${totalSteps}</span>
+  `;
+  timeline.appendChild(progressDiv);
+
+  function updateProgress() {
+    const checked = timeline.querySelectorAll(".step-check:checked").length;
+    const pct = totalSteps > 0 ? (checked / totalSteps) * 100 : 0;
+    document.getElementById("progress-fill").style.width = pct + "%";
+    document.getElementById("progress-text").textContent = `${checked} / ${totalSteps}`;
+  }
+
+  buildOrder.forEach((entry, index) => {
+    const item = ITEMS[entry.itemId];
+    if (!item) return;
+    const building = entry.building;
+    const buildingsNeeded = Math.ceil(entry.buildings);
+
+    const step = document.createElement("div");
+    step.className = "build-step";
+    step.style.animationDelay = `${index * 0.06}s`;
+
+    let detail = "";
+    if (entry.recipe.inputs.length === 0) {
+      detail = `Place <span class="highlight">${buildingsNeeded}x ${building ? building.name : "Extractor"}</span> to extract <span class="highlight">${item.name}</span> at <span class="highlight">${entry.rate.toFixed(1)}/min</span>`;
+    } else {
+      const outputQty = entry.recipe.outputs.find(o => o.item === entry.itemId)?.qty || 1;
+      const inputStrs = entry.recipe.inputs.map(inp => {
+        const inputItem = ITEMS[inp.item];
+        const ratePerMin = (inp.qty / outputQty) * entry.rate;
+        return `${inputItem ? inputItem.name : inp.item} (${ratePerMin.toFixed(1)}/min)`;
+      });
+      detail = `Build <span class="highlight">${buildingsNeeded}x ${building ? building.name : "Building"}</span> for <span class="highlight">${item.name}</span><br>` +
+               `Consumes: ${inputStrs.join(", ")}<br>` +
+               `Produces: <span class="highlight">${entry.rate.toFixed(1)}/min ${item.name}</span>`;
+    }
+
+    step.innerHTML = `
+      <div class="step-number">${index + 1}</div>
+      <div class="step-content">
+        <input type="checkbox" class="step-check" id="step-check-${index}">
+        <div class="step-text">
+          <div class="step-title" style="color: ${item.color}">${item.name}</div>
+          <div class="step-detail">${detail}</div>
+        </div>
+      </div>
+    `;
+
+    const checkbox = step.querySelector(".step-check");
+    checkbox.addEventListener("change", () => {
+      step.classList.toggle("completed", checkbox.checked);
+      updateProgress();
+    });
+
+    timeline.appendChild(step);
+  });
+}
+
+function renderRawSummary(buildOrder) {
+  const container = document.getElementById("raw-summary");
+  const rawItems = buildOrder.filter(e => e.category === "raw");
+
+  if (rawItems.length === 0) {
+    container.innerHTML = "<h3>Raw Resources</h3><p style='color:var(--text-muted)'>No raw resources needed.</p>";
+    return;
+  }
+
+  const maxRate = Math.max(...rawItems.map(r => r.rate));
+
+  let html = "<h3>Raw Resources Required</h3>";
+  const rawColors = {
+    ironOre: "#a0522d", copperOre: "#b87333", stone: "#888888", coal: "#555555",
+    siliconOre: "#aabbcc", titaniumOre: "#8899aa", water: "#4488cc", crudeOil: "#cc8800",
+    hydrogen: "#00ccff", fireIce: "#ff4466", kimberliteOre: "#88ddff", spiniformCrystal: "#55cc99",
+  };
+
+  for (const entry of rawItems) {
+    const item = ITEMS[entry.itemId];
+    const pct = (entry.rate / maxRate) * 100;
+    const color = rawColors[entry.itemId] || '#ff8800';
+    html += `
+      <div class="raw-bar">
+        <span class="raw-name">${item ? item.name : entry.itemId}</span>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${pct}%; background: linear-gradient(90deg, ${color}, ${color}88);"></div>
+        </div>
+        <span class="raw-rate">${entry.rate.toFixed(1)}/min</span>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+}
+
+function renderMathBreakdown(buildOrder) {
+  const container = document.getElementById("math-breakdown");
+  const targetItem = ITEMS[state.selectedItem];
+  const targetRate = parseFloat(document.getElementById("rate-input").value);
+
+  // Helper to format a number nicely
+  const fmt = (n) => {
+    if (Number.isInteger(n)) return n.toString();
+    return n % 1 === 0 ? n.toFixed(0) : n.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
+  };
+
+  const itemName = (id) => ITEMS[id]?.name || id;
+
+  // Build the overview section explaining the general formulas
+  let html = `
+    <div class="math-overview">
+      <h3>How the Calculator Works</h3>
+      <p>
+        You asked for <em style="color:var(--neon-cyan)">${fmt(targetRate)}/min</em> of
+        <em style="color:var(--neon-cyan)">${targetItem?.name || state.selectedItem}</em>.
+        The calculator walks backward through every recipe in the production chain, using three core formulas
+        to figure out how many buildings you need at each step.
+      </p>
+      <div class="formula-block">
+        <span class="label">Formula 1 &mdash; Crafts needed per minute</span>
+        crafts/min = desired_rate &divide; output_qty_per_craft
+      </div>
+      <p>
+        Each recipe produces a certain number of items per craft cycle.
+        For example, Circuit Board produces <em>2</em> per craft, so to get 60/min you only need 30 crafts/min.
+      </p>
+      <div class="formula-block">
+        <span class="label">Formula 2 &mdash; Crafts one building can do per minute</span>
+        building_crafts/min = (60 &divide; craft_time_seconds) &times; building_speed_multiplier
+      </div>
+      <p>
+        A building with a speed multiplier of 1.0x running a 2-second recipe does 60&divide;2 = 30 crafts/min.
+        A faster building (e.g. Assembler Mk.III at 1.5x) would do 45 crafts/min on the same recipe.
+      </p>
+      <div class="formula-block">
+        <span class="label">Formula 3 &mdash; Number of buildings required</span>
+        buildings = &lceil; crafts/min &divide; building_crafts/min &rceil;
+        <br><span style="color:var(--text-muted); font-size:0.8rem">(always rounded up &mdash; you can't build half a smelter)</span>
+      </div>
+      <p>
+        Input demand is calculated by scaling the recipe&rsquo;s input quantities by the total crafts/min:
+      </p>
+      <div class="formula-block">
+        <span class="label">Formula 4 &mdash; Input item rate</span>
+        input_rate = (input_qty_per_craft &divide; output_qty_per_craft) &times; desired_rate
+      </div>
+      <p>
+        This input rate then becomes the <em>desired rate</em> for that ingredient, and the same
+        four formulas are applied recursively all the way down to raw resources.
+        When multiple recipes need the same intermediate (e.g. Iron Ingot), their rates are summed.
+      </p>
+    </div>
+
+    <div class="math-overview" style="border-color: rgba(179, 102, 255, 0.15); margin-bottom: 16px;">
+      <h3>Per-Item Breakdown</h3>
+      <p>Click any item below to expand the full step-by-step math for that item.</p>
+    </div>
+
+    <div class="math-breakdown">
+  `;
+
+  // Per-item breakdowns
+  buildOrder.forEach((entry, index) => {
+    const item = ITEMS[entry.itemId];
+    if (!item) return;
+    const recipe = entry.recipe;
+    const building = entry.building;
+    const outputEntry = recipe.outputs.find(o => o.item === entry.itemId);
+    const outputQty = outputEntry ? outputEntry.qty : 1;
+    const craftsPerMin = entry.rate / outputQty;
+    const buildingSpeed = building ? building.speed : 1;
+    const craftsPerMinPerBuilding = (60 / recipe.time) * buildingSpeed;
+    const exactBuildings = craftsPerMin / craftsPerMinPerBuilding;
+    const ceilBuildings = Math.ceil(exactBuildings);
+    const isRaw = recipe.inputs.length === 0;
+
+    // Determine color for item label based on category
+    const catColorMap = {
+      raw: 'var(--neon-orange)', smelting: 'var(--neon-red)', assembling: 'var(--neon-cyan)',
+      chemical: 'var(--neon-green)', refining: 'var(--neon-yellow)', research: 'var(--neon-magenta)',
+      collider: 'var(--neon-purple)', fractionation: 'var(--neon-pink)', building: 'var(--neon-yellow)',
+    };
+    const itemColor = catColorMap[entry.category] || 'var(--neon-cyan)';
+
+    html += `
+      <div class="math-item" style="animation-delay: ${index * 0.04}s">
+        <div class="math-item-header" onclick="this.parentElement.classList.toggle('open')">
+          <div>
+            <span class="item-label" style="color: ${itemColor}">${item.name}</span>
+            <span class="item-summary">
+              &mdash; <span class="val">${fmt(entry.rate)}/min</span> using
+              <span class="val">${ceilBuildings}x ${building ? building.name : 'Extractor'}</span>
+            </span>
+          </div>
+          <span class="toggle-icon">&#9660;</span>
+        </div>
+        <div class="math-item-body">
+    `;
+
+    if (isRaw) {
+      // Raw resource — simpler explanation
+      html += `
+          <div class="math-step">
+            <div class="step-label">Demand Source</div>
+            <div class="step-explanation">
+              This is a <em>raw resource</em> that is mined or extracted directly.
+              The total demand of <em>${fmt(entry.rate)}/min</em> is the sum of all recipes further
+              up the chain that consume ${item.name}.
+            </div>
+          </div>
+          <div class="math-step">
+            <div class="step-label">Extraction Rate</div>
+            <div class="step-formula">
+              One ${building ? building.name : 'Extractor'} produces roughly
+              <span class="num">${fmt(60 / recipe.time * buildingSpeed)}/min</span> per node/patch
+            </div>
+            <div class="step-explanation">
+              At base extraction time of <em>${fmt(recipe.time)}s</em> per unit, that's
+              60 &divide; ${fmt(recipe.time)} = ${fmt(60 / recipe.time)} units/min per building.
+              The actual number of miners depends on how many resource nodes you place them on,
+              and vein utilization. This calculator assumes the standard base rate.
+            </div>
+          </div>
+          <div class="math-step">
+            <div class="step-label">Buildings Needed</div>
+            <div class="step-formula">
+              <span class="num">${fmt(entry.rate)}</span> <span class="op">&divide;</span>
+              <span class="num">${fmt(60 / recipe.time * buildingSpeed)}</span>
+              <span class="op">=</span>
+              <span class="num">${fmt(exactBuildings)}</span>
+              <span class="op">&rarr; &lceil;</span><span class="eq">${ceilBuildings}</span><span class="op">&rceil;</span>
+            </div>
+            <div class="step-explanation">
+              You need <em>${fmt(entry.rate)}/min</em> total, so
+              ${fmt(entry.rate)} &divide; ${fmt(60 / recipe.time * buildingSpeed)} = ${fmt(exactBuildings)}
+              &rarr; rounded up to <em>${ceilBuildings}</em> ${building ? building.name : 'Extractor'}(s).
+            </div>
+          </div>
+      `;
+    } else {
+      // Produced item — full formula breakdown
+      // Step 1: Why this rate?
+      html += `
+          <div class="math-step">
+            <div class="step-label">Step 1 &mdash; Where does the demand come from?</div>
+            <div class="step-explanation">
+              The total demand for ${item.name} is <em>${fmt(entry.rate)}/min</em>.
+              This is the sum of all recipes in the chain that consume it.
+              The recipe "${recipe.name}" produces <em>${outputQty}</em> ${item.name} per craft cycle.
+            </div>
+          </div>
+      `;
+
+      // Step 2: Crafts per minute
+      html += `
+          <div class="math-step">
+            <div class="step-label">Step 2 &mdash; Crafts per minute needed</div>
+            <div class="step-formula">
+              crafts/min <span class="op">=</span> desired_rate <span class="op">&divide;</span> output_per_craft<br>
+              crafts/min <span class="op">=</span> <span class="num">${fmt(entry.rate)}</span>
+              <span class="op">&divide;</span> <span class="num">${outputQty}</span>
+              <span class="op">=</span> <span class="eq">${fmt(craftsPerMin)}</span>
+            </div>
+            <div class="step-explanation">
+              Each craft cycle of this recipe produces <em>${outputQty}</em> ${item.name},
+              so to get ${fmt(entry.rate)}/min output, the buildings need to collectively
+              complete <em>${fmt(craftsPerMin)}</em> craft cycles per minute.
+            </div>
+          </div>
+      `;
+
+      // Step 3: Building throughput
+      html += `
+          <div class="math-step">
+            <div class="step-label">Step 3 &mdash; Crafts per building per minute</div>
+            <div class="step-formula">
+              building_crafts/min <span class="op">=</span> (60 <span class="op">&divide;</span> craft_time)
+              <span class="op">&times;</span> speed_multiplier<br>
+              building_crafts/min <span class="op">=</span>
+              (60 <span class="op">&divide;</span> <span class="num">${fmt(recipe.time)}</span>)
+              <span class="op">&times;</span> <span class="num">${fmt(buildingSpeed)}</span>
+              <span class="op">=</span> <span class="num">${fmt(60 / recipe.time)}</span>
+              <span class="op">&times;</span> <span class="num">${fmt(buildingSpeed)}</span>
+              <span class="op">=</span> <span class="eq">${fmt(craftsPerMinPerBuilding)}</span>
+            </div>
+            <div class="step-explanation">
+              The recipe takes <em>${fmt(recipe.time)} seconds</em> per craft.
+              A single <em>${building ? building.name : 'building'}</em> (speed: ${fmt(buildingSpeed)}x)
+              can do <em>${fmt(craftsPerMinPerBuilding)}</em> crafts per minute.
+            </div>
+          </div>
+      `;
+
+      // Step 4: Buildings needed
+      html += `
+          <div class="math-step">
+            <div class="step-label">Step 4 &mdash; Number of buildings</div>
+            <div class="step-formula">
+              buildings <span class="op">=</span> &lceil; crafts_needed <span class="op">&divide;</span> crafts_per_building &rceil;<br>
+              buildings <span class="op">=</span> &lceil;
+              <span class="num">${fmt(craftsPerMin)}</span>
+              <span class="op">&divide;</span>
+              <span class="num">${fmt(craftsPerMinPerBuilding)}</span>
+              &rceil; <span class="op">=</span> &lceil;
+              <span class="num">${fmt(exactBuildings)}</span>
+              &rceil; <span class="op">=</span> <span class="eq">${ceilBuildings}</span>
+            </div>
+            <div class="step-explanation">
+              ${fmt(craftsPerMin)} crafts/min needed &divide; ${fmt(craftsPerMinPerBuilding)} crafts/min per building
+              = ${fmt(exactBuildings)} buildings.
+              Rounded up: <em>${ceilBuildings}x ${building ? building.name : 'building'}</em>.
+            </div>
+          </div>
+      `;
+
+      // Step 5: Input rates
+      if (recipe.inputs.length > 0) {
+        let inputRows = '';
+        for (const inp of recipe.inputs) {
+          const inputRate = (inp.qty / outputQty) * entry.rate;
+          inputRows += `
+            <span class="num">${itemName(inp.item)}</span>:
+            (<span class="num">${inp.qty}</span> <span class="op">&divide;</span>
+            <span class="num">${outputQty}</span>) <span class="op">&times;</span>
+            <span class="num">${fmt(entry.rate)}</span> <span class="op">=</span>
+            <span class="eq">${fmt(inputRate)}/min</span><br>
+          `;
+        }
+
+        html += `
+          <div class="math-step">
+            <div class="step-label">Step 5 &mdash; Input consumption rates</div>
+            <div class="step-formula">
+              input_rate <span class="op">=</span> (input_qty <span class="op">&divide;</span> output_qty)
+              <span class="op">&times;</span> desired_rate<br><br>
+              ${inputRows}
+            </div>
+            <div class="step-explanation">
+              These input rates become the <em>desired rates</em> for each ingredient.
+              The same formulas are then applied to those ingredients recursively.
+              If multiple recipes need the same ingredient, their rates are added together.
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    html += `
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+// Calculate button
+function setupCalculate() {
+  document.getElementById("calc-btn").addEventListener("click", () => {
+    if (!state.selectedItem) {
+      alert("Please select a target item.");
+      return;
+    }
+    const rate = parseFloat(document.getElementById("rate-input").value);
+    if (!rate || rate <= 0) {
+      alert("Please enter a valid production rate.");
+      return;
+    }
+
+    const requirements = calculateChain(state.selectedItem, rate);
+    renderResults(requirements);
+  });
+
+  // Also calculate on Enter in rate input
+  document.getElementById("rate-input").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") document.getElementById("calc-btn").click();
+  });
+}
+
+// =====================================================
+// SECTION 5: ANIMATED BACKGROUND
+// =====================================================
+
+function initStarfield() {
+  const canvas = document.getElementById("starfield");
+  const ctx = canvas.getContext("2d");
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener("resize", resize);
+
+  const stars = [];
+  const numStars = 250;
+  for (let i = 0; i < numStars; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      radius: Math.random() * 1.5 + 0.3,
+      baseOpacity: Math.random() * 0.5 + 0.2,
+      twinkleSpeed: Math.random() * 0.003 + 0.001,
+      twinkleOffset: Math.random() * Math.PI * 2,
+      hue: Math.random() > 0.7 ? [180, 200, 260, 280, 320, 40][Math.floor(Math.random() * 6)] : 0,
+    });
+  }
+
+  // Shooting stars
+  const shootingStars = [];
+
+  function spawnShootingStar() {
+    if (shootingStars.length < 2 && Math.random() < 0.005) {
+      shootingStars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height * 0.5,
+        vx: (Math.random() - 0.3) * 8,
+        vy: Math.random() * 4 + 2,
+        life: 1,
+        decay: Math.random() * 0.015 + 0.01,
+        length: Math.random() * 40 + 20,
+      });
+    }
+  }
+
+  function animate() {
+    ctx.fillStyle = "#05050f";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Psychedelic nebula clouds — more vivid, slowly color-shifting
+    const t = Date.now() * 0.0001;
+    const hueShift = Math.sin(t * 0.5) * 40;
+    const nebulae = [
+      { x: canvas.width * (0.25 + Math.sin(t) * 0.08), y: canvas.height * 0.25, r: 350, color: [120 + hueShift, 0, 220] },
+      { x: canvas.width * (0.75 + Math.cos(t * 1.3) * 0.06), y: canvas.height * 0.5, r: 300, color: [0, 80 + hueShift, 200] },
+      { x: canvas.width * (0.5 + Math.sin(t * 0.7) * 0.07), y: canvas.height * 0.8, r: 280, color: [200, 0, 120 + hueShift] },
+      { x: canvas.width * (0.15 + Math.cos(t * 0.9) * 0.05), y: canvas.height * 0.65, r: 200, color: [0, 180 + hueShift * 0.5, 100] },
+      { x: canvas.width * (0.85 + Math.sin(t * 1.1) * 0.04), y: canvas.height * 0.2, r: 220, color: [255, 80, 0] },
+    ];
+
+    for (const neb of nebulae) {
+      const r = Math.max(0, Math.min(255, neb.color[0]));
+      const g = Math.max(0, Math.min(255, neb.color[1]));
+      const b = Math.max(0, Math.min(255, neb.color[2]));
+      const gradient = ctx.createRadialGradient(neb.x, neb.y, 0, neb.x, neb.y, neb.r);
+      gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.09)`);
+      gradient.addColorStop(0.4, `rgba(${r}, ${g}, ${b}, 0.04)`);
+      gradient.addColorStop(1, "transparent");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Stars
+    const now = Date.now();
+    for (const star of stars) {
+      const twinkle = Math.sin(now * star.twinkleSpeed + star.twinkleOffset);
+      const opacity = Math.max(0.05, Math.min(1, star.baseOpacity + twinkle * 0.3));
+
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+      if (star.hue > 0) {
+        ctx.fillStyle = `hsla(${star.hue}, 80%, 80%, ${opacity})`;
+      } else {
+        ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+      }
+      ctx.fill();
+
+      // Glow for brighter stars
+      if (star.radius > 1.2) {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius * 3, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(200, 220, 255, ${opacity * 0.08})`;
+        ctx.fill();
+      }
+    }
+
+    // Shooting stars
+    spawnShootingStar();
+    for (let i = shootingStars.length - 1; i >= 0; i--) {
+      const ss = shootingStars[i];
+      ss.x += ss.vx;
+      ss.y += ss.vy;
+      ss.life -= ss.decay;
+
+      if (ss.life <= 0) {
+        shootingStars.splice(i, 1);
+        continue;
+      }
+
+      const gradient = ctx.createLinearGradient(
+        ss.x, ss.y,
+        ss.x - ss.vx * ss.length / 4, ss.y - ss.vy * ss.length / 4
+      );
+      gradient.addColorStop(0, `rgba(255, 255, 255, ${ss.life})`);
+      gradient.addColorStop(1, `rgba(150, 200, 255, 0)`);
+
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(ss.x, ss.y);
+      ctx.lineTo(ss.x - ss.vx * ss.length / 4, ss.y - ss.vy * ss.length / 4);
+      ctx.stroke();
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+}
+
+// =====================================================
+// SECTION 6: INITIALIZATION
+// =====================================================
+
+document.addEventListener("DOMContentLoaded", () => {
+  initStarfield();
+  buildDropdown();
+  setupTierButtons();
+  setupTabs();
+  setupCalculate();
+
+  // Mouse tracking glow on result cards
+  document.addEventListener("mousemove", (e) => {
+    const cards = document.querySelectorAll(".result-card");
+    cards.forEach(card => {
+      const rect = card.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      card.style.setProperty("--mouse-x", x + "%");
+      card.style.setProperty("--mouse-y", y + "%");
+    });
+  });
+});
+</script>
+</body>
+</html>
