@@ -56,3 +56,7 @@ ipcMain.on('window-maximize', () => {
 ipcMain.on('window-close', () => {
   mainWindow?.close();
 });
+
+ipcMain.on('window-fullscreen', () => {
+  mainWindow?.setFullScreen(!mainWindow.isFullScreen());
+});
