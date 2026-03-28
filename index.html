@@ -11,9 +11,9 @@
    ============================================ */
 :root {
   --bg-primary: #05050f;
-  --bg-secondary: #0a0a20;
-  --bg-card: #10103a;
-  --bg-card-hover: #1a1a4e;
+  --bg-secondary: rgba(10, 10, 32, 0.8);
+  --bg-card: rgba(14, 14, 52, 0.75);
+  --bg-card-hover: rgba(26, 26, 78, 0.8);
   --neon-cyan: #00ffff;
   --neon-magenta: #ff00ff;
   --neon-purple: #cc77ff;
@@ -41,19 +41,23 @@ body {
   font-weight: 500;
   font-size: 17px;
   color: var(--text-primary);
-  background: var(--bg-primary);
+  background: transparent;
   min-height: 100vh;
   overflow-x: hidden;
   line-height: 1.6;
 }
 
-/* Canvas starfield */
+/* Canvas starfield — single unified background */
 #starfield {
   position: fixed;
   top: 0; left: 0;
   width: 100vw; height: 100vh;
   z-index: -1;
   pointer-events: none;
+}
+
+html {
+  background: #05050f;
 }
 
 /* ---- Scrollbar ---- */
@@ -69,25 +73,6 @@ body {
   position: relative;
   text-align: center;
   padding: 40px 20px 30px;
-  overflow: hidden;
-}
-
-.header::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: radial-gradient(ellipse at 50% 0%, rgba(120, 0, 255, 0.2) 0%, transparent 55%),
-              radial-gradient(ellipse at 20% 90%, rgba(0, 255, 255, 0.12) 0%, transparent 45%),
-              radial-gradient(ellipse at 85% 70%, rgba(255, 0, 200, 0.1) 0%, transparent 45%),
-              radial-gradient(ellipse at 50% 50%, rgba(255, 100, 0, 0.04) 0%, transparent 60%);
-  pointer-events: none;
-  animation: header-hue 20s ease-in-out infinite alternate;
-}
-
-@keyframes header-hue {
-  0% { filter: hue-rotate(0deg); }
-  50% { filter: hue-rotate(30deg); }
-  100% { filter: hue-rotate(-20deg); }
 }
 
 /* DSP Logo — CSS Dyson Sphere */
@@ -179,8 +164,11 @@ body {
   font-size: clamp(1.5rem, 4vw, 2.8rem);
   font-weight: 900;
   letter-spacing: 3px;
-  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta), var(--neon-purple), var(--neon-cyan));
-  background-size: 300% 300%;
+  background: linear-gradient(135deg,
+    var(--neon-cyan), var(--neon-green), var(--neon-yellow),
+    var(--neon-orange), var(--neon-red), var(--neon-magenta),
+    var(--neon-purple), var(--neon-blue), var(--neon-cyan));
+  background-size: 600% 600%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -219,6 +207,8 @@ body {
 /* ---- Input Panel ---- */
 .input-panel {
   background: var(--bg-secondary);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(0, 245, 255, 0.15);
   border-radius: 16px;
   padding: 30px;
@@ -307,7 +297,9 @@ body {
   left: 0; right: 0;
   max-height: 300px;
   overflow-y: auto;
-  background: var(--bg-card);
+  background: rgba(14, 14, 52, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(0, 245, 255, 0.3);
   border-radius: 0 0 8px 8px;
   z-index: 100;
@@ -533,6 +525,8 @@ select:focus {
 
 .result-card {
   background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 245, 255, 0.12);
   border-radius: 12px;
   padding: 20px;
@@ -556,8 +550,17 @@ select:focus {
 .result-card .card-glow {
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 2px;
+  height: 3px;
   border-radius: 12px 12px 0 0;
+  animation: glow-hue-cycle 12s linear infinite;
+}
+
+@keyframes glow-hue-cycle {
+  0% { filter: hue-rotate(0deg) brightness(1); }
+  25% { filter: hue-rotate(60deg) brightness(1.2); }
+  50% { filter: hue-rotate(120deg) brightness(1); }
+  75% { filter: hue-rotate(180deg) brightness(1.2); }
+  100% { filter: hue-rotate(360deg) brightness(1); }
 }
 
 .result-card .item-name {
@@ -664,10 +667,15 @@ select:focus {
   position: absolute;
   top: 0; bottom: 0;
   left: 23px;
-  width: 2px;
-  background: linear-gradient(180deg, var(--neon-cyan), var(--neon-magenta), var(--neon-purple), var(--neon-cyan));
+  width: 3px;
+  background: linear-gradient(180deg,
+    var(--neon-cyan), var(--neon-green), var(--neon-yellow),
+    var(--neon-orange), var(--neon-red), var(--neon-magenta),
+    var(--neon-purple), var(--neon-blue), var(--neon-cyan));
   background-size: 100% 400%;
   animation: gradient-shift 8s ease infinite;
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.2);
 }
 
 .build-step {
@@ -690,13 +698,15 @@ select:focus {
   font-size: 0.75rem;
   font-weight: 700;
   border: 2px solid var(--neon-cyan);
-  background: var(--bg-primary);
+  background: rgba(5, 5, 15, 0.9);
   color: var(--neon-cyan);
   box-shadow: 0 0 10px rgba(0, 245, 255, 0.2);
 }
 
 .build-step .step-content {
   background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 245, 255, 0.1);
   border-radius: 10px;
   padding: 16px 20px;
@@ -840,6 +850,8 @@ select:focus {
 /* ---- Raw Resources Summary ---- */
 .raw-summary {
   background: var(--bg-secondary);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 136, 0, 0.15);
   border-radius: 12px;
   padding: 24px;
@@ -975,6 +987,8 @@ select:focus {
 
 .math-overview {
   background: var(--bg-secondary);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 245, 255, 0.15);
   border-radius: 12px;
   padding: 24px;
@@ -2435,27 +2449,54 @@ function initStarfield() {
     ctx.fillStyle = "#05050f";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Psychedelic nebula clouds — more vivid, slowly color-shifting
+    // Psychedelic nebula system — each cloud independently cycles through different color ranges
     const t = Date.now() * 0.0001;
-    const hueShift = Math.sin(t * 0.5) * 40;
+    const w = canvas.width;
+    const h = canvas.height;
+
+    // Helper: convert HSL to RGB (h: 0-360, s/l: 0-1)
+    function hsl2rgb(hue, sat, lit) {
+      const c = (1 - Math.abs(2 * lit - 1)) * sat;
+      const x = c * (1 - Math.abs((hue / 60) % 2 - 1));
+      const m = lit - c / 2;
+      let r, g, b;
+      if (hue < 60) { r = c; g = x; b = 0; }
+      else if (hue < 120) { r = x; g = c; b = 0; }
+      else if (hue < 180) { r = 0; g = c; b = x; }
+      else if (hue < 240) { r = 0; g = x; b = c; }
+      else if (hue < 300) { r = x; g = 0; b = c; }
+      else { r = c; g = 0; b = x; }
+      return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
+    }
+
+    // 9 nebula clouds, each with its own hue cycle speed and position drift
     const nebulae = [
-      { x: canvas.width * (0.25 + Math.sin(t) * 0.08), y: canvas.height * 0.25, r: 350, color: [120 + hueShift, 0, 220] },
-      { x: canvas.width * (0.75 + Math.cos(t * 1.3) * 0.06), y: canvas.height * 0.5, r: 300, color: [0, 80 + hueShift, 200] },
-      { x: canvas.width * (0.5 + Math.sin(t * 0.7) * 0.07), y: canvas.height * 0.8, r: 280, color: [200, 0, 120 + hueShift] },
-      { x: canvas.width * (0.15 + Math.cos(t * 0.9) * 0.05), y: canvas.height * 0.65, r: 200, color: [0, 180 + hueShift * 0.5, 100] },
-      { x: canvas.width * (0.85 + Math.sin(t * 1.1) * 0.04), y: canvas.height * 0.2, r: 220, color: [255, 80, 0] },
+      // Large background washes
+      { xBase: 0.25, yBase: 0.20, xAmp: 0.10, yAmp: 0.06, xFreq: 1.0,  yFreq: 0.7,  r: 400, hueBase: 270, hueRange: 80,  hueSpeed: 0.3,  alpha: 0.07 },
+      { xBase: 0.75, yBase: 0.30, xAmp: 0.08, yAmp: 0.05, xFreq: 0.8,  yFreq: 1.1,  r: 380, hueBase: 180, hueRange: 60,  hueSpeed: 0.5,  alpha: 0.06 },
+      { xBase: 0.50, yBase: 0.75, xAmp: 0.09, yAmp: 0.07, xFreq: 0.6,  yFreq: 0.9,  r: 350, hueBase: 320, hueRange: 70,  hueSpeed: 0.4,  alpha: 0.06 },
+      // Medium accent clouds
+      { xBase: 0.15, yBase: 0.55, xAmp: 0.06, yAmp: 0.08, xFreq: 1.2,  yFreq: 0.5,  r: 260, hueBase: 120, hueRange: 50,  hueSpeed: 0.7,  alpha: 0.055 },
+      { xBase: 0.85, yBase: 0.65, xAmp: 0.05, yAmp: 0.06, xFreq: 0.9,  yFreq: 1.3,  r: 240, hueBase: 30,  hueRange: 40,  hueSpeed: 0.6,  alpha: 0.05 },
+      { xBase: 0.40, yBase: 0.45, xAmp: 0.07, yAmp: 0.04, xFreq: 1.1,  yFreq: 0.8,  r: 280, hueBase: 210, hueRange: 90,  hueSpeed: 0.35, alpha: 0.05 },
+      // Smaller vivid pops
+      { xBase: 0.60, yBase: 0.15, xAmp: 0.04, yAmp: 0.05, xFreq: 1.4,  yFreq: 1.0,  r: 180, hueBase: 0,   hueRange: 360, hueSpeed: 0.2,  alpha: 0.045 },
+      { xBase: 0.30, yBase: 0.85, xAmp: 0.05, yAmp: 0.03, xFreq: 0.7,  yFreq: 1.5,  r: 200, hueBase: 60,  hueRange: 360, hueSpeed: 0.15, alpha: 0.04 },
+      { xBase: 0.70, yBase: 0.90, xAmp: 0.06, yAmp: 0.04, xFreq: 1.3,  yFreq: 0.6,  r: 220, hueBase: 150, hueRange: 100, hueSpeed: 0.55, alpha: 0.04 },
     ];
 
     for (const neb of nebulae) {
-      const r = Math.max(0, Math.min(255, neb.color[0]));
-      const g = Math.max(0, Math.min(255, neb.color[1]));
-      const b = Math.max(0, Math.min(255, neb.color[2]));
-      const gradient = ctx.createRadialGradient(neb.x, neb.y, 0, neb.x, neb.y, neb.r);
-      gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.09)`);
-      gradient.addColorStop(0.4, `rgba(${r}, ${g}, ${b}, 0.04)`);
+      const nx = w * (neb.xBase + Math.sin(t * neb.xFreq) * neb.xAmp);
+      const ny = h * (neb.yBase + Math.cos(t * neb.yFreq) * neb.yAmp);
+      const hue = (neb.hueBase + Math.sin(t * neb.hueSpeed) * neb.hueRange + 360) % 360;
+      const [cr, cg, cb] = hsl2rgb(hue, 0.8, 0.5);
+      const gradient = ctx.createRadialGradient(nx, ny, 0, nx, ny, neb.r);
+      gradient.addColorStop(0, `rgba(${cr}, ${cg}, ${cb}, ${neb.alpha})`);
+      gradient.addColorStop(0.35, `rgba(${cr}, ${cg}, ${cb}, ${neb.alpha * 0.5})`);
+      gradient.addColorStop(0.7, `rgba(${cr}, ${cg}, ${cb}, ${neb.alpha * 0.15})`);
       gradient.addColorStop(1, "transparent");
       ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, w, h);
     }
 
     // Stars
