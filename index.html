@@ -871,6 +871,66 @@ select:focus {
   font-weight: 600;
 }
 
+/* Recipe ingredient pills */
+.recipe-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.recipe-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid rgba(105, 67, 255, 0.2);
+  background: rgba(105, 67, 255, 0.08);
+}
+
+.recipe-pill .pill-qty {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--neon-gold);
+}
+
+.recipe-pill .pill-icon {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.recipe-pill .pill-name {
+  color: var(--text-primary);
+}
+
+.recipe-pill .pill-times {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.recipe-arrow {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  padding: 0 2px;
+}
+
+.recipe-pill.output-pill {
+  border-color: rgba(165, 255, 144, 0.2);
+  background: rgba(165, 255, 144, 0.06);
+}
+
+.recipe-pill.output-pill .pill-qty {
+  color: var(--neon-green);
+}
+
 /* ---- Raw Resources Summary ---- */
 .raw-summary {
   background: var(--bg-secondary);
@@ -2069,18 +2129,25 @@ function renderBuildTimeline(buildOrder) {
     step.style.animationDelay = `${index * 0.06}s`;
 
     let detail = "";
+    let recipePills = "";
     if (entry.recipe.inputs.length === 0) {
       detail = `Place <span class="highlight">${buildingsNeeded}x ${building ? building.name : "Extractor"}</span> to extract <span class="highlight">${item.name}</span> at <span class="highlight">${entry.rate.toFixed(1)}/min</span>`;
     } else {
       const outputQty = entry.recipe.outputs.find(o => o.item === entry.itemId)?.qty || 1;
-      const inputStrs = entry.recipe.inputs.map(inp => {
+
+      // Build ingredient pills
+      const inputPills = entry.recipe.inputs.map(inp => {
         const inputItem = ITEMS[inp.item];
-        const ratePerMin = (inp.qty / outputQty) * entry.rate;
-        return `${inputItem ? inputItem.name : inp.item} (${ratePerMin.toFixed(1)}/min)`;
+        const color = inputItem ? inputItem.color : '#888';
+        const name = inputItem ? inputItem.name : inp.item;
+        return `<span class="recipe-pill"><span class="pill-qty">${inp.qty}x</span><span class="pill-icon" style="background:${color}"></span><span class="pill-name">${name}</span></span>`;
       });
-      detail = `Build <span class="highlight">${buildingsNeeded}x ${building ? building.name : "Building"}</span> for <span class="highlight">${item.name}</span><br>` +
-               `Consumes: ${inputStrs.join(", ")}<br>` +
-               `Produces: <span class="highlight">${entry.rate.toFixed(1)}/min ${item.name}</span>`;
+
+      const outputPill = `<span class="recipe-pill output-pill"><span class="pill-qty">${outputQty}x</span><span class="pill-icon" style="background:${item.color}"></span><span class="pill-name">${item.name}</span></span>`;
+
+      recipePills = `<div class="recipe-pills">${inputPills.join('<span class="recipe-pill pill-times">+</span>')}<span class="recipe-arrow">&rarr;</span>${outputPill}</div>`;
+
+      detail = `Build <span class="highlight">${buildingsNeeded}x ${building ? building.name : "Building"}</span> for <span class="highlight">${item.name}</span> &mdash; <span class="highlight">${entry.rate.toFixed(1)}/min</span>`;
     }
 
     step.innerHTML = `
@@ -2090,6 +2157,7 @@ function renderBuildTimeline(buildOrder) {
         <div class="step-text">
           <div class="step-title" style="color: ${item.color}">${item.name}</div>
           <div class="step-detail">${detail}</div>
+          ${recipePills}
         </div>
       </div>
     `;
