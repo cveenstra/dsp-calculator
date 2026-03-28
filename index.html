@@ -197,10 +197,11 @@ html {
 /* ---- Cosmic Turtle ---- */
 .cosmic-turtle {
   flex-shrink: 0;
-  width: 180px;
-  height: 180px;
+  width: 320px;
+  height: 320px;
   position: relative;
   animation: turtle-float 8s ease-in-out infinite;
+  margin-right: -20px;
 }
 
 @keyframes turtle-float {
@@ -228,8 +229,8 @@ html {
 }
 
 .turtle-accretion-1 {
-  width: 200px; height: 70px;
-  margin-top: -35px; margin-left: -100px;
+  width: 360px; height: 110px;
+  margin-top: -55px; margin-left: -180px;
   border-color: rgba(179, 98, 255, 0.3);
   transform: rotateX(60deg) rotateZ(0deg);
   animation: accretion-spin-1 20s linear infinite;
@@ -237,8 +238,8 @@ html {
 }
 
 .turtle-accretion-2 {
-  width: 220px; height: 80px;
-  margin-top: -40px; margin-left: -110px;
+  width: 390px; height: 120px;
+  margin-top: -60px; margin-left: -195px;
   border-color: rgba(250, 208, 0, 0.2);
   transform: rotateX(65deg) rotateZ(30deg);
   animation: accretion-spin-2 28s linear infinite;
@@ -246,8 +247,8 @@ html {
 }
 
 .turtle-accretion-3 {
-  width: 240px; height: 55px;
-  margin-top: -27px; margin-left: -120px;
+  width: 420px; height: 90px;
+  margin-top: -45px; margin-left: -210px;
   border-color: rgba(165, 255, 144, 0.15);
   transform: rotateX(70deg) rotateZ(-20deg);
   animation: accretion-spin-3 35s linear infinite;
@@ -262,8 +263,8 @@ html {
 .turtle-singularity {
   position: absolute;
   top: 50%; left: 50%;
-  width: 80px; height: 80px;
-  margin-top: -40px; margin-left: -40px;
+  width: 140px; height: 140px;
+  margin-top: -70px; margin-left: -70px;
   border-radius: 50%;
   background: radial-gradient(circle,
     rgba(0, 0, 0, 0.9) 0%,
@@ -284,7 +285,7 @@ html {
 }
 
 @media (max-width: 900px) {
-  .cosmic-turtle { width: 130px; height: 130px; }
+  .cosmic-turtle { width: 220px; height: 220px; }
   .turtle-accretion { display: none; }
 }
 
@@ -300,7 +301,7 @@ html {
   }
   .header-text { align-items: center; }
   .header-spacer { display: none; }
-  .cosmic-turtle { width: 140px; height: 140px; }
+  .cosmic-turtle { width: 200px; height: 200px; margin-right: 0; }
 }
 
 /* DSP Logo — CSS Dyson Sphere */
@@ -1508,110 +1509,180 @@ select:focus {
     <div class="turtle-accretion turtle-accretion-1"></div>
     <div class="turtle-accretion turtle-accretion-2"></div>
     <div class="turtle-accretion turtle-accretion-3"></div>
-    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 400 380" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <!-- Cosmic shell gradient -->
-        <radialGradient id="shellGrad" cx="50%" cy="45%" r="50%">
-          <stop offset="0%" stop-color="#1a0a30"/>
-          <stop offset="30%" stop-color="#2d1060"/>
-          <stop offset="55%" stop-color="#4D21FC"/>
-          <stop offset="75%" stop-color="#B362FF"/>
-          <stop offset="100%" stop-color="#FAD000"/>
-        </radialGradient>
-        <!-- Event horizon center -->
-        <radialGradient id="voidCore" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#000000"/>
-          <stop offset="40%" stop-color="#0a0020"/>
-          <stop offset="70%" stop-color="#1a0a40"/>
-          <stop offset="100%" stop-color="#4D21FC" stop-opacity="0.3"/>
-        </radialGradient>
-        <!-- Flipper gradient -->
-        <linearGradient id="flipperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#B362FF"/>
-          <stop offset="50%" stop-color="#6943FF"/>
-          <stop offset="100%" stop-color="#A5FF90" stop-opacity="0.6"/>
+        <linearGradient id="wirePurple" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#B362FF"/><stop offset="100%" stop-color="#6943FF"/>
         </linearGradient>
-        <!-- Head gradient -->
-        <linearGradient id="headGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#9EFFFF"/>
-          <stop offset="50%" stop-color="#6943FF"/>
-          <stop offset="100%" stop-color="#B362FF"/>
+        <linearGradient id="wireGold" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#FAD000"/><stop offset="100%" stop-color="#FF9D00"/>
         </linearGradient>
-        <!-- Sacred geometry pattern for shell -->
-        <pattern id="sacredGeo" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(15)">
-          <polygon points="10,0 20,17.3 0,17.3" fill="none" stroke="rgba(250,208,0,0.15)" stroke-width="0.5"/>
-          <circle cx="10" cy="10" r="4" fill="none" stroke="rgba(179,98,255,0.12)" stroke-width="0.4"/>
-        </pattern>
-        <!-- Glow filter -->
-        <filter id="turtleGlow">
-          <feGaussianBlur stdDeviation="2" result="blur"/>
-          <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+        <linearGradient id="wireGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#A5FF90"/><stop offset="100%" stop-color="#80FFBB"/>
+        </linearGradient>
+        <linearGradient id="wireCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#9EFFFF"/><stop offset="100%" stop-color="#80FCFF"/>
+        </linearGradient>
+        <linearGradient id="wirePink" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#FB94FF"/><stop offset="100%" stop-color="#FF2C70"/>
+        </linearGradient>
+        <radialGradient id="voidCore" cx="50%" cy="48%" r="45%">
+          <stop offset="0%" stop-color="#000"/><stop offset="50%" stop-color="#08001a"/>
+          <stop offset="80%" stop-color="#1a0a40" stop-opacity="0.6"/><stop offset="100%" stop-color="transparent"/>
+        </radialGradient>
+        <filter id="wireGlow">
+          <feGaussianBlur stdDeviation="1.5" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
         </filter>
-        <!-- Animated gravitational lensing -->
+        <filter id="strongGlow">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
         <filter id="lensing">
-          <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="42">
-            <animate attributeName="seed" from="0" to="100" dur="20s" repeatCount="indefinite"/>
+          <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="7">
+            <animate attributeName="seed" from="0" to="80" dur="25s" repeatCount="indefinite"/>
           </feTurbulence>
-          <feDisplacementMap in="SourceGraphic" scale="3"/>
+          <feDisplacementMap in="SourceGraphic" scale="2.5"/>
         </filter>
       </defs>
 
+      <!-- Void core behind the shell -->
+      <ellipse cx="200" cy="175" rx="70" ry="55" fill="url(#voidCore)" opacity="0.9"/>
+
       <g filter="url(#lensing)">
-        <!-- Shell (the black hole carapace) -->
-        <ellipse cx="100" cy="92" rx="52" ry="42" fill="url(#shellGrad)" opacity="0.95"/>
-        <!-- Void core in shell center -->
-        <ellipse cx="100" cy="88" rx="28" ry="22" fill="url(#voidCore)"/>
-        <!-- Sacred geometry overlay on shell -->
-        <ellipse cx="100" cy="92" rx="52" ry="42" fill="url(#sacredGeo)" opacity="0.7"/>
-        <!-- Shell rim glow -->
-        <ellipse cx="100" cy="92" rx="52" ry="42" fill="none" stroke="url(#flipperGrad)" stroke-width="1.5" opacity="0.6"/>
+      <g filter="url(#wireGlow)">
 
-        <!-- Shell hexagonal plates -->
-        <path d="M100,55 L115,65 L115,80 L100,90 L85,80 L85,65 Z" fill="none" stroke="rgba(250,208,0,0.2)" stroke-width="0.7"/>
-        <path d="M100,90 L118,100 L118,118 L100,128 L82,118 L82,100 Z" fill="none" stroke="rgba(179,98,255,0.2)" stroke-width="0.7"/>
-        <path d="M115,65 L132,72 L132,88 L118,100 L115,80 Z" fill="none" stroke="rgba(165,255,144,0.12)" stroke-width="0.5"/>
-        <path d="M85,65 L68,72 L68,88 L82,100 L85,80 Z" fill="none" stroke="rgba(165,255,144,0.12)" stroke-width="0.5"/>
+        <!-- ===== HEAD ===== -->
+        <!-- Skull outline -->
+        <path d="M200,82 C215,78 228,85 230,100 C232,112 225,122 215,126 L200,130 L185,126 C175,122 168,112 170,100 C172,85 185,78 200,82 Z" fill="none" stroke="url(#wireCyan)" stroke-width="1.4"/>
+        <!-- Beak/mouth -->
+        <path d="M188,104 C192,98 208,98 212,104 C210,108 205,112 200,113 C195,112 190,108 188,104 Z" fill="none" stroke="url(#wireCyan)" stroke-width="1"/>
+        <path d="M193,104 L200,100 L207,104" fill="none" stroke="url(#wireCyan)" stroke-width="0.7"/>
+        <!-- Nostril dots -->
+        <circle cx="196" cy="98" r="1.5" fill="none" stroke="url(#wireCyan)" stroke-width="0.8"/>
+        <circle cx="204" cy="98" r="1.5" fill="none" stroke="url(#wireCyan)" stroke-width="0.8"/>
+        <!-- Head scute pattern -->
+        <path d="M190,85 C195,82 205,82 210,85" fill="none" stroke="url(#wireGold)" stroke-width="0.7"/>
+        <path d="M185,90 C192,86 208,86 215,90" fill="none" stroke="url(#wireGold)" stroke-width="0.6"/>
+        <path d="M182,96 L190,92 L200,90 L210,92 L218,96" fill="none" stroke="url(#wireGold)" stroke-width="0.6"/>
+        <path d="M200,82 L200,90" fill="none" stroke="url(#wireGold)" stroke-width="0.5"/>
+        <path d="M190,85 L195,92" fill="none" stroke="url(#wireGold)" stroke-width="0.4"/>
+        <path d="M210,85 L205,92" fill="none" stroke="url(#wireGold)" stroke-width="0.4"/>
+        <!-- Neck connecting to shell -->
+        <path d="M185,126 C188,135 192,140 200,142 C208,140 212,135 215,126" fill="none" stroke="url(#wirePurple)" stroke-width="1.1"/>
+        <path d="M190,130 C194,136 206,136 210,130" fill="none" stroke="url(#wirePurple)" stroke-width="0.6"/>
 
-        <!-- Head -->
-        <ellipse cx="100" cy="48" rx="14" ry="12" fill="url(#headGrad)" opacity="0.9"/>
-        <!-- Eyes — tiny void portals -->
-        <circle cx="94" cy="45" r="3" fill="#000">
-          <animate attributeName="r" values="3;3.5;3" dur="4s" repeatCount="indefinite"/>
+        <!-- Eyes — void portals with pulsing irises -->
+        <ellipse cx="188" cy="92" rx="6" ry="5" fill="#000" stroke="url(#wireGold)" stroke-width="1">
+          <animate attributeName="stroke-opacity" values="1;0.5;1" dur="4s" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse cx="212" cy="92" rx="6" ry="5" fill="#000" stroke="url(#wireGold)" stroke-width="1">
+          <animate attributeName="stroke-opacity" values="1;0.5;1" dur="4.5s" repeatCount="indefinite"/>
+        </ellipse>
+        <circle cx="188" cy="91.5" r="2" fill="#FAD000" opacity="0.9">
+          <animate attributeName="r" values="2;2.8;2" dur="3s" repeatCount="indefinite"/>
         </circle>
-        <circle cx="106" cy="45" r="3" fill="#000">
-          <animate attributeName="r" values="3;3.5;3" dur="4s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="94" cy="44.5" r="1.2" fill="#FAD000" opacity="0.9">
-          <animate attributeName="opacity" values="0.9;0.4;0.9" dur="3s" repeatCount="indefinite"/>
-        </circle>
-        <circle cx="106" cy="44.5" r="1.2" fill="#9EFFFF" opacity="0.9">
-          <animate attributeName="opacity" values="0.9;0.4;0.9" dur="3.5s" repeatCount="indefinite"/>
+        <circle cx="212" cy="91.5" r="2" fill="#9EFFFF" opacity="0.9">
+          <animate attributeName="r" values="2;2.8;2" dur="3.5s" repeatCount="indefinite"/>
         </circle>
 
-        <!-- Front flippers -->
-        <path d="M60,85 Q45,70 35,78 Q30,83 38,92 Q48,100 62,95 Z" fill="url(#flipperGrad)" opacity="0.8"/>
-        <path d="M140,85 Q155,70 165,78 Q170,83 162,92 Q152,100 138,95 Z" fill="url(#flipperGrad)" opacity="0.8"/>
+        <!-- ===== SHELL — main carapace ===== -->
+        <ellipse cx="200" cy="200" rx="95" ry="72" fill="none" stroke="url(#wirePurple)" stroke-width="1.8"/>
+        <!-- Marginal scutes (outer ring of shell plates) -->
+        <ellipse cx="200" cy="200" rx="82" ry="62" fill="none" stroke="url(#wirePurple)" stroke-width="0.9"/>
 
-        <!-- Rear flippers -->
-        <path d="M70,120 Q58,128 55,140 Q57,145 65,140 Q72,132 75,122 Z" fill="url(#flipperGrad)" opacity="0.6"/>
-        <path d="M130,120 Q142,128 145,140 Q143,145 135,140 Q128,132 125,122 Z" fill="url(#flipperGrad)" opacity="0.6"/>
+        <!-- Central vertebral scutes (spine ridge) -->
+        <path d="M200,132 L200,268" fill="none" stroke="url(#wireGold)" stroke-width="1"/>
+        <!-- Vertebral plate outlines -->
+        <path d="M186,142 L200,132 L214,142 L214,160 L200,168 L186,160 Z" fill="none" stroke="url(#wireGold)" stroke-width="0.9"/>
+        <path d="M184,164 L200,156 L216,164 L216,186 L200,194 L184,186 Z" fill="none" stroke="url(#wireGold)" stroke-width="0.9"/>
+        <path d="M184,190 L200,182 L216,190 L216,212 L200,220 L184,212 Z" fill="none" stroke="url(#wireGold)" stroke-width="0.9"/>
+        <path d="M186,216 L200,208 L214,216 L214,236 L200,244 L186,236 Z" fill="none" stroke="url(#wireGold)" stroke-width="0.9"/>
+        <path d="M190,240 L200,234 L210,240 L210,254 L200,260 L190,254 Z" fill="none" stroke="url(#wireGold)" stroke-width="0.8"/>
 
-        <!-- Tail -->
-        <path d="M97,130 Q100,145 103,130" fill="url(#flipperGrad)" opacity="0.5"/>
+        <!-- Costal scutes (side plates — left) -->
+        <path d="M186,142 L150,148 L140,165 L148,180 L184,186" fill="none" stroke="url(#wireGreen)" stroke-width="0.8"/>
+        <path d="M184,186 L140,190 L130,208 L140,224 L184,212" fill="none" stroke="url(#wireGreen)" stroke-width="0.8"/>
+        <path d="M186,216 L150,222 L144,240 L155,252 L190,240" fill="none" stroke="url(#wireGreen)" stroke-width="0.7"/>
+        <path d="M186,142 L162,136 L148,148 L150,148" fill="none" stroke="url(#wireGreen)" stroke-width="0.7"/>
+        <!-- Costal scutes — right -->
+        <path d="M214,142 L250,148 L260,165 L252,180 L216,186" fill="none" stroke="url(#wireGreen)" stroke-width="0.8"/>
+        <path d="M216,186 L260,190 L270,208 L260,224 L216,212" fill="none" stroke="url(#wireGreen)" stroke-width="0.8"/>
+        <path d="M214,216 L250,222 L256,240 L245,252 L210,240" fill="none" stroke="url(#wireGreen)" stroke-width="0.7"/>
+        <path d="M214,142 L238,136 L252,148 L250,148" fill="none" stroke="url(#wireGreen)" stroke-width="0.7"/>
 
-        <!-- Energy lines on flippers -->
-        <path d="M55,82 Q42,75 37,80" fill="none" stroke="rgba(250,208,0,0.3)" stroke-width="0.6"/>
-        <path d="M50,88 Q40,84 36,87" fill="none" stroke="rgba(165,255,144,0.25)" stroke-width="0.5"/>
-        <path d="M145,82 Q158,75 163,80" fill="none" stroke="rgba(250,208,0,0.3)" stroke-width="0.6"/>
-        <path d="M150,88 Q160,84 164,87" fill="none" stroke="rgba(165,255,144,0.25)" stroke-width="0.5"/>
+        <!-- Marginal scute divisions around the rim -->
+        <line x1="150" y1="148" x2="138" y2="145" stroke="url(#wirePurple)" stroke-width="0.5"/>
+        <line x1="140" y1="165" x2="124" y2="162" stroke="url(#wirePurple)" stroke-width="0.5"/>
+        <line x1="130" y1="208" x2="112" y2="206" stroke="url(#wirePurple)" stroke-width="0.5"/>
+        <line x1="140" y1="224" x2="122" y2="228" stroke="url(#wirePurple)" stroke-width="0.5"/>
+        <line x1="155" y1="252" x2="148" y2="262" stroke="url(#wirePurple)" stroke-width="0.5"/>
+        <line x1="250" y1="148" x2="262" y2="145" stroke="url(#wirePurple)" stroke-width="0.5"/>
+        <line x1="260" y1="165" x2="276" y2="162" stroke="url(#wirePurple)" stroke-width="0.5"/>
+        <line x1="270" y1="208" x2="288" y2="206" stroke="url(#wirePurple)" stroke-width="0.5"/>
+        <line x1="260" y1="224" x2="278" y2="228" stroke="url(#wirePurple)" stroke-width="0.5"/>
+        <line x1="245" y1="252" x2="252" y2="262" stroke="url(#wirePurple)" stroke-width="0.5"/>
+
+        <!-- Cross-hatching detail on shell plates -->
+        <path d="M148,180 L184,164" fill="none" stroke="url(#wireGold)" stroke-width="0.35" opacity="0.5"/>
+        <path d="M140,190 L184,190" fill="none" stroke="url(#wireGold)" stroke-width="0.35" opacity="0.5"/>
+        <path d="M252,180 L216,164" fill="none" stroke="url(#wireGold)" stroke-width="0.35" opacity="0.5"/>
+        <path d="M260,190 L216,190" fill="none" stroke="url(#wireGold)" stroke-width="0.35" opacity="0.5"/>
+
+        <!-- ===== FRONT LEFT FLIPPER ===== -->
+        <path d="M120,168 C100,150 68,132 42,136 C30,140 24,152 30,162 C38,175 58,182 78,186 C92,188 108,184 120,178" fill="none" stroke="url(#wirePurple)" stroke-width="1.4"/>
+        <!-- Flipper bone structure -->
+        <path d="M120,172 L95,160 L72,152 L50,148" fill="none" stroke="url(#wirePink)" stroke-width="0.7"/>
+        <path d="M95,160 L88,170" fill="none" stroke="url(#wirePink)" stroke-width="0.5"/>
+        <path d="M72,152 L65,162 L58,170" fill="none" stroke="url(#wirePink)" stroke-width="0.5"/>
+        <path d="M50,148 L42,155 L36,162" fill="none" stroke="url(#wirePink)" stroke-width="0.5"/>
+        <!-- Flipper scale lines -->
+        <path d="M105,158 C98,155 90,154 82,155" fill="none" stroke="url(#wireGold)" stroke-width="0.4"/>
+        <path d="M95,162 C86,160 76,160 68,162" fill="none" stroke="url(#wireGold)" stroke-width="0.35"/>
+        <path d="M82,168 C74,166 64,167 56,170" fill="none" stroke="url(#wireGold)" stroke-width="0.35"/>
+        <path d="M68,174 C60,173 50,175 44,178" fill="none" stroke="url(#wireGold)" stroke-width="0.3"/>
+
+        <!-- ===== FRONT RIGHT FLIPPER ===== -->
+        <path d="M280,168 C300,150 332,132 358,136 C370,140 376,152 370,162 C362,175 342,182 322,186 C308,188 292,184 280,178" fill="none" stroke="url(#wirePurple)" stroke-width="1.4"/>
+        <path d="M280,172 L305,160 L328,152 L350,148" fill="none" stroke="url(#wirePink)" stroke-width="0.7"/>
+        <path d="M305,160 L312,170" fill="none" stroke="url(#wirePink)" stroke-width="0.5"/>
+        <path d="M328,152 L335,162 L342,170" fill="none" stroke="url(#wirePink)" stroke-width="0.5"/>
+        <path d="M350,148 L358,155 L364,162" fill="none" stroke="url(#wirePink)" stroke-width="0.5"/>
+        <path d="M295,158 C302,155 310,154 318,155" fill="none" stroke="url(#wireGold)" stroke-width="0.4"/>
+        <path d="M305,162 C314,160 324,160 332,162" fill="none" stroke="url(#wireGold)" stroke-width="0.35"/>
+        <path d="M318,168 C326,166 336,167 344,170" fill="none" stroke="url(#wireGold)" stroke-width="0.35"/>
+        <path d="M332,174 C340,173 350,175 356,178" fill="none" stroke="url(#wireGold)" stroke-width="0.3"/>
+
+        <!-- ===== REAR LEFT FLIPPER ===== -->
+        <path d="M138,248 C125,258 112,275 108,295 C106,308 112,318 122,316 C134,312 142,298 146,280 C148,268 146,256 142,248" fill="none" stroke="url(#wirePurple)" stroke-width="1.2"/>
+        <path d="M140,252 L130,268 L120,285 L112,300" fill="none" stroke="url(#wirePink)" stroke-width="0.6"/>
+        <path d="M130,268 L122,272" fill="none" stroke="url(#wirePink)" stroke-width="0.4"/>
+        <path d="M120,285 L114,288" fill="none" stroke="url(#wirePink)" stroke-width="0.4"/>
+        <path d="M135,260 C128,264 122,270 118,276" fill="none" stroke="url(#wireGold)" stroke-width="0.35"/>
+        <path d="M130,274 C124,278 118,284 116,290" fill="none" stroke="url(#wireGold)" stroke-width="0.3"/>
+
+        <!-- ===== REAR RIGHT FLIPPER ===== -->
+        <path d="M262,248 C275,258 288,275 292,295 C294,308 288,318 278,316 C266,312 258,298 254,280 C252,268 254,256 258,248" fill="none" stroke="url(#wirePurple)" stroke-width="1.2"/>
+        <path d="M260,252 L270,268 L280,285 L288,300" fill="none" stroke="url(#wirePink)" stroke-width="0.6"/>
+        <path d="M270,268 L278,272" fill="none" stroke="url(#wirePink)" stroke-width="0.4"/>
+        <path d="M280,285 L286,288" fill="none" stroke="url(#wirePink)" stroke-width="0.4"/>
+        <path d="M265,260 C272,264 278,270 282,276" fill="none" stroke="url(#wireGold)" stroke-width="0.35"/>
+        <path d="M270,274 C276,278 282,284 284,290" fill="none" stroke="url(#wireGold)" stroke-width="0.3"/>
+
+        <!-- ===== TAIL ===== -->
+        <path d="M194,262 C196,278 198,295 200,308 C202,295 204,278 206,262" fill="none" stroke="url(#wirePurple)" stroke-width="1"/>
+        <path d="M197,275 L200,272 L203,275" fill="none" stroke="url(#wireGold)" stroke-width="0.4"/>
+        <path d="M198,288 L200,285 L202,288" fill="none" stroke="url(#wireGold)" stroke-width="0.35"/>
+
+      </g>
       </g>
 
-      <!-- Gravitational lensing arcs around the shell -->
-      <ellipse cx="100" cy="90" rx="65" ry="50" fill="none" stroke="rgba(179,98,255,0.12)" stroke-width="0.8" stroke-dasharray="4 8" opacity="0.5">
-        <animateTransform attributeName="transform" type="rotate" from="0 100 90" to="360 100 90" dur="40s" repeatCount="indefinite"/>
+      <!-- Gravitational lensing arcs -->
+      <ellipse cx="200" cy="195" rx="120" ry="88" fill="none" stroke="rgba(179,98,255,0.1)" stroke-width="0.8" stroke-dasharray="5 10" opacity="0.5">
+        <animateTransform attributeName="transform" type="rotate" from="0 200 195" to="360 200 195" dur="45s" repeatCount="indefinite"/>
       </ellipse>
-      <ellipse cx="100" cy="90" rx="72" ry="55" fill="none" stroke="rgba(250,208,0,0.08)" stroke-width="0.6" stroke-dasharray="2 12" opacity="0.4">
-        <animateTransform attributeName="transform" type="rotate" from="360 100 90" to="0 100 90" dur="55s" repeatCount="indefinite"/>
+      <ellipse cx="200" cy="195" rx="135" ry="98" fill="none" stroke="rgba(250,208,0,0.06)" stroke-width="0.6" stroke-dasharray="3 14" opacity="0.4">
+        <animateTransform attributeName="transform" type="rotate" from="360 200 195" to="0 200 195" dur="60s" repeatCount="indefinite"/>
       </ellipse>
     </svg>
   </div>
