@@ -171,16 +171,121 @@ html {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 30px;
-  padding: 30px 20px 24px;
+  justify-content: flex-start;
+  gap: 24px;
+  padding: 20px 20px 16px;
   max-width: 1400px;
   margin: 0 auto;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
 }
 
 .header-text {
   display: flex;
   flex-direction: column;
+}
+
+.header-spacer {
+  flex: 1;
+}
+
+/* ---- Cosmic Turtle ---- */
+.cosmic-turtle {
+  flex-shrink: 0;
+  width: 180px;
+  height: 180px;
+  position: relative;
+  animation: turtle-float 8s ease-in-out infinite;
+}
+
+@keyframes turtle-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-6px) rotate(1deg); }
+  50% { transform: translateY(2px) rotate(-1deg); }
+  75% { transform: translateY(-4px) rotate(0.5deg); }
+}
+
+.cosmic-turtle svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 15px rgba(179, 98, 255, 0.4))
+          drop-shadow(0 0 30px rgba(250, 208, 0, 0.15));
+}
+
+/* Accretion disk rings around the turtle */
+.turtle-accretion {
+  position: absolute;
+  top: 50%; left: 50%;
+  border-radius: 50%;
+  border: 1.5px solid;
+  transform-origin: center;
+  pointer-events: none;
+}
+
+.turtle-accretion-1 {
+  width: 200px; height: 70px;
+  margin-top: -35px; margin-left: -100px;
+  border-color: rgba(179, 98, 255, 0.3);
+  transform: rotateX(60deg) rotateZ(0deg);
+  animation: accretion-spin-1 20s linear infinite;
+  box-shadow: 0 0 12px rgba(179, 98, 255, 0.15), inset 0 0 12px rgba(179, 98, 255, 0.05);
+}
+
+.turtle-accretion-2 {
+  width: 220px; height: 80px;
+  margin-top: -40px; margin-left: -110px;
+  border-color: rgba(250, 208, 0, 0.2);
+  transform: rotateX(65deg) rotateZ(30deg);
+  animation: accretion-spin-2 28s linear infinite;
+  box-shadow: 0 0 10px rgba(250, 208, 0, 0.1), inset 0 0 10px rgba(250, 208, 0, 0.03);
+}
+
+.turtle-accretion-3 {
+  width: 240px; height: 55px;
+  margin-top: -27px; margin-left: -120px;
+  border-color: rgba(165, 255, 144, 0.15);
+  transform: rotateX(70deg) rotateZ(-20deg);
+  animation: accretion-spin-3 35s linear infinite;
+  box-shadow: 0 0 8px rgba(165, 255, 144, 0.08);
+}
+
+@keyframes accretion-spin-1 { to { transform: rotateX(60deg) rotateZ(360deg); } }
+@keyframes accretion-spin-2 { to { transform: rotateX(65deg) rotateZ(390deg); } }
+@keyframes accretion-spin-3 { to { transform: rotateX(70deg) rotateZ(340deg); } }
+
+/* Event horizon glow behind turtle */
+.turtle-singularity {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 80px; height: 80px;
+  margin-top: -40px; margin-left: -40px;
+  border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(0, 0, 0, 0.9) 0%,
+    rgba(0, 0, 0, 0.7) 30%,
+    rgba(105, 67, 255, 0.3) 50%,
+    rgba(250, 208, 0, 0.15) 65%,
+    rgba(165, 255, 144, 0.08) 80%,
+    transparent 100%
+  );
+  animation: singularity-pulse 6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes singularity-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
+}
+
+@media (max-width: 900px) {
+  .cosmic-turtle { width: 130px; height: 130px; }
+  .turtle-accretion { display: none; }
 }
 
 @media (max-width: 640px) {
@@ -189,7 +294,13 @@ html {
     text-align: center;
     gap: 16px;
   }
+  .header-left {
+    flex-direction: column;
+    align-items: center;
+  }
   .header-text { align-items: center; }
+  .header-spacer { display: none; }
+  .cosmic-turtle { width: 140px; height: 140px; }
 }
 
 /* DSP Logo — CSS Dyson Sphere */
@@ -1377,16 +1488,132 @@ select:focus {
 <canvas id="starfield"></canvas>
 
 <div class="header">
-  <div class="dsp-logo">
-    <div class="ring ring-1"></div>
-    <div class="ring ring-2"></div>
-    <div class="ring ring-3"></div>
-    <div class="star"></div>
+  <div class="header-left">
+    <div class="dsp-logo">
+      <div class="ring ring-1"></div>
+      <div class="ring ring-2"></div>
+      <div class="ring ring-3"></div>
+      <div class="star"></div>
+    </div>
+    <div class="header-text">
+      <img src="https://cdn.akamai.steamstatic.com/steam/apps/1366540/logo.png" alt="Dyson Sphere Program" class="dsp-game-logo" onerror="this.style.display='none'">
+      <h1>Production Calculator</h1>
+      <p class="subtitle">Engineer the stars. Calculate the cosmos.</p>
+    </div>
   </div>
-  <div class="header-text">
-    <img src="https://cdn.akamai.steamstatic.com/steam/apps/1366540/logo.png" alt="Dyson Sphere Program" class="dsp-game-logo" onerror="this.style.display='none'">
-    <h1>Production Calculator</h1>
-    <p class="subtitle">Engineer the stars. Calculate the cosmos.</p>
+  <div class="header-spacer"></div>
+  <!-- Cosmic Void Turtle -->
+  <div class="cosmic-turtle">
+    <div class="turtle-singularity"></div>
+    <div class="turtle-accretion turtle-accretion-1"></div>
+    <div class="turtle-accretion turtle-accretion-2"></div>
+    <div class="turtle-accretion turtle-accretion-3"></div>
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Cosmic shell gradient -->
+        <radialGradient id="shellGrad" cx="50%" cy="45%" r="50%">
+          <stop offset="0%" stop-color="#1a0a30"/>
+          <stop offset="30%" stop-color="#2d1060"/>
+          <stop offset="55%" stop-color="#4D21FC"/>
+          <stop offset="75%" stop-color="#B362FF"/>
+          <stop offset="100%" stop-color="#FAD000"/>
+        </radialGradient>
+        <!-- Event horizon center -->
+        <radialGradient id="voidCore" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#000000"/>
+          <stop offset="40%" stop-color="#0a0020"/>
+          <stop offset="70%" stop-color="#1a0a40"/>
+          <stop offset="100%" stop-color="#4D21FC" stop-opacity="0.3"/>
+        </radialGradient>
+        <!-- Flipper gradient -->
+        <linearGradient id="flipperGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#B362FF"/>
+          <stop offset="50%" stop-color="#6943FF"/>
+          <stop offset="100%" stop-color="#A5FF90" stop-opacity="0.6"/>
+        </linearGradient>
+        <!-- Head gradient -->
+        <linearGradient id="headGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#9EFFFF"/>
+          <stop offset="50%" stop-color="#6943FF"/>
+          <stop offset="100%" stop-color="#B362FF"/>
+        </linearGradient>
+        <!-- Sacred geometry pattern for shell -->
+        <pattern id="sacredGeo" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(15)">
+          <polygon points="10,0 20,17.3 0,17.3" fill="none" stroke="rgba(250,208,0,0.15)" stroke-width="0.5"/>
+          <circle cx="10" cy="10" r="4" fill="none" stroke="rgba(179,98,255,0.12)" stroke-width="0.4"/>
+        </pattern>
+        <!-- Glow filter -->
+        <filter id="turtleGlow">
+          <feGaussianBlur stdDeviation="2" result="blur"/>
+          <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+        </filter>
+        <!-- Animated gravitational lensing -->
+        <filter id="lensing">
+          <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" seed="42">
+            <animate attributeName="seed" from="0" to="100" dur="20s" repeatCount="indefinite"/>
+          </feTurbulence>
+          <feDisplacementMap in="SourceGraphic" scale="3"/>
+        </filter>
+      </defs>
+
+      <g filter="url(#lensing)">
+        <!-- Shell (the black hole carapace) -->
+        <ellipse cx="100" cy="92" rx="52" ry="42" fill="url(#shellGrad)" opacity="0.95"/>
+        <!-- Void core in shell center -->
+        <ellipse cx="100" cy="88" rx="28" ry="22" fill="url(#voidCore)"/>
+        <!-- Sacred geometry overlay on shell -->
+        <ellipse cx="100" cy="92" rx="52" ry="42" fill="url(#sacredGeo)" opacity="0.7"/>
+        <!-- Shell rim glow -->
+        <ellipse cx="100" cy="92" rx="52" ry="42" fill="none" stroke="url(#flipperGrad)" stroke-width="1.5" opacity="0.6"/>
+
+        <!-- Shell hexagonal plates -->
+        <path d="M100,55 L115,65 L115,80 L100,90 L85,80 L85,65 Z" fill="none" stroke="rgba(250,208,0,0.2)" stroke-width="0.7"/>
+        <path d="M100,90 L118,100 L118,118 L100,128 L82,118 L82,100 Z" fill="none" stroke="rgba(179,98,255,0.2)" stroke-width="0.7"/>
+        <path d="M115,65 L132,72 L132,88 L118,100 L115,80 Z" fill="none" stroke="rgba(165,255,144,0.12)" stroke-width="0.5"/>
+        <path d="M85,65 L68,72 L68,88 L82,100 L85,80 Z" fill="none" stroke="rgba(165,255,144,0.12)" stroke-width="0.5"/>
+
+        <!-- Head -->
+        <ellipse cx="100" cy="48" rx="14" ry="12" fill="url(#headGrad)" opacity="0.9"/>
+        <!-- Eyes — tiny void portals -->
+        <circle cx="94" cy="45" r="3" fill="#000">
+          <animate attributeName="r" values="3;3.5;3" dur="4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="106" cy="45" r="3" fill="#000">
+          <animate attributeName="r" values="3;3.5;3" dur="4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="94" cy="44.5" r="1.2" fill="#FAD000" opacity="0.9">
+          <animate attributeName="opacity" values="0.9;0.4;0.9" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="106" cy="44.5" r="1.2" fill="#9EFFFF" opacity="0.9">
+          <animate attributeName="opacity" values="0.9;0.4;0.9" dur="3.5s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- Front flippers -->
+        <path d="M60,85 Q45,70 35,78 Q30,83 38,92 Q48,100 62,95 Z" fill="url(#flipperGrad)" opacity="0.8"/>
+        <path d="M140,85 Q155,70 165,78 Q170,83 162,92 Q152,100 138,95 Z" fill="url(#flipperGrad)" opacity="0.8"/>
+
+        <!-- Rear flippers -->
+        <path d="M70,120 Q58,128 55,140 Q57,145 65,140 Q72,132 75,122 Z" fill="url(#flipperGrad)" opacity="0.6"/>
+        <path d="M130,120 Q142,128 145,140 Q143,145 135,140 Q128,132 125,122 Z" fill="url(#flipperGrad)" opacity="0.6"/>
+
+        <!-- Tail -->
+        <path d="M97,130 Q100,145 103,130" fill="url(#flipperGrad)" opacity="0.5"/>
+
+        <!-- Energy lines on flippers -->
+        <path d="M55,82 Q42,75 37,80" fill="none" stroke="rgba(250,208,0,0.3)" stroke-width="0.6"/>
+        <path d="M50,88 Q40,84 36,87" fill="none" stroke="rgba(165,255,144,0.25)" stroke-width="0.5"/>
+        <path d="M145,82 Q158,75 163,80" fill="none" stroke="rgba(250,208,0,0.3)" stroke-width="0.6"/>
+        <path d="M150,88 Q160,84 164,87" fill="none" stroke="rgba(165,255,144,0.25)" stroke-width="0.5"/>
+      </g>
+
+      <!-- Gravitational lensing arcs around the shell -->
+      <ellipse cx="100" cy="90" rx="65" ry="50" fill="none" stroke="rgba(179,98,255,0.12)" stroke-width="0.8" stroke-dasharray="4 8" opacity="0.5">
+        <animateTransform attributeName="transform" type="rotate" from="0 100 90" to="360 100 90" dur="40s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="100" cy="90" rx="72" ry="55" fill="none" stroke="rgba(250,208,0,0.08)" stroke-width="0.6" stroke-dasharray="2 12" opacity="0.4">
+        <animateTransform attributeName="transform" type="rotate" from="360 100 90" to="0 100 90" dur="55s" repeatCount="indefinite"/>
+      </ellipse>
+    </svg>
   </div>
 </div>
 
