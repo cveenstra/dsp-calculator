@@ -429,7 +429,7 @@ html {
 .main-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 20px 60px;
+  padding: 0 20px 20px;
 }
 
 /* ---- Input Panel ---- */
@@ -570,7 +570,50 @@ input[type="number"] {
 
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button {
-  opacity: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+/* Custom increment/decrement buttons via wrapper */
+.number-input-wrapper {
+  position: relative;
+}
+
+.number-input-wrapper input {
+  padding-right: 36px;
+}
+
+.number-input-wrapper .spin-btns {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.number-input-wrapper .spin-btn {
+  width: 24px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(105, 67, 255, 0.15);
+  border: 1px solid rgba(105, 67, 255, 0.2);
+  border-radius: 3px;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 1;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.number-input-wrapper .spin-btn:hover {
+  background: rgba(105, 67, 255, 0.3);
+  color: var(--neon-gold);
 }
 
 input[type="number"]:focus {
@@ -1190,7 +1233,7 @@ select:focus {
 /* ---- Empty State ---- */
 .empty-state {
   text-align: center;
-  padding: 60px 20px;
+  padding: 10px 20px;
   color: var(--text-muted);
 }
 
@@ -1450,7 +1493,7 @@ select:focus {
 /* Footer */
 .footer {
   text-align: center;
-  padding: 30px 20px;
+  padding: 10px 20px;
   color: var(--text-muted);
   font-size: 0.8rem;
   border-top: none;
@@ -1505,10 +1548,6 @@ select:focus {
   <div class="header-spacer"></div>
   <!-- Cosmic Void Turtle -->
   <div class="cosmic-turtle">
-    <div class="turtle-singularity"></div>
-    <div class="turtle-accretion turtle-accretion-1"></div>
-    <div class="turtle-accretion turtle-accretion-2"></div>
-    <div class="turtle-accretion turtle-accretion-3"></div>
     <svg viewBox="0 0 400 380" xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="wirePurple" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#B362FF"/><stop offset="100%" stop-color="#6943FF"/></linearGradient>
@@ -1813,7 +1852,13 @@ select:focus {
       </div>
       <div class="input-group">
         <label>Production Rate (items/min)</label>
-        <input type="number" id="rate-input" value="30" min="0.1" step="0.1">
+        <div class="number-input-wrapper">
+          <input type="number" id="rate-input" value="30" min="0.1" step="0.1">
+          <div class="spin-btns">
+            <button class="spin-btn" onclick="document.getElementById('rate-input').stepUp();document.getElementById('rate-input').dispatchEvent(new Event('input'))">&#9650;</button>
+            <button class="spin-btn" onclick="document.getElementById('rate-input').stepDown();document.getElementById('rate-input').dispatchEvent(new Event('input'))">&#9660;</button>
+          </div>
+        </div>
       </div>
       <div class="input-group">
         <label>Assembler Tier</label>
