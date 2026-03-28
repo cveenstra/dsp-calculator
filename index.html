@@ -2862,10 +2862,10 @@ function renderDepTree(requirements) {
   const container = document.getElementById("dep-tree");
   const targetItem = state.selectedItem;
   const targetRate = parseFloat(document.getElementById("rate-input").value);
-
   const depthColors = ['#FAD000', '#B362FF', '#A5FF90', '#9EFFFF', '#FB94FF', '#FF2C70'];
 
-  // Build tree data structure first
+  // Build tree data with unique IDs for every node instance
+  let nodeCounter = 0;
   function buildTreeData(itemId, rate, depth, visited) {
     const item = ITEMS[itemId];
     if (!item) return null;
@@ -2875,8 +2875,9 @@ function renderDepTree(requirements) {
     const buildingsNeeded = req ? Math.ceil(req.buildings) : 0;
     const isRaw = !recipe || recipe.inputs.length === 0;
     const isCircular = visited.has(itemId) && depth > 0;
+    const uid = 'tn' + (nodeCounter++);
 
-    const node = { itemId, item, rate, depth, recipe, building, buildingsNeeded, isRaw, children: [] };
+    const node = { uid, itemId, item, rate, depth, recipe, building, buildingsNeeded, isRaw, children: [] };
 
     if (!isRaw && !isCircular && recipe.inputs.length > 0) {
       const newVisited = new Set(visited);
@@ -2894,37 +2895,30 @@ function renderDepTree(requirements) {
   const tree = buildTreeData(targetItem, targetRate, 0, new Set());
   if (!tree) { container.innerHTML = ''; return; }
 
-  // Flatten tree into levels (BFS)
+  // BFS into levels, track edges by uid
   const levels = [];
-  const parentMap = []; // parentMap[level] = array of { parentIdx (in prev level), childIndices (in this level) }
+  const edges = []; // { parentUid, childUid, depth }
   let queue = [tree];
 
   while (queue.length > 0) {
     const levelNodes = [];
     const nextQueue = [];
-    const edges = [];
     for (const node of queue) {
-      const parentIdx = levelNodes.length;
       levelNodes.push(node);
-      if (node.children.length > 0) {
-        const childStart = nextQueue.length;
-        for (const child of node.children) {
-          nextQueue.push(child);
-        }
-        edges.push({ parentIdx, childStart, childEnd: nextQueue.length - 1 });
+      for (const child of node.children) {
+        edges.push({ parentUid: node.uid, childUid: child.uid, depth: node.depth });
+        nextQueue.push(child);
       }
     }
     levels.push(levelNodes);
-    parentMap.push(edges);
     queue = nextQueue;
   }
 
-  // Render card HTML
+  // Render card
   function renderCard(node) {
     const d = Math.min(node.depth, 5);
     const rootClass = node.depth === 0 ? ' tc-root' : '';
     const rawClass = node.isRaw ? ' tc-raw' : '';
-
     let recipeHtml = '';
     if (node.recipe && node.recipe.inputs.length > 0) {
       const outputQty = node.recipe.outputs.find(o => o.item === node.itemId)?.qty || 1;
@@ -2934,8 +2928,7 @@ function renderDepTree(requirements) {
       });
       recipeHtml = `<div class="tc-recipe">${parts.join(' + ')} &rarr; ${outputQty}</div>`;
     }
-
-    return `<div class="tree-card${rootClass}${rawClass}" data-depth="${d}">
+    return `<div class="tree-card${rootClass}${rawClass}" data-depth="${d}" id="${node.uid}">
       <div class="tc-dot" style="background:${node.item.color}; color:${node.item.color}"></div>
       <div class="tc-name">${node.item.name}</div>
       <div class="tc-rate">${node.rate.toFixed(1)}/min</div>
@@ -2944,68 +2937,68 @@ function renderDepTree(requirements) {
     </div>`;
   }
 
-  // Build HTML: levels with SVG connectors between them
-  let html = '<div class="dep-tree-wrapper"><div class="dep-tree">';
-
+  // Build HTML: levels of cards, one big SVG overlay for all lines
+  let html = '<div class="dep-tree-wrapper"><div class="dep-tree" id="dep-tree-inner">';
   for (let lvl = 0; lvl < levels.length; lvl++) {
-    // Render this level's cards
-    html += `<div class="tree-level" id="tree-level-${lvl}">`;
-    for (const node of levels[lvl]) {
-      html += renderCard(node);
-    }
+    html += `<div class="tree-level">`;
+    for (const node of levels[lvl]) html += renderCard(node);
     html += '</div>';
-
-    // Render connector SVG between this level and next
-    if (lvl < levels.length - 1 && parentMap[lvl].length > 0) {
-      html += `<svg class="tree-connectors" id="tree-svg-${lvl}" preserveAspectRatio="none"></svg>`;
-    }
+    // spacer between levels for the lines to pass through
+    if (lvl < levels.length - 1) html += '<div style="height:48px;flex-shrink:0"></div>';
   }
+  html += '</div>';
+  // One overlay SVG for all connector lines
+  html += '<svg id="dep-tree-svg" style="position:absolute;top:0;left:0;pointer-events:none;overflow:visible;"></svg>';
+  html += '</div>';
 
-  html += '</div></div>';
   container.innerHTML = html;
 
-  // Now draw SVG connectors using actual DOM positions
+  // Draw all connector lines in a single SVG overlay
   requestAnimationFrame(() => {
-    for (let lvl = 0; lvl < levels.length - 1; lvl++) {
-      const svg = document.getElementById(`tree-svg-${lvl}`);
-      if (!svg) continue;
-      const edges = parentMap[lvl];
-      if (edges.length === 0) continue;
+    const wrapper = container.querySelector('.dep-tree-wrapper');
+    const inner = document.getElementById('dep-tree-inner');
+    const svg = document.getElementById('dep-tree-svg');
+    if (!wrapper || !inner || !svg) return;
 
-      const parentLevel = document.getElementById(`tree-level-${lvl}`);
-      const childLevel = document.getElementById(`tree-level-${lvl + 1}`);
-      if (!parentLevel || !childLevel) continue;
+    // Make wrapper position:relative so the SVG can overlay
+    wrapper.style.position = 'relative';
+    const wrapperRect = wrapper.getBoundingClientRect();
 
-      const parentCards = parentLevel.querySelectorAll('.tree-card');
-      const childCards = childLevel.querySelectorAll('.tree-card');
-      const svgRect = svg.getBoundingClientRect();
+    // Size SVG to cover the full tree
+    const innerRect = inner.getBoundingClientRect();
+    const svgW = Math.max(innerRect.width, wrapperRect.width);
+    const svgH = innerRect.height;
+    svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
+    svg.setAttribute('width', svgW);
+    svg.setAttribute('height', svgH);
 
-      // Set viewBox to match actual pixel size
-      svg.setAttribute('viewBox', `0 0 ${svgRect.width} ${svgRect.height}`);
-      svg.style.width = svgRect.width + 'px';
+    let paths = '';
+    for (const edge of edges) {
+      const pEl = document.getElementById(edge.parentUid);
+      const cEl = document.getElementById(edge.childUid);
+      if (!pEl || !cEl) continue;
 
-      let paths = '';
-      for (const edge of edges) {
-        const pCard = parentCards[edge.parentIdx];
-        if (!pCard) continue;
-        const pRect = pCard.getBoundingClientRect();
-        const px = pRect.left + pRect.width / 2 - svgRect.left;
+      const pRect = pEl.getBoundingClientRect();
+      const cRect = cEl.getBoundingClientRect();
+      // Positions relative to the wrapper
+      const px = pRect.left + pRect.width / 2 - wrapperRect.left;
+      const py = pRect.bottom - wrapperRect.top;
+      const cx = cRect.left + cRect.width / 2 - wrapperRect.left;
+      const cy = cRect.top - wrapperRect.top;
 
-        for (let ci = edge.childStart; ci <= edge.childEnd; ci++) {
-          const cCard = childCards[ci];
-          if (!cCard) continue;
-          const cRect = cCard.getBoundingClientRect();
-          const cx = cRect.left + cRect.width / 2 - svgRect.left;
+      const color = depthColors[Math.min(edge.depth, depthColors.length - 1)];
+      const dy = (cy - py);
+      const cp1y = py + dy * 0.4;
+      const cp2y = py + dy * 0.6;
 
-          const color = depthColors[Math.min(lvl, depthColors.length - 1)];
-          const midY = svgRect.height / 2;
-          paths += `<path d="M${px},0 C${px},${midY} ${cx},${midY} ${cx},${svgRect.height}" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.5"/>`;
-          // Glow duplicate
-          paths += `<path d="M${px},0 C${px},${midY} ${cx},${midY} ${cx},${svgRect.height}" fill="none" stroke="${color}" stroke-width="4" opacity="0.08"/>`;
-        }
-      }
-      svg.innerHTML = paths;
+      // Glow line (wide, low opacity)
+      paths += `<path d="M${px},${py} C${px},${cp1y} ${cx},${cp2y} ${cx},${cy}" fill="none" stroke="${color}" stroke-width="5" opacity="0.07"/>`;
+      // Main line
+      paths += `<path d="M${px},${py} C${px},${cp1y} ${cx},${cp2y} ${cx},${cy}" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.55"/>`;
+      // Small dot at child end
+      paths += `<circle cx="${cx}" cy="${cy}" r="2.5" fill="${color}" opacity="0.4"/>`;
     }
+    svg.innerHTML = paths;
   });
 }
 
