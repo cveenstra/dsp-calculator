@@ -1312,7 +1312,7 @@ select:focus {
 
 .math-overview h3 {
   font-family: var(--font-display);
-  font-size: 0.85rem;
+  font-size: 1rem;
   color: var(--neon-gold);
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -1322,7 +1322,7 @@ select:focus {
 .math-overview p {
   color: var(--text-muted);
   line-height: 1.8;
-  font-size: 0.95rem;
+  font-size: 1.1rem;
 }
 
 .math-overview .formula-block {
@@ -1341,7 +1341,7 @@ select:focus {
 .math-overview .formula-block .label {
   color: var(--text-muted);
   font-family: var(--font-body);
-  font-size: 0.8rem;
+  font-size: 1rem;
   display: block;
   margin-bottom: 4px;
 }
@@ -1375,13 +1375,13 @@ select:focus {
 
 .math-item-header .item-label {
   font-family: var(--font-display);
-  font-size: 0.8rem;
+  font-size: 1rem;
   font-weight: 700;
   letter-spacing: 1px;
 }
 
 .math-item-header .item-summary {
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   color: var(--text-muted);
 }
 
@@ -1418,7 +1418,7 @@ select:focus {
 
 .math-step .step-label {
   font-family: var(--font-display);
-  font-size: 0.65rem;
+  font-size: 0.88rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   color: var(--neon-purple);
@@ -1453,7 +1453,7 @@ select:focus {
 
 .math-step .step-explanation {
   margin-top: 6px;
-  font-size: 0.85rem;
+  font-size: 1.1rem;
   color: var(--text-muted);
   line-height: 1.6;
 }
@@ -2739,17 +2739,17 @@ function renderMathBreakdown(buildOrder) {
         backward through every ingredient until it hits raw resources. Here&rsquo;s how they connect:
       </p>
 
-      <div class="formula-block" style="text-align:center; font-size:15px; line-height: 2.2;">
+      <div class="formula-block" style="text-align:center; font-size:18px; line-height: 2.2;">
         <span style="color:var(--neon-gold)">You want X/min of an item</span><br>
-        &darr;&ensp;<span style="color:var(--text-muted); font-size:13px">feeds into</span><br>
+        &darr;&ensp;<span style="color:var(--text-muted); font-size:16px">feeds into</span><br>
         <span style="color:var(--neon-cyan)">Formula 1</span> &rarr; how many craft cycles/min the factory needs<br>
-        &darr;&ensp;<span style="color:var(--text-muted); font-size:13px">compared against</span><br>
+        &darr;&ensp;<span style="color:var(--text-muted); font-size:16px">compared against</span><br>
         <span style="color:var(--neon-cyan)">Formula 2</span> &rarr; how many cycles one building can do/min<br>
-        &darr;&ensp;<span style="color:var(--text-muted); font-size:13px">divided to get</span><br>
+        &darr;&ensp;<span style="color:var(--text-muted); font-size:16px">divided to get</span><br>
         <span style="color:var(--neon-green)">Formula 3</span> &rarr; <strong>how many buildings to place</strong><br>
-        &darr;&ensp;<span style="color:var(--text-muted); font-size:13px">and simultaneously</span><br>
+        &darr;&ensp;<span style="color:var(--text-muted); font-size:16px">and simultaneously</span><br>
         <span style="color:var(--neon-magenta)">Formula 4</span> &rarr; how much of each input ingredient/min<br>
-        &darr;&ensp;<span style="color:var(--text-muted); font-size:13px">each input rate <em>becomes a new &ldquo;X/min&rdquo;</em> &mdash; loop back to top</span><br>
+        &darr;&ensp;<span style="color:var(--text-muted); font-size:16px">each input rate <em>becomes a new &ldquo;X/min&rdquo;</em> &mdash; loop back to top</span><br>
         <span style="color:var(--neon-purple)">&uarr; this loop runs once for every crafted ingredient in the chain.</span><br>
         <span style="color:var(--neon-purple)">It stops when it reaches raw ores/liquids (Iron Ore, Copper Ore, etc.)</span><br>
         <span style="color:var(--neon-purple)">because those are mined directly &mdash; they have no recipe inputs, so</span><br>
