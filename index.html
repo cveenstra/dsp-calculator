@@ -77,16 +77,35 @@ html {
 /* ---- Header ---- */
 .header {
   position: relative;
-  text-align: center;
-  padding: 40px 20px 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  padding: 30px 20px 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+  }
+  .header-text { align-items: center; }
 }
 
 /* DSP Logo — CSS Dyson Sphere */
 .dsp-logo {
   position: relative;
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 20px;
+  width: 110px;
+  height: 110px;
+  flex-shrink: 0;
   animation: logo-float 6s ease-in-out infinite;
 }
 
@@ -151,10 +170,10 @@ html {
 @keyframes ring-spin-3 { to { transform: rotateX(70deg) rotateZ(480deg); } }
 
 .dsp-game-logo {
-  max-width: 340px;
-  width: 80%;
+  max-width: 300px;
+  width: 100%;
   height: auto;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   filter: drop-shadow(0 0 20px rgba(250, 208, 0, 0.25)) drop-shadow(0 0 40px rgba(179, 98, 255, 0.2));
   position: relative;
   animation: logo-glow 4s ease-in-out infinite alternate;
@@ -1224,7 +1243,7 @@ select:focus {
   padding: 30px 20px;
   color: var(--text-muted);
   font-size: 0.8rem;
-  border-top: 1px solid rgba(105, 67, 255, 0.05);
+  border-top: none;
 }
 
 .footer a {
@@ -1244,9 +1263,11 @@ select:focus {
     <div class="ring ring-3"></div>
     <div class="star"></div>
   </div>
-  <img src="https://cdn.akamai.steamstatic.com/steam/apps/1366540/logo.png" alt="Dyson Sphere Program" class="dsp-game-logo" onerror="this.style.display='none'">
-  <h1>Production Calculator</h1>
-  <p class="subtitle">Engineer the stars. Calculate the cosmos.</p>
+  <div class="header-text">
+    <img src="https://cdn.akamai.steamstatic.com/steam/apps/1366540/logo.png" alt="Dyson Sphere Program" class="dsp-game-logo" onerror="this.style.display='none'">
+    <h1>Production Calculator</h1>
+    <p class="subtitle">Engineer the stars. Calculate the cosmos.</p>
+  </div>
 </div>
 
 <div class="main-container">
@@ -1332,7 +1353,6 @@ select:focus {
 
   <!-- Empty State -->
   <div id="empty-state" class="empty-state">
-    <div class="icon">&#x1F30C;</div>
     <p>Select an item and production rate to calculate the full production chain and recommended build sequence.</p>
   </div>
 </div>
