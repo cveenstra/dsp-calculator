@@ -10,24 +10,30 @@
    CSS DESIGN SYSTEM — Space Cadet / Psychedelic
    ============================================ */
 :root {
-  --bg-primary: #05050f;
-  --bg-secondary: rgba(10, 10, 32, 0.8);
-  --bg-card: rgba(14, 14, 52, 0.75);
-  --bg-card-hover: rgba(26, 26, 78, 0.8);
-  --neon-cyan: #00ffff;
-  --neon-magenta: #ff00ff;
-  --neon-purple: #cc77ff;
-  --neon-blue: #5577ff;
-  --neon-green: #00ff99;
-  --neon-orange: #ff9922;
-  --neon-red: #ff4477;
-  --neon-yellow: #ffee33;
-  --neon-pink: #ff77dd;
-  --neon-lime: #aaff00;
-  --text-primary: #eeeeff;
-  --text-muted: #9999cc;
+  /* Shades of Purple Super Dark foundations */
+  --bg-primary: #131327;
+  --bg-secondary: rgba(21, 21, 43, 0.85);
+  --bg-card: rgba(25, 24, 48, 0.8);
+  --bg-card-hover: rgba(31, 31, 65, 0.85);
+  /* Shamanic Mardi Gras palette */
+  --neon-cyan: #9EFFFF;
+  --neon-magenta: #FB94FF;
+  --neon-purple: #B362FF;
+  --neon-blue: #6943FF;
+  --neon-green: #A5FF90;
+  --neon-orange: #FF9D00;
+  --neon-red: #FF628C;
+  --neon-yellow: #FAD000;
+  --neon-pink: #FF2C70;
+  --neon-lime: #3AD900;
+  --neon-mint: #80FFBB;
+  --neon-gold: #FAD000;
+  --neon-deep-purple: #4D21FC;
+  /* Text from SoP */
+  --text-primary: #E1EFFF;
+  --text-muted: #A599E9;
   --text-bright: #ffffff;
-  --border-glow: rgba(0, 255, 255, 0.35);
+  --border-glow: rgba(105, 67, 255, 0.35);
   --font-display: 'Orbitron', sans-serif;
   --font-body: 'Rajdhani', sans-serif;
 }
@@ -57,14 +63,14 @@ body {
 }
 
 html {
-  background: #05050f;
+  background: #131327;
 }
 
 /* ---- Scrollbar ---- */
 ::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-track { background: #15152b; }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--neon-cyan), var(--neon-purple));
+  background: linear-gradient(180deg, var(--neon-gold), var(--neon-purple));
   border-radius: 4px;
 }
 
@@ -116,19 +122,19 @@ html {
 .dsp-logo .ring-1 {
   width: 80px; height: 80px;
   margin-top: -40px; margin-left: -40px;
-  border-color: rgba(0, 245, 255, 0.6);
+  border-color: rgba(105, 67, 255, 0.6);
   transform: rotateX(70deg) rotateZ(0deg);
   animation: ring-spin-1 12s linear infinite;
-  box-shadow: 0 0 8px rgba(0, 245, 255, 0.3);
+  box-shadow: 0 0 8px rgba(105, 67, 255, 0.3);
 }
 
 .dsp-logo .ring-2 {
   width: 100px; height: 100px;
   margin-top: -50px; margin-left: -50px;
-  border-color: rgba(255, 0, 255, 0.5);
+  border-color: rgba(250, 208, 0, 0.5);
   transform: rotateX(70deg) rotateZ(60deg);
   animation: ring-spin-2 15s linear infinite;
-  box-shadow: 0 0 8px rgba(255, 0, 255, 0.3);
+  box-shadow: 0 0 8px rgba(250, 208, 0, 0.3);
 }
 
 .dsp-logo .ring-3 {
@@ -149,14 +155,14 @@ html {
   width: 80%;
   height: auto;
   margin-bottom: 10px;
-  filter: drop-shadow(0 0 20px rgba(0, 245, 255, 0.3)) drop-shadow(0 0 40px rgba(255, 0, 255, 0.15));
+  filter: drop-shadow(0 0 20px rgba(250, 208, 0, 0.25)) drop-shadow(0 0 40px rgba(179, 98, 255, 0.2));
   position: relative;
   animation: logo-glow 4s ease-in-out infinite alternate;
 }
 
 @keyframes logo-glow {
-  0% { filter: drop-shadow(0 0 15px rgba(0, 245, 255, 0.2)) drop-shadow(0 0 30px rgba(255, 0, 255, 0.1)); }
-  100% { filter: drop-shadow(0 0 25px rgba(0, 245, 255, 0.4)) drop-shadow(0 0 50px rgba(255, 0, 255, 0.2)); }
+  0% { filter: drop-shadow(0 0 15px rgba(250, 208, 0, 0.15)) drop-shadow(0 0 30px rgba(179, 98, 255, 0.12)); }
+  100% { filter: drop-shadow(0 0 25px rgba(250, 208, 0, 0.35)) drop-shadow(0 0 50px rgba(179, 98, 255, 0.25)); }
 }
 
 .header h1 {
@@ -165,9 +171,9 @@ html {
   font-weight: 900;
   letter-spacing: 3px;
   background: linear-gradient(135deg,
-    var(--neon-cyan), var(--neon-purple), var(--neon-magenta),
-    var(--neon-cyan));
-  background-size: 300% 300%;
+    var(--neon-gold), var(--neon-purple), var(--neon-green),
+    var(--neon-gold), var(--neon-magenta));
+  background-size: 400% 400%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -208,13 +214,13 @@ html {
   background: var(--bg-secondary);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 245, 255, 0.15);
+  border: 1px solid rgba(105, 67, 255, 0.15);
   border-radius: 16px;
   padding: 30px;
   margin-bottom: 30px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 30px rgba(0, 245, 255, 0.05), inset 0 0 30px rgba(0, 245, 255, 0.02);
+  box-shadow: 0 0 30px rgba(105, 67, 255, 0.05), inset 0 0 30px rgba(105, 67, 255, 0.02);
 }
 
 .input-panel::before {
@@ -222,7 +228,7 @@ html {
   position: absolute;
   top: -1px; left: -1px; right: -1px; bottom: -1px;
   border-radius: 16px;
-  background: linear-gradient(135deg, rgba(0, 245, 255, 0.2), transparent 40%, transparent 60%, rgba(255, 0, 255, 0.2));
+  background: linear-gradient(135deg, rgba(179, 98, 255, 0.15), transparent 40%, transparent 60%, rgba(250, 208, 0, 0.1));
   z-index: -1;
   pointer-events: none;
 }
@@ -230,11 +236,11 @@ html {
 .input-panel h2 {
   font-family: var(--font-display);
   font-size: 1.2rem;
-  color: var(--neon-cyan);
+  color: var(--neon-gold);
   margin-bottom: 20px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  text-shadow: 0 0 20px rgba(250, 208, 0, 0.3);
 }
 
 .input-grid {
@@ -271,7 +277,7 @@ html {
   width: 100%;
   padding: 12px 16px;
   background: var(--bg-card);
-  border: 1px solid rgba(0, 245, 255, 0.2);
+  border: 1px solid rgba(105, 67, 255, 0.2);
   border-radius: 8px;
   color: var(--text-primary);
   font-family: var(--font-body);
@@ -283,7 +289,7 @@ html {
 
 .search-select-wrapper input:focus {
   border-color: var(--neon-cyan);
-  box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
+  box-shadow: 0 0 15px rgba(105, 67, 255, 0.2);
 }
 
 .search-select-wrapper input::placeholder {
@@ -299,7 +305,7 @@ html {
   background: rgba(14, 14, 52, 0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(0, 245, 255, 0.3);
+  border: 1px solid rgba(105, 67, 255, 0.3);
   border-radius: 0 0 8px 8px;
   z-index: 100;
   display: none;
@@ -329,7 +335,7 @@ html {
 }
 
 .dropdown-item:hover {
-  background: rgba(0, 245, 255, 0.1);
+  background: rgba(105, 67, 255, 0.1);
   color: var(--text-bright);
 }
 
@@ -344,7 +350,7 @@ input[type="number"] {
   width: 100%;
   padding: 12px 16px;
   background: var(--bg-card);
-  border: 1px solid rgba(0, 245, 255, 0.2);
+  border: 1px solid rgba(105, 67, 255, 0.2);
   border-radius: 8px;
   color: var(--text-primary);
   font-family: var(--font-body);
@@ -362,7 +368,7 @@ input[type="number"]::-webkit-outer-spin-button {
 
 input[type="number"]:focus {
   border-color: var(--neon-cyan);
-  box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
+  box-shadow: 0 0 15px rgba(105, 67, 255, 0.2);
 }
 
 /* Select */
@@ -370,7 +376,7 @@ select {
   width: 100%;
   padding: 12px 16px;
   background: var(--bg-card);
-  border: 1px solid rgba(0, 245, 255, 0.2);
+  border: 1px solid rgba(105, 67, 255, 0.2);
   border-radius: 8px;
   color: var(--text-primary);
   font-family: var(--font-body);
@@ -388,7 +394,7 @@ select {
 
 select:focus {
   border-color: var(--neon-cyan);
-  box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
+  box-shadow: 0 0 15px rgba(105, 67, 255, 0.2);
 }
 
 /* Tier selectors */
@@ -401,7 +407,7 @@ select:focus {
 .tier-btn {
   padding: 8px 14px;
   background: var(--bg-card);
-  border: 1px solid rgba(0, 245, 255, 0.2);
+  border: 1px solid rgba(105, 67, 255, 0.2);
   border-radius: 6px;
   color: var(--text-muted);
   font-family: var(--font-body);
@@ -412,15 +418,15 @@ select:focus {
 }
 
 .tier-btn:hover {
-  border-color: var(--neon-cyan);
+  border-color: var(--neon-purple);
   color: var(--text-primary);
 }
 
 .tier-btn.active {
-  background: rgba(0, 245, 255, 0.1);
-  border-color: var(--neon-cyan);
-  color: var(--neon-cyan);
-  box-shadow: 0 0 10px rgba(0, 245, 255, 0.2);
+  background: rgba(105, 67, 255, 0.15);
+  border-color: var(--neon-purple);
+  color: var(--neon-gold);
+  box-shadow: 0 0 10px rgba(179, 98, 255, 0.2);
 }
 
 /* Calculate button */
@@ -438,10 +444,10 @@ select:focus {
   letter-spacing: 3px;
   text-transform: uppercase;
   padding: 14px 50px;
-  border: 2px solid var(--neon-cyan);
+  border: 2px solid var(--neon-gold);
   border-radius: 50px;
   background: transparent;
-  color: var(--neon-cyan);
+  color: var(--neon-gold);
   cursor: pointer;
   position: relative;
   overflow: hidden;
@@ -453,7 +459,7 @@ select:focus {
   position: absolute;
   top: 50%; left: 50%;
   width: 0; height: 0;
-  background: radial-gradient(circle, rgba(0, 245, 255, 0.3), transparent);
+  background: radial-gradient(circle, rgba(250, 208, 0, 0.2), rgba(179, 98, 255, 0.1), transparent);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   transition: all 0.5s;
@@ -465,8 +471,8 @@ select:focus {
 
 .calc-btn:hover {
   color: var(--text-bright);
-  box-shadow: 0 0 20px rgba(0, 245, 255, 0.4), 0 0 40px rgba(0, 245, 255, 0.2);
-  text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+  box-shadow: 0 0 20px rgba(250, 208, 0, 0.3), 0 0 40px rgba(179, 98, 255, 0.15);
+  text-shadow: 0 0 10px rgba(250, 208, 0, 0.4);
 }
 
 .calc-btn:active {
@@ -478,7 +484,7 @@ select:focus {
   display: flex;
   gap: 0;
   margin-bottom: 24px;
-  border-bottom: 1px solid rgba(0, 245, 255, 0.1);
+  border-bottom: 1px solid rgba(105, 67, 255, 0.1);
 }
 
 .tab-btn {
@@ -499,7 +505,7 @@ select:focus {
 .tab-btn:hover { color: var(--text-primary); }
 
 .tab-btn.active {
-  color: var(--neon-cyan);
+  color: var(--neon-gold);
 }
 
 .tab-btn.active::after {
@@ -508,8 +514,8 @@ select:focus {
   bottom: -1px;
   left: 0; right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta));
-  box-shadow: 0 0 10px var(--neon-cyan);
+  background: linear-gradient(90deg, var(--neon-gold), var(--neon-purple), var(--neon-green));
+  box-shadow: 0 0 10px rgba(250, 208, 0, 0.3);
 }
 
 .tab-content { display: none; }
@@ -526,7 +532,7 @@ select:focus {
   background: var(--bg-card);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 245, 255, 0.12);
+  border: 1px solid rgba(105, 67, 255, 0.12);
   border-radius: 12px;
   padding: 20px;
   position: relative;
@@ -536,13 +542,13 @@ select:focus {
 }
 
 .result-card:hover {
-  border-color: rgba(0, 255, 255, 0.3);
+  border-color: rgba(105, 67, 255, 0.3);
   transform: translateY(-3px);
   box-shadow:
     0 8px 30px rgba(0, 0, 0, 0.4),
     0 0 15px rgba(0, 255, 200, 0.12),
     0 0 30px rgba(140, 0, 255, 0.08),
-    inset 0 0 20px rgba(0, 255, 255, 0.03);
+    inset 0 0 20px rgba(105, 67, 255, 0.03);
 }
 
 @keyframes card-entrance {
@@ -619,42 +625,42 @@ select:focus {
   color: var(--text-primary);
 }
 
-/* Category colors */
-.cat-raw .card-glow { background: linear-gradient(90deg, var(--neon-orange), var(--neon-yellow)); }
-.cat-raw .item-name { color: var(--neon-orange); }
-.cat-raw .badge { background: rgba(255, 136, 0, 0.15); color: var(--neon-orange); border: 1px solid rgba(255, 136, 0, 0.3); }
+/* Category colors — Shamanic Mardi Gras palette */
+.cat-raw .card-glow { background: linear-gradient(90deg, var(--neon-gold), var(--neon-orange)); }
+.cat-raw .item-name { color: var(--neon-gold); }
+.cat-raw .badge { background: rgba(250, 208, 0, 0.12); color: var(--neon-gold); border: 1px solid rgba(250, 208, 0, 0.3); }
 
-.cat-smelting .card-glow { background: linear-gradient(90deg, var(--neon-red), var(--neon-orange)); }
-.cat-smelting .item-name { color: var(--neon-red); }
-.cat-smelting .badge { background: rgba(255, 51, 102, 0.15); color: var(--neon-red); border: 1px solid rgba(255, 51, 102, 0.3); }
+.cat-smelting .card-glow { background: linear-gradient(90deg, var(--neon-orange), var(--neon-red)); }
+.cat-smelting .item-name { color: var(--neon-orange); }
+.cat-smelting .badge { background: rgba(255, 157, 0, 0.12); color: var(--neon-orange); border: 1px solid rgba(255, 157, 0, 0.3); }
 
-.cat-assembling .card-glow { background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue)); }
+.cat-assembling .card-glow { background: linear-gradient(90deg, var(--neon-cyan), var(--neon-mint)); }
 .cat-assembling .item-name { color: var(--neon-cyan); }
-.cat-assembling .badge { background: rgba(0, 245, 255, 0.1); color: var(--neon-cyan); border: 1px solid rgba(0, 245, 255, 0.3); }
+.cat-assembling .badge { background: rgba(158, 255, 255, 0.08); color: var(--neon-cyan); border: 1px solid rgba(158, 255, 255, 0.25); }
 
-.cat-chemical .card-glow { background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan)); }
+.cat-chemical .card-glow { background: linear-gradient(90deg, var(--neon-green), var(--neon-mint)); }
 .cat-chemical .item-name { color: var(--neon-green); }
-.cat-chemical .badge { background: rgba(0, 255, 136, 0.1); color: var(--neon-green); border: 1px solid rgba(0, 255, 136, 0.3); }
+.cat-chemical .badge { background: rgba(165, 255, 144, 0.1); color: var(--neon-green); border: 1px solid rgba(165, 255, 144, 0.25); }
 
-.cat-refining .card-glow { background: linear-gradient(90deg, var(--neon-yellow), var(--neon-green)); }
-.cat-refining .item-name { color: var(--neon-yellow); }
-.cat-refining .badge { background: rgba(255, 238, 0, 0.1); color: var(--neon-yellow); border: 1px solid rgba(255, 238, 0, 0.3); }
+.cat-refining .card-glow { background: linear-gradient(90deg, var(--neon-gold), var(--neon-green)); }
+.cat-refining .item-name { color: #FFEE80; }
+.cat-refining .badge { background: rgba(255, 238, 128, 0.1); color: #FFEE80; border: 1px solid rgba(255, 238, 128, 0.25); }
 
 .cat-research .card-glow { background: linear-gradient(90deg, var(--neon-magenta), var(--neon-purple)); }
 .cat-research .item-name { color: var(--neon-magenta); }
-.cat-research .badge { background: rgba(255, 0, 255, 0.1); color: var(--neon-magenta); border: 1px solid rgba(255, 0, 255, 0.3); }
+.cat-research .badge { background: rgba(251, 148, 255, 0.1); color: var(--neon-magenta); border: 1px solid rgba(251, 148, 255, 0.25); }
 
-.cat-collider .card-glow { background: linear-gradient(90deg, var(--neon-purple), var(--neon-blue)); }
+.cat-collider .card-glow { background: linear-gradient(90deg, var(--neon-purple), var(--neon-deep-purple)); }
 .cat-collider .item-name { color: var(--neon-purple); }
-.cat-collider .badge { background: rgba(179, 102, 255, 0.1); color: var(--neon-purple); border: 1px solid rgba(179, 102, 255, 0.3); }
+.cat-collider .badge { background: rgba(179, 98, 255, 0.1); color: var(--neon-purple); border: 1px solid rgba(179, 98, 255, 0.25); }
 
-.cat-fractionation .card-glow { background: linear-gradient(90deg, var(--neon-pink), var(--neon-magenta)); }
+.cat-fractionation .card-glow { background: linear-gradient(90deg, var(--neon-pink), var(--neon-red)); }
 .cat-fractionation .item-name { color: var(--neon-pink); }
-.cat-fractionation .badge { background: rgba(255, 102, 204, 0.1); color: var(--neon-pink); border: 1px solid rgba(255, 102, 204, 0.3); }
+.cat-fractionation .badge { background: rgba(255, 44, 112, 0.1); color: var(--neon-pink); border: 1px solid rgba(255, 44, 112, 0.25); }
 
-.cat-building .card-glow { background: linear-gradient(90deg, var(--neon-yellow), var(--neon-cyan)); }
-.cat-building .item-name { color: var(--neon-yellow); }
-.cat-building .badge { background: rgba(255, 238, 0, 0.1); color: var(--neon-yellow); border: 1px solid rgba(255, 238, 0, 0.3); }
+.cat-building .card-glow { background: linear-gradient(90deg, var(--neon-gold), var(--neon-purple)); }
+.cat-building .item-name { color: var(--neon-gold); }
+.cat-building .badge { background: rgba(250, 208, 0, 0.1); color: var(--neon-gold); border: 1px solid rgba(250, 208, 0, 0.25); }
 
 /* ---- Build Sequence Timeline ---- */
 .build-timeline {
@@ -669,12 +675,12 @@ select:focus {
   left: 23px;
   width: 2px;
   background: linear-gradient(180deg,
-    var(--neon-cyan), var(--neon-purple), var(--neon-magenta),
-    var(--neon-purple), var(--neon-cyan));
+    var(--neon-gold), var(--neon-purple), var(--neon-green),
+    var(--neon-purple), var(--neon-gold));
   background-size: 100% 300%;
   animation: gradient-shift 12s ease infinite;
   border-radius: 2px;
-  box-shadow: 0 0 12px rgba(0, 255, 255, 0.15), 0 0 24px rgba(180, 0, 255, 0.08);
+  box-shadow: 0 0 12px rgba(179, 98, 255, 0.2), 0 0 24px rgba(250, 208, 0, 0.08);
 }
 
 .build-step {
@@ -696,17 +702,17 @@ select:focus {
   font-family: var(--font-display);
   font-size: 0.75rem;
   font-weight: 700;
-  border: 2px solid var(--neon-cyan);
-  background: rgba(5, 5, 15, 0.9);
-  color: var(--neon-cyan);
-  box-shadow: 0 0 10px rgba(0, 245, 255, 0.2);
+  border: 2px solid var(--neon-purple);
+  background: rgba(19, 19, 39, 0.9);
+  color: var(--neon-purple);
+  box-shadow: 0 0 10px rgba(179, 98, 255, 0.2);
 }
 
 .build-step .step-content {
   background: var(--bg-card);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 245, 255, 0.1);
+  border: 1px solid rgba(105, 67, 255, 0.1);
   border-radius: 10px;
   padding: 16px 20px;
   transition: all 0.4s;
@@ -716,7 +722,7 @@ select:focus {
 }
 
 .build-step .step-content:hover {
-  border-color: rgba(0, 245, 255, 0.25);
+  border-color: rgba(105, 67, 255, 0.25);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
@@ -726,7 +732,7 @@ select:focus {
   width: 24px;
   height: 24px;
   margin-top: 2px;
-  border: 2px solid var(--neon-cyan);
+  border: 2px solid var(--neon-purple);
   border-radius: 6px;
   background: transparent;
   cursor: pointer;
@@ -737,14 +743,14 @@ select:focus {
 }
 
 .build-step .step-check:hover {
-  box-shadow: 0 0 12px rgba(0, 255, 255, 0.3);
-  border-color: var(--neon-magenta);
+  box-shadow: 0 0 12px rgba(179, 98, 255, 0.4);
+  border-color: var(--neon-gold);
 }
 
 .build-step .step-check:checked {
-  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+  background: linear-gradient(135deg, var(--neon-gold), var(--neon-green));
   border-color: transparent;
-  box-shadow: 0 0 14px rgba(0, 255, 255, 0.4);
+  box-shadow: 0 0 14px rgba(250, 208, 0, 0.4);
 }
 
 .build-step .step-check:checked::after {
@@ -760,20 +766,20 @@ select:focus {
 
 .build-step.completed .step-content {
   opacity: 0.4;
-  border-color: rgba(0, 255, 255, 0.05);
+  border-color: rgba(105, 67, 255, 0.05);
 }
 
 .build-step.completed .step-number {
-  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta));
+  background: linear-gradient(135deg, var(--neon-gold), var(--neon-green));
   border-color: transparent;
-  color: var(--bg-primary);
-  box-shadow: 0 0 14px rgba(0, 255, 255, 0.3);
+  color: #15152b;
+  box-shadow: 0 0 14px rgba(250, 208, 0, 0.3);
 }
 
 .build-step.completed .step-title,
 .build-step.completed .step-detail {
   text-decoration: line-through;
-  text-decoration-color: rgba(0, 255, 255, 0.3);
+  text-decoration-color: rgba(105, 67, 255, 0.3);
 }
 
 .build-step .step-text {
@@ -786,7 +792,7 @@ select:focus {
   margin-bottom: 20px;
   padding: 16px 20px;
   background: var(--bg-secondary);
-  border: 1px solid rgba(0, 255, 255, 0.1);
+  border: 1px solid rgba(105, 67, 255, 0.1);
   border-radius: 10px;
   display: flex;
   align-items: center;
@@ -798,7 +804,7 @@ select:focus {
   font-size: 0.78rem;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: var(--neon-cyan);
+  color: var(--neon-gold);
   white-space: nowrap;
 }
 
@@ -813,9 +819,9 @@ select:focus {
 .build-progress .progress-fill {
   height: 100%;
   border-radius: 5px;
-  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta), var(--neon-purple));
-  background-size: 200% 100%;
-  animation: shimmer 3s ease infinite;
+  background: linear-gradient(90deg, var(--neon-purple), var(--neon-gold), var(--neon-green), var(--neon-purple));
+  background-size: 300% 100%;
+  animation: shimmer 4s ease infinite;
   transition: width 0.5s ease;
 }
 
@@ -842,7 +848,7 @@ select:focus {
 }
 
 .build-step .step-detail .highlight {
-  color: var(--neon-cyan);
+  color: var(--neon-gold);
   font-weight: 600;
 }
 
@@ -860,7 +866,7 @@ select:focus {
 .raw-summary h3 {
   font-family: var(--font-display);
   font-size: 0.85rem;
-  color: var(--neon-orange);
+  color: var(--neon-gold);
   letter-spacing: 2px;
   text-transform: uppercase;
   margin-bottom: 16px;
@@ -910,7 +916,7 @@ select:focus {
   font-family: var(--font-display);
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--neon-orange);
+  color: var(--neon-gold);
   flex-shrink: 0;
 }
 
@@ -938,7 +944,7 @@ select:focus {
 .alt-recipes-panel {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid rgba(0, 245, 255, 0.08);
+  border-top: 1px solid rgba(105, 67, 255, 0.08);
   grid-column: 1 / -1;
 }
 
@@ -988,7 +994,7 @@ select:focus {
   background: var(--bg-secondary);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 245, 255, 0.15);
+  border: 1px solid rgba(105, 67, 255, 0.15);
   border-radius: 12px;
   padding: 24px;
   margin-bottom: 8px;
@@ -997,7 +1003,7 @@ select:focus {
 .math-overview h3 {
   font-family: var(--font-display);
   font-size: 0.85rem;
-  color: var(--neon-cyan);
+  color: var(--neon-gold);
   letter-spacing: 2px;
   text-transform: uppercase;
   margin-bottom: 16px;
@@ -1011,13 +1017,13 @@ select:focus {
 
 .math-overview .formula-block {
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(0, 245, 255, 0.1);
+  border: 1px solid rgba(105, 67, 255, 0.1);
   border-radius: 8px;
   padding: 14px 18px;
   margin: 12px 0;
   font-family: 'Courier New', monospace;
   font-size: 0.9rem;
-  color: var(--neon-cyan);
+  color: var(--neon-purple);
   line-height: 1.7;
   overflow-x: auto;
 }
@@ -1037,7 +1043,7 @@ select:focus {
 
 .math-item {
   background: var(--bg-card);
-  border: 1px solid rgba(0, 245, 255, 0.1);
+  border: 1px solid rgba(105, 67, 255, 0.1);
   border-radius: 12px;
   overflow: hidden;
   animation: card-entrance 0.4s ease-out both;
@@ -1054,7 +1060,7 @@ select:focus {
 }
 
 .math-item-header:hover {
-  background: rgba(0, 245, 255, 0.04);
+  background: rgba(105, 67, 255, 0.04);
 }
 
 .math-item-header .item-label {
@@ -1089,7 +1095,7 @@ select:focus {
 .math-item-body {
   display: none;
   padding: 0 20px 20px;
-  border-top: 1px solid rgba(0, 245, 255, 0.06);
+  border-top: 1px solid rgba(105, 67, 255, 0.06);
 }
 
 .math-item.open .math-item-body {
@@ -1111,7 +1117,7 @@ select:focus {
 
 .math-step .step-formula {
   background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(0, 245, 255, 0.08);
+  border: 1px solid rgba(105, 67, 255, 0.08);
   border-radius: 6px;
   padding: 10px 14px;
   font-family: 'Courier New', monospace;
@@ -1126,7 +1132,7 @@ select:focus {
 }
 
 .math-step .step-formula .num {
-  color: var(--neon-cyan);
+  color: var(--neon-gold);
   font-weight: 700;
 }
 
@@ -1160,10 +1166,10 @@ select:focus {
   inset: -2px;
   border-radius: 18px;
   background:
-    radial-gradient(ellipse at 20% 50%, rgba(0, 255, 200, 0.25) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 50%, rgba(180, 0, 255, 0.25) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 0%, rgba(0, 180, 255, 0.2) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 100%, rgba(255, 0, 160, 0.2) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 50%, rgba(165, 255, 144, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 50%, rgba(179, 98, 255, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 0%, rgba(250, 208, 0, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 100%, rgba(105, 67, 255, 0.2) 0%, transparent 50%);
   z-index: -2;
   opacity: 0.5;
   animation: dmt-border-breathe 8s ease-in-out infinite;
@@ -1189,7 +1195,7 @@ select:focus {
 
 /* Glowing selection highlight */
 ::selection {
-  background: rgba(0, 245, 255, 0.3);
+  background: #5706a2;
   color: var(--text-bright);
 }
 
@@ -1201,7 +1207,7 @@ select:focus {
   border-radius: 12px;
   opacity: 0;
   background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(0, 245, 255, 0.06) 0%,
+    rgba(105, 67, 255, 0.06) 0%,
     transparent 60%
   );
   transition: opacity 0.3s;
@@ -1218,11 +1224,11 @@ select:focus {
   padding: 30px 20px;
   color: var(--text-muted);
   font-size: 0.8rem;
-  border-top: 1px solid rgba(0, 245, 255, 0.05);
+  border-top: 1px solid rgba(105, 67, 255, 0.05);
 }
 
 .footer a {
-  color: var(--neon-cyan);
+  color: var(--neon-gold);
   text-decoration: none;
 }
 </style>
@@ -2446,7 +2452,7 @@ function initStarfield() {
   }
 
   function animate() {
-    ctx.fillStyle = "#05050f";
+    ctx.fillStyle = "#0e0e22";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Psychedelic nebula system — each cloud independently cycles through different color ranges
@@ -2469,30 +2475,30 @@ function initStarfield() {
       return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
     }
 
-    // DMT-space nebula system — deep jewel tones, slow organic breathing
-    // Hue ranges favor deep teals, indigos, violets, magentas, and sacred greens
-    // Narrower hue ranges = more cohesive; slower speeds = more organic
-    const breathe = Math.sin(t * 0.3) * 0.02; // global breathing intensity
+    // Shamanic Mardi Gras in space — royal purples, ritual golds, mystic greens
+    // Deep SoP purple-blacks with Mardi Gras trinity (purple, gold, green)
+    const breathe = Math.sin(t * 0.25) * 0.015;
 
     const nebulae = [
-      // Deep space foundation washes — indigo / violet / deep teal
-      { xBase: 0.22, yBase: 0.18, xAmp: 0.08, yAmp: 0.05, xFreq: 0.4,  yFreq: 0.3,  r: 450, hueBase: 260, hueRange: 40,  hueSpeed: 0.12, alpha: 0.075 + breathe, sat: 0.7, lit: 0.35 },
-      { xBase: 0.78, yBase: 0.25, xAmp: 0.06, yAmp: 0.04, xFreq: 0.35, yFreq: 0.5,  r: 420, hueBase: 190, hueRange: 35,  hueSpeed: 0.15, alpha: 0.065 + breathe, sat: 0.65, lit: 0.3 },
-      { xBase: 0.50, yBase: 0.72, xAmp: 0.07, yAmp: 0.06, xFreq: 0.3,  yFreq: 0.4,  r: 400, hueBase: 300, hueRange: 45,  hueSpeed: 0.1,  alpha: 0.06 + breathe, sat: 0.75, lit: 0.35 },
+      // Royal purple foundation — the dominant SoP presence
+      { xBase: 0.25, yBase: 0.20, xAmp: 0.07, yAmp: 0.05, xFreq: 0.35, yFreq: 0.25, r: 450, hueBase: 268, hueRange: 25,  hueSpeed: 0.1,  alpha: 0.085 + breathe, sat: 0.7, lit: 0.3 },
+      { xBase: 0.75, yBase: 0.70, xAmp: 0.06, yAmp: 0.04, xFreq: 0.3,  yFreq: 0.4,  r: 420, hueBase: 275, hueRange: 30,  hueSpeed: 0.12, alpha: 0.07 + breathe, sat: 0.65, lit: 0.28 },
+      { xBase: 0.50, yBase: 0.45, xAmp: 0.05, yAmp: 0.05, xFreq: 0.4,  yFreq: 0.3,  r: 380, hueBase: 258, hueRange: 20,  hueSpeed: 0.08, alpha: 0.06, sat: 0.6, lit: 0.25 },
 
-      // Mid-layer — sacred emerald / deep cyan / violet-rose
-      { xBase: 0.15, yBase: 0.50, xAmp: 0.05, yAmp: 0.07, xFreq: 0.5,  yFreq: 0.25, r: 300, hueBase: 160, hueRange: 30,  hueSpeed: 0.2,  alpha: 0.055, sat: 0.8, lit: 0.35 },
-      { xBase: 0.85, yBase: 0.58, xAmp: 0.04, yAmp: 0.05, xFreq: 0.45, yFreq: 0.55, r: 280, hueBase: 280, hueRange: 50,  hueSpeed: 0.18, alpha: 0.05, sat: 0.7, lit: 0.4 },
-      { xBase: 0.42, yBase: 0.40, xAmp: 0.06, yAmp: 0.03, xFreq: 0.55, yFreq: 0.35, r: 320, hueBase: 220, hueRange: 40,  hueSpeed: 0.14, alpha: 0.05, sat: 0.65, lit: 0.35 },
+      // Ritual gold / amber — Mardi Gras warmth bleeding through
+      { xBase: 0.60, yBase: 0.25, xAmp: 0.05, yAmp: 0.06, xFreq: 0.45, yFreq: 0.2,  r: 280, hueBase: 45,  hueRange: 15,  hueSpeed: 0.18, alpha: 0.05 + breathe, sat: 0.85, lit: 0.45 },
+      { xBase: 0.20, yBase: 0.65, xAmp: 0.04, yAmp: 0.04, xFreq: 0.35, yFreq: 0.5,  r: 220, hueBase: 40,  hueRange: 12,  hueSpeed: 0.22, alpha: 0.04, sat: 0.8, lit: 0.5 },
 
-      // Detail layer — tighter, brighter accents that drift and pulse
-      { xBase: 0.35, yBase: 0.15, xAmp: 0.04, yAmp: 0.04, xFreq: 0.7,  yFreq: 0.45, r: 200, hueBase: 175, hueRange: 25,  hueSpeed: 0.25, alpha: 0.045, sat: 0.85, lit: 0.45 },
-      { xBase: 0.65, yBase: 0.82, xAmp: 0.05, yAmp: 0.03, xFreq: 0.35, yFreq: 0.65, r: 220, hueBase: 310, hueRange: 30,  hueSpeed: 0.22, alpha: 0.04, sat: 0.8, lit: 0.4 },
-      { xBase: 0.50, yBase: 0.50, xAmp: 0.03, yAmp: 0.03, xFreq: 0.6,  yFreq: 0.4,  r: 250, hueBase: 240, hueRange: 60,  hueSpeed: 0.08, alpha: 0.035, sat: 0.6, lit: 0.3 },
+      // Mystic green — shamanic emerald glow
+      { xBase: 0.80, yBase: 0.40, xAmp: 0.05, yAmp: 0.07, xFreq: 0.5,  yFreq: 0.25, r: 300, hueBase: 130, hueRange: 20,  hueSpeed: 0.15, alpha: 0.05 + breathe, sat: 0.75, lit: 0.4 },
+      { xBase: 0.35, yBase: 0.80, xAmp: 0.04, yAmp: 0.03, xFreq: 0.3,  yFreq: 0.6,  r: 240, hueBase: 140, hueRange: 18,  hueSpeed: 0.2,  alpha: 0.04, sat: 0.7, lit: 0.35 },
 
-      // Rare warm accents — deep amber / rose, very subtle
-      { xBase: 0.70, yBase: 0.35, xAmp: 0.03, yAmp: 0.04, xFreq: 0.5,  yFreq: 0.3,  r: 180, hueBase: 340, hueRange: 20,  hueSpeed: 0.3,  alpha: 0.03, sat: 0.7, lit: 0.4 },
-      { xBase: 0.25, yBase: 0.75, xAmp: 0.04, yAmp: 0.03, xFreq: 0.4,  yFreq: 0.5,  r: 160, hueBase: 25,  hueRange: 15,  hueSpeed: 0.25, alpha: 0.025, sat: 0.6, lit: 0.4 },
+      // Deep violet / magenta accents — where purple meets the mystic
+      { xBase: 0.15, yBase: 0.35, xAmp: 0.04, yAmp: 0.05, xFreq: 0.55, yFreq: 0.35, r: 260, hueBase: 290, hueRange: 25,  hueSpeed: 0.16, alpha: 0.045, sat: 0.75, lit: 0.35 },
+      { xBase: 0.65, yBase: 0.55, xAmp: 0.03, yAmp: 0.04, xFreq: 0.4,  yFreq: 0.45, r: 200, hueBase: 310, hueRange: 20,  hueSpeed: 0.2,  alpha: 0.035, sat: 0.7, lit: 0.38 },
+
+      // Rare cosmic blue whisper — deep space between the colors
+      { xBase: 0.45, yBase: 0.15, xAmp: 0.03, yAmp: 0.03, xFreq: 0.5,  yFreq: 0.3,  r: 200, hueBase: 240, hueRange: 15,  hueSpeed: 0.12, alpha: 0.03, sat: 0.5, lit: 0.3 },
     ];
 
     for (const neb of nebulae) {
