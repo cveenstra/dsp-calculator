@@ -1293,142 +1293,14 @@ select:focus {
   100% { background-position: 200% center; }
 }
 
-/* ---- Dependency Tree (top-down) ---- */
-.dep-tree-wrapper {
-  overflow-x: auto;
-  overflow-y: auto;
-  padding: 20px 0;
+/* ---- Dependency Tree (canvas) ---- */
+#dep-tree-canvas-wrap {
+  overflow: auto;
+  padding: 10px 0;
 }
-
-.dep-tree {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  min-width: min-content;
-}
-
-.tree-level {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  position: relative;
-  width: 100%;
-}
-
-/* SVG connector layer between levels */
-.tree-connectors {
-  width: 100%;
-  height: 40px;
+#dep-tree-canvas {
   display: block;
-  flex-shrink: 0;
 }
-
-/* Node card */
-.tree-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  background: rgba(14, 14, 52, 0.8);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(105, 67, 255, 0.15);
-  cursor: default;
-  transition: all 0.3s;
-  min-width: 100px;
-  text-align: center;
-  position: relative;
-  flex-shrink: 0;
-}
-
-.tree-card:hover {
-  border-color: rgba(105, 67, 255, 0.35);
-  box-shadow: 0 0 18px rgba(105, 67, 255, 0.12), 0 0 6px rgba(250, 208, 0, 0.06);
-  transform: translateY(-2px);
-}
-
-.tree-card .tc-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  box-shadow: 0 0 8px currentColor;
-  margin-bottom: 2px;
-}
-
-.tree-card .tc-name {
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  line-height: 1.2;
-}
-
-.tree-card .tc-rate {
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--neon-gold);
-}
-
-.tree-card .tc-buildings {
-  font-family: var(--font-display);
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--neon-purple);
-}
-
-.tree-card .tc-recipe {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  line-height: 1.3;
-  margin-top: 2px;
-}
-
-.tree-card .tc-recipe .tq {
-  color: var(--neon-gold);
-  font-weight: 700;
-}
-
-/* Root node */
-.tree-card.tc-root {
-  border-color: rgba(250, 208, 0, 0.3);
-  background: rgba(250, 208, 0, 0.06);
-  padding: 10px 18px;
-}
-
-.tree-card.tc-root .tc-name {
-  color: var(--neon-gold);
-  font-size: 1.1rem;
-}
-
-.tree-card.tc-root .tc-rate {
-  font-size: 0.82rem;
-}
-
-/* Raw resource node */
-.tree-card.tc-raw {
-  border-color: rgba(250, 208, 0, 0.12);
-  border-style: dashed;
-}
-
-/* Depth-based top glow bar */
-.tree-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  border-radius: 10px 10px 0 0;
-}
-
-.tree-card[data-depth="0"]::before { background: var(--neon-gold); }
-.tree-card[data-depth="1"]::before { background: var(--neon-purple); }
-.tree-card[data-depth="2"]::before { background: var(--neon-green); }
-.tree-card[data-depth="3"]::before { background: var(--neon-cyan); }
-.tree-card[data-depth="4"]::before { background: var(--neon-magenta); }
-.tree-card[data-depth="5"]::before { background: var(--neon-pink); }
 
 /* ---- Math Breakdown ---- */
 .math-breakdown {
@@ -2052,7 +1924,9 @@ select:focus {
     </div>
 
     <div id="tab-tree" class="tab-content">
-      <div id="dep-tree"></div>
+      <div id="dep-tree-canvas-wrap">
+        <canvas id="dep-tree-canvas"></canvas>
+      </div>
     </div>
 
     <div id="tab-math" class="tab-content">
@@ -2859,14 +2733,21 @@ function renderRawSummary(buildOrder) {
 }
 
 function renderDepTree(requirements) {
-  const container = document.getElementById("dep-tree");
+  const canvas = document.getElementById("dep-tree-canvas");
+  const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
   const targetItem = state.selectedItem;
   const targetRate = parseFloat(document.getElementById("rate-input").value);
   const depthColors = ['#FAD000', '#B362FF', '#A5FF90', '#9EFFFF', '#FB94FF', '#FF2C70'];
 
-  // Build tree data with unique IDs for every node instance
-  let nodeCounter = 0;
-  function buildTreeData(itemId, rate, depth, visited) {
+  // Layout constants
+  const NODE_W = 150, NODE_H = 58, H_GAP = 30, V_GAP = 70;
+  const FONT_NAME = '13px Nunito, sans-serif';
+  const FONT_RATE = '11px Orbitron, sans-serif';
+  const FONT_BUILD = '10px Orbitron, sans-serif';
+
+  // Build tree data
+  function buildTree(itemId, rate, depth, visited) {
     const item = ITEMS[itemId];
     if (!item) return null;
     const req = requirements[itemId];
@@ -2875,131 +2756,191 @@ function renderDepTree(requirements) {
     const buildingsNeeded = req ? Math.ceil(req.buildings) : 0;
     const isRaw = !recipe || recipe.inputs.length === 0;
     const isCircular = visited.has(itemId) && depth > 0;
-    const uid = 'tn' + (nodeCounter++);
-
-    const node = { uid, itemId, item, rate, depth, recipe, building, buildingsNeeded, isRaw, children: [] };
+    const node = { itemId, item, rate, depth, recipe, building, buildingsNeeded, isRaw, children: [], x: 0, y: 0, subtreeWidth: 0 };
 
     if (!isRaw && !isCircular && recipe.inputs.length > 0) {
       const newVisited = new Set(visited);
       newVisited.add(itemId);
       const outputQty = recipe.outputs.find(o => o.item === itemId)?.qty || 1;
       for (const inp of recipe.inputs) {
-        const childRate = (inp.qty / outputQty) * rate;
-        const child = buildTreeData(inp.item, childRate, depth + 1, newVisited);
+        const child = buildTree(inp.item, (inp.qty / outputQty) * rate, depth + 1, newVisited);
         if (child) node.children.push(child);
       }
     }
     return node;
   }
 
-  const tree = buildTreeData(targetItem, targetRate, 0, new Set());
-  if (!tree) { container.innerHTML = ''; return; }
+  const tree = buildTree(targetItem, targetRate, 0, new Set());
+  if (!tree) return;
 
-  // BFS into levels, track edges by uid
-  const levels = [];
-  const edges = []; // { parentUid, childUid, depth }
-  let queue = [tree];
-
-  while (queue.length > 0) {
-    const levelNodes = [];
-    const nextQueue = [];
-    for (const node of queue) {
-      levelNodes.push(node);
-      for (const child of node.children) {
-        edges.push({ parentUid: node.uid, childUid: child.uid, depth: node.depth });
-        nextQueue.push(child);
-      }
+  // Pass 1: compute subtree widths bottom-up
+  function computeWidths(node) {
+    if (node.children.length === 0) {
+      node.subtreeWidth = NODE_W;
+      return;
     }
-    levels.push(levelNodes);
-    queue = nextQueue;
+    for (const child of node.children) computeWidths(child);
+    const childrenWidth = node.children.reduce((s, c) => s + c.subtreeWidth, 0) + H_GAP * (node.children.length - 1);
+    node.subtreeWidth = Math.max(NODE_W, childrenWidth);
   }
+  computeWidths(tree);
 
-  // Render card
-  function renderCard(node) {
-    const d = Math.min(node.depth, 5);
-    const rootClass = node.depth === 0 ? ' tc-root' : '';
-    const rawClass = node.isRaw ? ' tc-raw' : '';
-    let recipeHtml = '';
-    if (node.recipe && node.recipe.inputs.length > 0) {
-      const outputQty = node.recipe.outputs.find(o => o.item === node.itemId)?.qty || 1;
-      const parts = node.recipe.inputs.map(inp => {
-        const iItem = ITEMS[inp.item];
-        return `<span class="tq">${inp.qty}</span>${iItem ? iItem.name : inp.item}`;
-      });
-      recipeHtml = `<div class="tc-recipe">${parts.join(' + ')} &rarr; ${outputQty}</div>`;
+  // Pass 2: assign x, y positions
+  function assignPositions(node, left, top) {
+    node.y = top;
+    // Center this node over its subtree span
+    node.x = left + node.subtreeWidth / 2 - NODE_W / 2;
+
+    let childLeft = left;
+    for (const child of node.children) {
+      assignPositions(child, childLeft, top + NODE_H + V_GAP);
+      childLeft += child.subtreeWidth + H_GAP;
     }
-    return `<div class="tree-card${rootClass}${rawClass}" data-depth="${d}" id="${node.uid}">
-      <div class="tc-dot" style="background:${node.item.color}; color:${node.item.color}"></div>
-      <div class="tc-name">${node.item.name}</div>
-      <div class="tc-rate">${node.rate.toFixed(1)}/min</div>
-      <div class="tc-buildings">${node.buildingsNeeded}x ${node.building ? node.building.name : 'Extractor'}</div>
-      ${recipeHtml}
-    </div>`;
   }
+  assignPositions(tree, 0, 0);
 
-  // Build HTML: levels of cards, one big SVG overlay for all lines
-  let html = '<div class="dep-tree-wrapper"><div class="dep-tree" id="dep-tree-inner">';
-  for (let lvl = 0; lvl < levels.length; lvl++) {
-    html += `<div class="tree-level">`;
-    for (const node of levels[lvl]) html += renderCard(node);
-    html += '</div>';
-    // spacer between levels for the lines to pass through
-    if (lvl < levels.length - 1) html += '<div style="height:48px;flex-shrink:0"></div>';
+  // Compute canvas size from tree bounds
+  function findBounds(node) {
+    let maxX = node.x + NODE_W, maxY = node.y + NODE_H;
+    for (const child of node.children) {
+      const b = findBounds(child);
+      maxX = Math.max(maxX, b.maxX);
+      maxY = Math.max(maxY, b.maxY);
+    }
+    return { maxX, maxY };
   }
-  html += '</div>';
-  // One overlay SVG for all connector lines
-  html += '<svg id="dep-tree-svg" style="position:absolute;top:0;left:0;pointer-events:none;overflow:visible;"></svg>';
-  html += '</div>';
+  const bounds = findBounds(tree);
+  const PAD = 30;
+  const canvasW = bounds.maxX + PAD * 2;
+  const canvasH = bounds.maxY + PAD * 2;
 
-  container.innerHTML = html;
+  canvas.width = canvasW * dpr;
+  canvas.height = canvasH * dpr;
+  canvas.style.width = canvasW + 'px';
+  canvas.style.height = canvasH + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, canvasW, canvasH);
 
-  // Draw all connector lines in a single SVG overlay
-  requestAnimationFrame(() => {
-    const wrapper = container.querySelector('.dep-tree-wrapper');
-    const inner = document.getElementById('dep-tree-inner');
-    const svg = document.getElementById('dep-tree-svg');
-    if (!wrapper || !inner || !svg) return;
+  const ox = PAD, oy = PAD; // offset
 
-    // Make wrapper position:relative so the SVG can overlay
-    wrapper.style.position = 'relative';
-    const wrapperRect = wrapper.getBoundingClientRect();
+  // Draw edges first (behind nodes)
+  function drawEdges(node) {
+    const px = ox + node.x + NODE_W / 2;
+    const py = oy + node.y + NODE_H;
+    for (const child of node.children) {
+      const cx = ox + child.x + NODE_W / 2;
+      const cy = oy + child.y;
+      const color = depthColors[Math.min(node.depth, depthColors.length - 1)];
+      const midY = (py + cy) / 2;
 
-    // Size SVG to cover the full tree
-    const innerRect = inner.getBoundingClientRect();
-    const svgW = Math.max(innerRect.width, wrapperRect.width);
-    const svgH = innerRect.height;
-    svg.setAttribute('viewBox', `0 0 ${svgW} ${svgH}`);
-    svg.setAttribute('width', svgW);
-    svg.setAttribute('height', svgH);
+      // Glow
+      ctx.strokeStyle = color;
+      ctx.globalAlpha = 0.08;
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(px, py);
+      ctx.bezierCurveTo(px, midY, cx, midY, cx, cy);
+      ctx.stroke();
 
-    let paths = '';
-    for (const edge of edges) {
-      const pEl = document.getElementById(edge.parentUid);
-      const cEl = document.getElementById(edge.childUid);
-      if (!pEl || !cEl) continue;
-
-      const pRect = pEl.getBoundingClientRect();
-      const cRect = cEl.getBoundingClientRect();
-      // Positions relative to the wrapper
-      const px = pRect.left + pRect.width / 2 - wrapperRect.left;
-      const py = pRect.bottom - wrapperRect.top;
-      const cx = cRect.left + cRect.width / 2 - wrapperRect.left;
-      const cy = cRect.top - wrapperRect.top;
-
-      const color = depthColors[Math.min(edge.depth, depthColors.length - 1)];
-      const dy = (cy - py);
-      const cp1y = py + dy * 0.4;
-      const cp2y = py + dy * 0.6;
-
-      // Glow line (wide, low opacity)
-      paths += `<path d="M${px},${py} C${px},${cp1y} ${cx},${cp2y} ${cx},${cy}" fill="none" stroke="${color}" stroke-width="5" opacity="0.07"/>`;
       // Main line
-      paths += `<path d="M${px},${py} C${px},${cp1y} ${cx},${cp2y} ${cx},${cy}" fill="none" stroke="${color}" stroke-width="1.5" opacity="0.55"/>`;
-      // Small dot at child end
-      paths += `<circle cx="${cx}" cy="${cy}" r="2.5" fill="${color}" opacity="0.4"/>`;
+      ctx.globalAlpha = 0.6;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(px, py);
+      ctx.bezierCurveTo(px, midY, cx, midY, cx, cy);
+      ctx.stroke();
+
+      // Dot at child
+      ctx.globalAlpha = 0.5;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.globalAlpha = 1;
+      drawEdges(child);
     }
-    svg.innerHTML = paths;
-  });
+  }
+  drawEdges(tree);
+
+  // Draw nodes
+  function drawNode(node) {
+    const x = ox + node.x;
+    const y = oy + node.y;
+    const d = Math.min(node.depth, depthColors.length - 1);
+    const glowColor = depthColors[d];
+
+    // Card background
+    ctx.globalAlpha = 0.75;
+    ctx.fillStyle = '#12123a';
+    ctx.beginPath();
+    ctx.roundRect(x, y, NODE_W, NODE_H, 8);
+    ctx.fill();
+
+    // Border
+    ctx.globalAlpha = 0.35;
+    ctx.strokeStyle = glowColor;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(x, y, NODE_W, NODE_H, 8);
+    ctx.stroke();
+
+    // Top glow bar
+    ctx.globalAlpha = 0.9;
+    ctx.fillStyle = glowColor;
+    ctx.beginPath();
+    ctx.roundRect(x, y, NODE_W, 2.5, [8, 8, 0, 0]);
+    ctx.fill();
+
+    ctx.globalAlpha = 1;
+
+    // Dot
+    ctx.fillStyle = node.item.color;
+    ctx.shadowColor = node.item.color;
+    ctx.shadowBlur = 6;
+    ctx.beginPath();
+    ctx.arc(x + 12, y + 14, 4, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Name
+    ctx.font = 'bold ' + FONT_NAME;
+    ctx.fillStyle = node.depth === 0 ? '#FAD000' : '#EEEEFF';
+    ctx.textAlign = 'left';
+    ctx.fillText(truncate(node.item.name, 16), x + 22, y + 18);
+
+    // Rate
+    ctx.font = FONT_RATE;
+    ctx.fillStyle = '#FAD000';
+    ctx.fillText(node.rate.toFixed(1) + '/min', x + 12, y + 34);
+
+    // Buildings
+    ctx.font = FONT_BUILD;
+    ctx.fillStyle = '#B362FF';
+    const bldgText = node.buildingsNeeded + 'x ' + (node.building ? node.building.name : 'Extractor');
+    ctx.fillText(truncate(bldgText, 22), x + 12, y + 48);
+
+    // Raw indicator
+    if (node.isRaw) {
+      ctx.globalAlpha = 0.3;
+      ctx.setLineDash([4, 3]);
+      ctx.strokeStyle = '#FAD000';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.roundRect(x + 1, y + 1, NODE_W - 2, NODE_H - 2, 7);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.globalAlpha = 1;
+    }
+
+    for (const child of node.children) drawNode(child);
+  }
+
+  function truncate(str, max) {
+    return str.length > max ? str.slice(0, max - 1) + '\u2026' : str;
+  }
+
+  drawNode(tree);
 }
 
 function renderMathBreakdown(buildOrder) {
