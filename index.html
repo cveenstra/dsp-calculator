@@ -1297,6 +1297,8 @@ select:focus {
 #dep-tree-canvas-wrap {
   overflow: auto;
   padding: 10px 0;
+  display: flex;
+  justify-content: center;
 }
 #dep-tree-canvas {
   display: block;
@@ -2620,7 +2622,41 @@ function renderBuildTimeline(buildOrder) {
   const timeline = document.getElementById("build-timeline");
   timeline.innerHTML = "";
 
-  const totalSteps = buildOrder.filter(e => ITEMS[e.itemId]).length;
+  // Expand raw resources: split each raw entry into one step per consumer recipe
+  const expandedSteps = [];
+  const rawItemIds = new Set(buildOrder.filter(e => e.category === "raw").map(e => e.itemId));
+  // Build a map of raw item -> list of { consumerName, rate }
+  const rawConsumers = {};
+  for (const entry of buildOrder) {
+    if (entry.category === "raw") continue;
+    if (!entry.recipe || entry.recipe.inputs.length === 0) continue;
+    const outputQty = entry.recipe.outputs.find(o => o.item === entry.itemId)?.qty || 1;
+    for (const inp of entry.recipe.inputs) {
+      if (rawItemIds.has(inp.item)) {
+        if (!rawConsumers[inp.item]) rawConsumers[inp.item] = [];
+        const inputRate = (inp.qty / outputQty) * entry.rate;
+        rawConsumers[inp.item].push({ consumerName: ITEMS[entry.itemId]?.name || entry.itemId, rate: inputRate });
+      }
+    }
+  }
+
+  for (const entry of buildOrder) {
+    if (entry.category === "raw") {
+      // Split into one step per consumer
+      const consumers = rawConsumers[entry.itemId];
+      if (consumers && consumers.length > 0) {
+        for (const consumer of consumers) {
+          expandedSteps.push({ ...entry, rate: consumer.rate, splitFor: consumer.consumerName });
+        }
+      } else {
+        expandedSteps.push(entry);
+      }
+    } else {
+      expandedSteps.push(entry);
+    }
+  }
+
+  const totalSteps = expandedSteps.filter(e => ITEMS[e.itemId]).length;
 
   // Progress bar
   const progressDiv = document.createElement("div");
@@ -2642,11 +2678,10 @@ function renderBuildTimeline(buildOrder) {
     document.getElementById("progress-text").textContent = `${checked} / ${totalSteps}`;
   }
 
-  buildOrder.forEach((entry, index) => {
+  expandedSteps.forEach((entry, index) => {
     const item = ITEMS[entry.itemId];
     if (!item) return;
     const building = entry.building;
-    const buildingsNeeded = Math.ceil(entry.buildings);
 
     const step = document.createElement("div");
     step.className = "build-step";
@@ -2655,11 +2690,15 @@ function renderBuildTimeline(buildOrder) {
     let detail = "";
     let recipePills = "";
     if (entry.recipe.inputs.length === 0) {
-      detail = `Place <span class="highlight">${buildingsNeeded}x ${building ? building.name : "Extractor"}</span> to extract <span class="highlight">${item.name}</span> at <span class="highlight">${entry.rate.toFixed(1)}/min</span>`;
+      // Raw resource — compute miners for this split rate
+      const buildingSpeed = building ? building.speed : 1;
+      const minersNeeded = Math.ceil(entry.rate / ((60 / entry.recipe.time) * buildingSpeed));
+      const feedsLabel = entry.splitFor ? ` to feed <span class="highlight">${entry.splitFor}</span>` : '';
+      detail = `Place <span class="highlight">${minersNeeded}x ${building ? building.name : "Extractor"}</span> for <span class="highlight">${item.name}</span> at <span class="highlight">${entry.rate.toFixed(1)}/min</span>${feedsLabel}`;
     } else {
+      const buildingsNeeded = Math.ceil(entry.buildings);
       const outputQty = entry.recipe.outputs.find(o => o.item === entry.itemId)?.qty || 1;
 
-      // Build ingredient pills
       const inputPills = entry.recipe.inputs.map(inp => {
         const inputItem = ITEMS[inp.item];
         const color = inputItem ? inputItem.color : '#888';
@@ -2679,7 +2718,7 @@ function renderBuildTimeline(buildOrder) {
       <div class="step-content">
         <input type="checkbox" class="step-check" id="step-check-${index}">
         <div class="step-text">
-          <div class="step-title" style="color: ${item.color}">${item.name}</div>
+          <div class="step-title" style="color: ${item.color}">${item.name}${entry.splitFor ? ' <span style="color:var(--text-muted);font-size:0.85rem">\u2192 ' + entry.splitFor + '</span>' : ''}</div>
           <div class="step-detail">${detail}</div>
           ${recipePills}
         </div>
@@ -2741,10 +2780,10 @@ function renderDepTree(requirements) {
   const depthColors = ['#FAD000', '#B362FF', '#A5FF90', '#9EFFFF', '#FB94FF', '#FF2C70'];
 
   // Layout constants
-  const NODE_W = 150, NODE_H = 58, H_GAP = 30, V_GAP = 70;
-  const FONT_NAME = '13px Nunito, sans-serif';
-  const FONT_RATE = '11px Orbitron, sans-serif';
-  const FONT_BUILD = '10px Orbitron, sans-serif';
+  const NODE_W = 190, NODE_H = 72, H_GAP = 40, V_GAP = 90;
+  const FONT_NAME = '15px Nunito, sans-serif';
+  const FONT_RATE = '12px Orbitron, sans-serif';
+  const FONT_BUILD = '11px Orbitron, sans-serif';
 
   // Build tree data
   function buildTree(itemId, rate, depth, visited) {
@@ -2897,9 +2936,9 @@ function renderDepTree(requirements) {
     // Dot
     ctx.fillStyle = node.item.color;
     ctx.shadowColor = node.item.color;
-    ctx.shadowBlur = 6;
+    ctx.shadowBlur = 8;
     ctx.beginPath();
-    ctx.arc(x + 12, y + 14, 4, 0, Math.PI * 2);
+    ctx.arc(x + 14, y + 18, 5, 0, Math.PI * 2);
     ctx.fill();
     ctx.shadowBlur = 0;
 
@@ -2907,18 +2946,18 @@ function renderDepTree(requirements) {
     ctx.font = 'bold ' + FONT_NAME;
     ctx.fillStyle = node.depth === 0 ? '#FAD000' : '#EEEEFF';
     ctx.textAlign = 'left';
-    ctx.fillText(truncate(node.item.name, 16), x + 22, y + 18);
+    ctx.fillText(truncate(node.item.name, 20), x + 26, y + 22);
 
     // Rate
     ctx.font = FONT_RATE;
     ctx.fillStyle = '#FAD000';
-    ctx.fillText(node.rate.toFixed(1) + '/min', x + 12, y + 34);
+    ctx.fillText(node.rate.toFixed(1) + '/min', x + 14, y + 42);
 
     // Buildings
     ctx.font = FONT_BUILD;
     ctx.fillStyle = '#B362FF';
     const bldgText = node.buildingsNeeded + 'x ' + (node.building ? node.building.name : 'Extractor');
-    ctx.fillText(truncate(bldgText, 22), x + 12, y + 48);
+    ctx.fillText(truncate(bldgText, 26), x + 14, y + 58);
 
     // Raw indicator
     if (node.isRaw) {
