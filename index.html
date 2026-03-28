@@ -729,6 +729,20 @@ select:focus {
   transform: scale(0.97);
 }
 
+.reset-btn {
+  border-color: var(--neon-purple);
+  color: var(--neon-purple);
+}
+
+.reset-btn:hover {
+  box-shadow: 0 0 20px rgba(179, 98, 255, 0.3), 0 0 40px rgba(179, 98, 255, 0.15);
+  text-shadow: 0 0 10px rgba(179, 98, 255, 0.4);
+}
+
+.reset-btn::before {
+  background: radial-gradient(circle, rgba(179, 98, 255, 0.2), transparent);
+}
+
 /* ---- Tabs ---- */
 .tabs {
   display: flex;
@@ -1899,6 +1913,7 @@ select:focus {
       </div>
       <div class="calc-btn-wrapper">
         <button class="calc-btn" id="calc-btn">Calculate</button>
+        <button class="calc-btn reset-btn" id="reset-btn">Reset</button>
       </div>
     </div>
   </div>
@@ -2622,31 +2637,47 @@ function renderBuildTimeline(buildOrder) {
   const timeline = document.getElementById("build-timeline");
   timeline.innerHTML = "";
 
-  // Expand raw resources: split each raw entry into one step per consumer recipe
+  // Expand raw resources: walk the full dependency tree from the target
+  // to find every leaf-level raw resource occurrence with its chain path.
+  // Each occurrence becomes its own miner step.
   const expandedSteps = [];
   const rawItemIds = new Set(buildOrder.filter(e => e.category === "raw").map(e => e.itemId));
-  // Build a map of raw item -> list of { consumerName, rate }
-  const rawConsumers = {};
-  for (const entry of buildOrder) {
-    if (entry.category === "raw") continue;
-    if (!entry.recipe || entry.recipe.inputs.length === 0) continue;
-    const outputQty = entry.recipe.outputs.find(o => o.item === entry.itemId)?.qty || 1;
-    for (const inp of entry.recipe.inputs) {
-      if (rawItemIds.has(inp.item)) {
-        if (!rawConsumers[inp.item]) rawConsumers[inp.item] = [];
-        const inputRate = (inp.qty / outputQty) * entry.rate;
-        rawConsumers[inp.item].push({ consumerName: ITEMS[entry.itemId]?.name || entry.itemId, rate: inputRate });
-      }
+
+  // Walk tree recursively to collect raw demands with their chain label
+  const rawDemands = {}; // rawItemId -> [ { label, rate } ]
+  function walkTree(itemId, rate, chainLabel, visited) {
+    const entry = buildOrder.find(e => e.itemId === itemId);
+    if (!entry) return;
+    const recipe = entry.recipe;
+    if (!recipe) return;
+    if (recipe.inputs.length === 0) {
+      // This is a raw resource — record it with the chain label
+      if (!rawDemands[itemId]) rawDemands[itemId] = [];
+      rawDemands[itemId].push({ label: chainLabel, rate });
+      return;
+    }
+    if (visited.has(itemId)) return;
+    const newVisited = new Set(visited);
+    newVisited.add(itemId);
+    const outputQty = recipe.outputs.find(o => o.item === itemId)?.qty || 1;
+    for (const inp of recipe.inputs) {
+      const inputRate = (inp.qty / outputQty) * rate;
+      const inputName = ITEMS[inp.item]?.name || inp.item;
+      const parentName = ITEMS[itemId]?.name || itemId;
+      const label = chainLabel ? chainLabel : parentName;
+      walkTree(inp.item, inputRate, label, newVisited);
     }
   }
 
+  const targetRate = parseFloat(document.getElementById("rate-input").value);
+  walkTree(state.selectedItem, targetRate, '', new Set());
+
   for (const entry of buildOrder) {
     if (entry.category === "raw") {
-      // Split into one step per consumer
-      const consumers = rawConsumers[entry.itemId];
-      if (consumers && consumers.length > 0) {
-        for (const consumer of consumers) {
-          expandedSteps.push({ ...entry, rate: consumer.rate, splitFor: consumer.consumerName });
+      const demands = rawDemands[entry.itemId];
+      if (demands && demands.length > 0) {
+        for (const demand of demands) {
+          expandedSteps.push({ ...entry, rate: demand.rate, splitFor: demand.label });
         }
       } else {
         expandedSteps.push(entry);
@@ -3297,6 +3328,20 @@ function setupCalculate() {
   // Also calculate on Enter in rate input
   document.getElementById("rate-input").addEventListener("keydown", (e) => {
     if (e.key === "Enter") document.getElementById("calc-btn").click();
+  });
+
+  // Reset button
+  document.getElementById("reset-btn").addEventListener("click", () => {
+    state.selectedItem = null;
+    document.getElementById("item-search").value = "";
+    document.getElementById("rate-input").value = "30";
+    document.getElementById("results-section").style.display = "none";
+    document.getElementById("empty-state").style.display = "";
+    // Reset to first tab
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+    document.querySelector(".tab-btn").classList.add("active");
+    document.querySelector(".tab-content").classList.add("active");
   });
 }
 
