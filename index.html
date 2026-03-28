@@ -291,7 +291,7 @@ html {
   font-family: var(--font-body);
   font-size: 1.1rem;
   color: var(--text-muted);
-  margin-top: 8px;
+  margin-top: 2px;
   letter-spacing: 2px;
   animation: pulse-opacity 4s ease-in-out infinite;
 }
@@ -1449,8 +1449,8 @@ select:focus {
       <div class="input-group">
         <label>Assembler Tier</label>
         <div class="tier-group" data-tier="assembler">
-          <button class="tier-btn" data-value="assemblerMk1">Mk.I</button>
-          <button class="tier-btn active" data-value="assemblerMk2">Mk.II</button>
+          <button class="tier-btn active" data-value="assemblerMk1">Mk.I</button>
+          <button class="tier-btn" data-value="assemblerMk2">Mk.II</button>
           <button class="tier-btn" data-value="assemblerMk3">Mk.III</button>
         </div>
       </div>
@@ -2015,7 +2015,7 @@ function generateBuildOrder(requirements) {
 
 const state = {
   selectedItem: null,
-  assemblerTier: "assemblerMk2",
+  assemblerTier: "assemblerMk1",
   smelterTier: "arcSmelter",
   chemicalTier: "chemicalPlant",
   deuteriumSource: "fractionator",
