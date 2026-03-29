@@ -684,6 +684,7 @@ select:focus {
   grid-column: 1 / -1;
   display: flex;
   justify-content: center;
+  gap: 16px;
   padding-top: 10px;
 }
 
@@ -1307,6 +1308,394 @@ select:focus {
   100% { background-position: 200% center; }
 }
 
+/* ---- Mode Switcher ---- */
+.mode-bar {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 20px;
+  max-width: 1400px;
+  margin: 0 auto 8px;
+}
+
+.mode-btn {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 10px 32px;
+  border: 1px solid rgba(105, 67, 255, 0.2);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.mode-btn:hover {
+  border-color: rgba(105, 67, 255, 0.4);
+  color: var(--text-primary);
+}
+
+.mode-btn.active {
+  background: rgba(105, 67, 255, 0.12);
+  border-color: var(--neon-gold);
+  color: var(--neon-gold);
+  box-shadow: 0 0 14px rgba(250, 208, 0, 0.12);
+}
+
+.mode-content { display: none; }
+.mode-content.active { display: block; }
+
+/* ---- The Dark Forest ---- */
+.forest-layout {
+  display: flex;
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px 20px;
+}
+
+.forest-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.forest-sidebar-btn {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: left;
+  padding: 10px 14px;
+  border: none;
+  border-left: 3px solid transparent;
+  border-radius: 0 6px 6px 0;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.forest-sidebar-btn:hover {
+  background: rgba(105, 67, 255, 0.06);
+  color: var(--text-primary);
+}
+
+.forest-sidebar-btn.active {
+  border-left-color: var(--neon-gold);
+  background: rgba(105, 67, 255, 0.1);
+  color: var(--neon-gold);
+}
+
+.forest-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.forest-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(105, 67, 255, 0.1);
+}
+
+.forest-tab-btn {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.forest-tab-btn:hover { color: var(--text-primary); }
+
+.forest-tab-btn.active { color: var(--neon-gold); }
+
+.forest-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--neon-gold), var(--neon-purple), var(--neon-green));
+  box-shadow: 0 0 10px rgba(250, 208, 0, 0.3);
+}
+
+.forest-panel { display: none; }
+.forest-panel.active { display: block; }
+
+/* Encyclopedia cards */
+.ency-header {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  color: var(--neon-gold);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.ency-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(105, 67, 255, 0.12);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.ency-card:hover {
+  border-color: rgba(105, 67, 255, 0.25);
+}
+
+.ency-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.ency-card-header:hover {
+  background: rgba(105, 67, 255, 0.04);
+}
+
+.ency-card-title {
+  font-family: var(--font-body);
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.ency-card-phase {
+  font-family: var(--font-display);
+  font-size: 0.62rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 10px;
+}
+
+.phase-early { background: rgba(165, 255, 144, 0.1); color: var(--neon-green); border: 1px solid rgba(165, 255, 144, 0.25); }
+.phase-mid { background: rgba(250, 208, 0, 0.1); color: var(--neon-gold); border: 1px solid rgba(250, 208, 0, 0.25); }
+.phase-late { background: rgba(179, 98, 255, 0.1); color: var(--neon-purple); border: 1px solid rgba(179, 98, 255, 0.25); }
+.phase-end { background: rgba(251, 148, 255, 0.1); color: var(--neon-magenta); border: 1px solid rgba(251, 148, 255, 0.25); }
+
+.ency-card-toggle {
+  color: var(--neon-purple);
+  font-size: 1.1rem;
+  transition: transform 0.3s;
+}
+
+.ency-card.open .ency-card-toggle { transform: rotate(180deg); }
+
+.ency-card-body {
+  display: none;
+  padding: 0 18px 16px;
+  border-top: 1px solid rgba(105, 67, 255, 0.06);
+}
+
+.ency-card.open .ency-card-body { display: block; }
+
+.ency-card-body p {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+
+.ency-tips {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0;
+}
+
+.ency-tips li {
+  padding: 4px 0 4px 18px;
+  position: relative;
+  color: var(--text-primary);
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+.ency-tips li::before {
+  content: '\25C6';
+  position: absolute;
+  left: 0;
+  color: var(--neon-gold);
+  font-size: 0.7rem;
+  top: 8px;
+}
+
+.ency-ratios {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(105, 67, 255, 0.08);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin: 10px 0;
+  font-family: 'Monaco', monospace;
+  font-size: 15px;
+  color: var(--neon-purple);
+  line-height: 1.7;
+}
+
+/* Save analyzer */
+.analyzer-section {
+  max-width: 800px;
+}
+
+.analyzer-file-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.analyzer-file-bar .file-path {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 14px;
+  background: var(--bg-card);
+  border: 1px solid rgba(105, 67, 255, 0.15);
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-family: 'Monaco', monospace;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.analyzer-btn {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 10px 22px;
+  border-radius: 8px;
+  border: 1px solid var(--neon-purple);
+  background: transparent;
+  color: var(--neon-purple);
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.analyzer-btn:hover {
+  background: rgba(105, 67, 255, 0.12);
+  box-shadow: 0 0 12px rgba(105, 67, 255, 0.15);
+}
+
+.analyzer-btn.primary {
+  border-color: var(--neon-gold);
+  color: var(--neon-gold);
+}
+
+.analyzer-btn.primary:hover {
+  background: rgba(250, 208, 0, 0.1);
+  box-shadow: 0 0 12px rgba(250, 208, 0, 0.15);
+}
+
+.analyzer-loading {
+  text-align: center;
+  padding: 40px 20px;
+  font-family: var(--font-display);
+  font-size: 0.88rem;
+  color: var(--neon-purple);
+  letter-spacing: 2px;
+  animation: pulse-opacity 2s ease-in-out infinite;
+}
+
+.analyzer-error {
+  padding: 16px 20px;
+  background: rgba(255, 44, 112, 0.08);
+  border: 1px solid rgba(255, 44, 112, 0.2);
+  border-radius: 8px;
+  color: var(--neon-pink);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.analyzer-error code {
+  display: block;
+  margin-top: 8px;
+  font-family: 'Monaco', monospace;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: rgba(0,0,0,0.3);
+  padding: 8px 12px;
+  border-radius: 4px;
+}
+
+.rec-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(105, 67, 255, 0.12);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 14px;
+}
+
+.rec-card h4 {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.rec-card .rec-list {
+  list-style: none;
+  padding: 0;
+}
+
+.rec-card .rec-list li {
+  padding: 6px 0;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rec-card .rec-list .rec-priority {
+  font-family: var(--font-display);
+  font-size: 0.6rem;
+  letter-spacing: 1px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.rec-priority.high { background: rgba(255, 44, 112, 0.15); color: var(--neon-pink); }
+.rec-priority.med { background: rgba(250, 208, 0, 0.12); color: var(--neon-gold); }
+.rec-priority.low { background: rgba(165, 255, 144, 0.1); color: var(--neon-green); }
+
+@media (max-width: 768px) {
+  .forest-layout { flex-direction: column; }
+  .forest-sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
+  .forest-sidebar-btn { border-left: none; border-bottom: 3px solid transparent; border-radius: 6px 6px 0 0; white-space: nowrap; }
+  .forest-sidebar-btn.active { border-bottom-color: var(--neon-gold); border-left-color: transparent; }
+}
+
 /* ---- Dependency Tree (canvas) ---- */
 #dep-tree-canvas-wrap {
   overflow: auto;
@@ -1856,6 +2245,14 @@ select:focus {
   </div>
 </div>
 
+<!-- Mode Switcher -->
+<div class="mode-bar">
+  <button class="mode-btn active" data-mode="trees" id="mode-btn-trees">Happy Little Trees</button>
+  <button class="mode-btn" data-mode="forest" id="mode-btn-forest">The Dark Forest</button>
+</div>
+
+<!-- MODE: Happy Little Trees -->
+<div id="mode-trees" class="mode-content active">
 <div class="main-container">
   <!-- Input Panel -->
   <div class="input-panel">
@@ -1956,6 +2353,35 @@ select:focus {
     <p>Select an item and production rate to calculate the full production chain and recommended build sequence.</p>
   </div>
 </div>
+
+</div><!-- /main-container -->
+</div><!-- /mode-trees -->
+
+<!-- MODE: The Dark Forest -->
+<div id="mode-forest" class="mode-content">
+  <div class="forest-layout">
+    <nav class="forest-sidebar" id="forest-sidebar"></nav>
+    <main class="forest-main">
+      <div class="forest-tabs">
+        <button class="forest-tab-btn active" data-ftab="encyclopedia">Encyclopedia</button>
+        <button class="forest-tab-btn" data-ftab="analyzer">Save Analyzer</button>
+      </div>
+      <div id="forest-encyclopedia" class="forest-panel active">
+        <div id="ency-content"></div>
+      </div>
+      <div id="forest-analyzer" class="forest-panel">
+        <div class="analyzer-section" id="analyzer-section">
+          <div class="analyzer-file-bar">
+            <button class="analyzer-btn" id="analyzer-browse">Browse</button>
+            <div class="file-path" id="analyzer-path">No save file selected</div>
+            <button class="analyzer-btn primary" id="analyzer-run">Analyze</button>
+          </div>
+          <div id="analyzer-results"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div><!-- /mode-forest -->
 
 <div class="footer">
   Dyson Sphere Program Assistant &mdash; Fan-made tool for DSP
@@ -3520,7 +3946,332 @@ function initStarfield() {
 }
 
 // =====================================================
-// SECTION 6: INITIALIZATION
+// SECTION 6: THE DARK FOREST — Encyclopedia + Analyzer
+// =====================================================
+
+const ENCYCLOPEDIA = [
+  {
+    id: "mall", name: "Mall / Bootstrap Base", color: "var(--neon-gold)",
+    entries: [
+      { title: "Starter Mall (First 10 Items)", phase: "early",
+        desc: "Your first mall automates the items you hand-craft constantly in early game. Place assemblers in a row fed by a single bus of Iron Ingot, Copper Ingot, Magnet, and Magnetic Coil.",
+        tips: ["Automate in order: Gear, Coil, Circuit Board, Sorter Mk.I, Belt Mk.I, Assembler Mk.I, Tesla Tower, Wind Turbine, Smelter, Mining Machine", "One Mk.I assembler per item at 0.75x speed is enough early on — you only need a trickle", "Feed the mall from a small smelting array: 2 iron smelters, 1 copper smelter, 1 magnet smelter"],
+        ratios: "1 Iron Smelter → feeds Gear + Circuit Board\n1 Copper Smelter → feeds Coil + Circuit Board\n1 Magnet Smelter → feeds Magnetic Coil" },
+      { title: "Mid-Game Expansion Mall", phase: "mid",
+        desc: "Expand the mall to include Electric Motors, EM Turbines, Processors, Prisms, Plasma Exciters, and all three tiers of belts and sorters. Switch assemblers to Mk.II.",
+        tips: ["Add a Steel smelter line and a High-Purity Silicon line", "Dedicate one assembler each to Prism, Electric Motor, EM Turbine, Processor", "Route Processor output back as an input — many mid-game buildings need it"],
+        ratios: "2 Assemblers for Electric Motor (feeds EM Turbine)\n1 Assembler for EM Turbine\n1 Assembler for Processor (feeds many buildings)" },
+      { title: "Automated Building Production", phase: "late",
+        desc: "Automate every placeable building so you never hand-craft again. This includes logistics stations, Oil Extractors, Chemical Plants, Matrix Labs, and all power buildings.",
+        tips: ["ILS and PLS production requires Particle Containers — set up that chain first", "Prioritize Logistics Drone and Vessel production for scaling to multiple planets", "Consider a dedicated planet for building production in late game"],
+        ratios: "1 Assembler for PLS (slow — 20s craft time)\n1 Assembler for ILS (30s craft time)\n1 Assembler for Logistics Drone" },
+    ]
+  },
+  {
+    id: "layout", name: "Bus vs Spaghetti vs City-Block", color: "var(--neon-purple)",
+    entries: [
+      { title: "Main Bus Design", phase: "early",
+        desc: "A main bus runs a wide belt highway of common ingredients (Iron Ingot, Copper Ingot, Magnet, Coil, Circuit Board, Steel, etc.) along the equator or a latitude line. Assemblers tap off the bus with splitters.",
+        tips: ["Start with 4 lanes: Iron Ingot, Copper Ingot, Magnet, Magnetic Coil", "Expand to 8+ lanes as you add Steel, Silicon, Graphite, Glass", "Leave 2-tile gaps between lanes for future splitters", "Run the bus along a single latitude for easy expansion in both directions"],
+        ratios: "1 belt lane at Mk.I = 360 items/min\n1 belt lane at Mk.II = 720 items/min\n1 belt lane at Mk.III = 1800 items/min" },
+      { title: "City-Block Grid", phase: "mid",
+        desc: "Divide the planet into rectangular blocks separated by belt highways and logistics infrastructure. Each block handles one recipe or a small sub-chain. Highly organized and scalable.",
+        tips: ["Use latitude lines near the tropics for consistent block sizing", "Standard block: 5-10 assemblers wide, bounded by belt corridors", "Run power (Tesla Towers) along the grid lines", "Each block should be self-contained: inputs arrive on one side, outputs leave on the other"],
+        ratios: "Typical block: 6 Assemblers Mk.II producing one item\nBelt corridors: 2 lanes each direction\nPower: Tesla Tower every 5th block" },
+      { title: "Spaghetti (Optimized Chaos)", phase: "early",
+        desc: "Build whatever you need, wherever there's space. Surprisingly effective in early game because you can iterate fast without planning. Transition to organized layouts around hour 10-15.",
+        tips: ["Don't fight it early — spaghetti gets you researching faster than planning does", "Once you unlock Logistics Stations, spaghetti becomes self-organizing", "The planet is round — belts can wrap around and still work", "Plan to tear it all down once. Your second base will be clean."],
+        ratios: "" },
+    ]
+  },
+  {
+    id: "ratios", name: "Ratio-Optimized Production Lines", color: "var(--neon-green)",
+    entries: [
+      { title: "Iron Chain Ratios", phase: "early",
+        desc: "The fundamental ratios for iron processing with Arc Smelters at 1x speed.",
+        tips: ["Iron Ingot and Magnet both smelt from Iron Ore at different rates", "Steel requires 3 Iron Ingot per craft — plan for heavy iron demand", "A single Mk.I belt of Iron Ore (360/min) feeds 6 Iron Ingot smelters"],
+        ratios: "Iron Ore → Iron Ingot: 1:1 (1s each), 1 smelter = 60/min\nIron Ore → Magnet: 1:1 (1.5s each), 1 smelter = 40/min\nIron Ingot → Steel: 3:1 (3s each), 1 smelter = 20/min\n\n30/min Steel needs: 3 Steel smelters + 5 Iron Ingot smelters + 5 Miners" },
+      { title: "Copper Chain Ratios", phase: "early",
+        desc: "Copper is simpler but needed everywhere.",
+        tips: ["Copper Ingot is 1:1 at 1s — same as Iron Ingot", "Circuit Board needs 2 Iron + 1 Copper per 2 output", "Magnetic Coil needs 2 Magnet + 1 Copper per 2 output"],
+        ratios: "Copper Ore → Copper Ingot: 1:1 (1s), 1 smelter = 60/min\n\n60/min Circuit Board needs:\n  1 Assembler (outputs 120/min at Mk.II)\n  60/min Iron Ingot + 30/min Copper Ingot" },
+      { title: "Science Matrix Ratios", phase: "mid",
+        desc: "Exact building counts for each matrix color at 30/min throughput.",
+        tips: ["EM Matrix is the easiest — set it up first", "Energy Matrix needs Hydrogen — plan your gas/oil supply", "Structure Matrix requires the full Titanium + Organic Crystal chain"],
+        ratios: "EM Matrix (30/min): 2 Labs, 15/min Coil + 15/min Circuit Board\nEnergy Matrix (30/min): 3 Labs, 30/min E.Graphite + 30/min Hydrogen\nStructure Matrix (30/min): 4 Labs, 3.75/min Diamond + 3.75/min Ti Crystal\nInfo Matrix (30/min): 5 Labs, 6/min Processor + 3/min Broadband\nGravity Matrix (30/min): 12 Labs, 15/min Grav Lens + 15/min Q.Chip" },
+    ]
+  },
+  {
+    id: "power", name: "Power Progression", color: "var(--neon-orange)",
+    entries: [
+      { title: "Wind Turbines (Start)", phase: "early",
+        desc: "Wind Turbines generate 300kW each, require no fuel, and work everywhere. Spam them early.",
+        tips: ["Place them in rows — they don't block each other", "You need ~20 for a basic starter base", "They become obsolete fast but don't tear them down — free power is free power"],
+        ratios: "1 Wind Turbine = 300kW\n20 Turbines = 6MW (enough for ~30 miners + 10 smelters)" },
+      { title: "Thermal Power (Coal/Graphite)", phase: "early",
+        desc: "Thermal Power Stations burn fuel for 2.16MW each. Coal is the easiest fuel; Energetic Graphite is better (6.75MJ vs 2.7MJ per unit).",
+        tips: ["Automate coal delivery with belts from miners", "Switch to Graphite fuel when you have spare from smelting", "10 Thermal Stations = 21.6MW, enough for a full production planet"],
+        ratios: "1 Thermal Station = 2.16MW\nCoal: ~15/min per station\nGraphite: ~6/min per station (burns 2.5x longer)" },
+      { title: "Solar + Accumulators", phase: "mid",
+        desc: "Solar Panels generate up to 360kW (depends on latitude and day/night). Pair with Accumulators for nighttime coverage.",
+        tips: ["Place near equator for maximum output", "Ring of solar panels around the equator is the classic mid-game move", "Accumulators charge during day, discharge at night — plan for ~50% solar uptime"],
+        ratios: "1 Solar Panel = ~180kW average (accounting for night)\n1 Accumulator = 90MJ storage\nEquator ring of 200 panels ≈ 36MW average" },
+      { title: "Fusion + Ray Receivers + Dyson Sphere", phase: "late",
+        desc: "Mini Fusion stations (9MW), Ray Receivers (harvest from Dyson Sphere/Swarm), and the Dyson Sphere itself for virtually unlimited power.",
+        tips: ["Mini Fusion runs on Hydrogen or Deuterium Fuel Rods", "Build a Dyson Swarm first (solar sails) before the full sphere", "Ray Receivers with Graviton Lenses produce 5x more power", "One mature Dyson Sphere can power every planet in the cluster"],
+        ratios: "1 Mini Fusion = 9MW (Hydrogen Fuel Rod)\n1 Ray Receiver = 12.5MW (no lens) or 62.5MW (with lens)\nDyson Sphere: 60GW+ at full build" },
+    ]
+  },
+  {
+    id: "logistics", name: "Logistics Station Layouts", color: "var(--neon-cyan)",
+    entries: [
+      { title: "PLS Hub Layout", phase: "mid",
+        desc: "A Planetary Logistics Station (PLS) can store 5 item types and drones deliver within the planet. Place one PLS per production cluster.",
+        tips: ["Set frequently needed inputs (Iron Ingot, Copper Ingot) to Remote Demand", "Set outputs to Remote Supply so other PLS can pull from them", "12 drone slots — fill them all for fast throughput", "Place PLS near the production it serves, not centralized"],
+        ratios: "1 PLS serves ~10-20 assemblers comfortably\nDrone delivery range: entire planet\nThroughput: ~200-360 items/min per slot (belt-limited)" },
+      { title: "ILS Import/Export Hub", phase: "late",
+        desc: "Interstellar Logistics Stations (ILS) handle cross-planet and cross-system logistics. One ILS can feed an entire production line from off-world resources.",
+        tips: ["Dedicate separate ILS for import vs export — don't mix", "Set vessel count high (10+) for cross-system routes", "Warper consumption is real — automate Space Warper production early", "ILS-to-ILS on the same planet uses drones (free, no warpers)"],
+        ratios: "1 ILS: 5 item slots, 10 vessel slots\nVessel speed: ~600m/s (upgradeable)\nWarper cost: 1 per interstellar trip per vessel" },
+    ]
+  },
+  {
+    id: "routing", name: "ILS vs PLS Routing", color: "var(--neon-blue)",
+    entries: [
+      { title: "When to Use PLS", phase: "mid",
+        desc: "PLS is for intra-planet logistics. Use it when you have production spread across the planet and want to avoid long belt runs.",
+        tips: ["PLS is unlocked earlier and cheaper to build than ILS", "No warper cost — purely drone-based", "Great for mall distribution — one PLS supplies your inventory", "Use for intermediate products that don't leave the planet"],
+        ratios: "PLS cost: 40 Steel + 40 Ti Ingot + 40 Processor + 20 Particle Container\nDrone cost: 5 Iron + 2 Processor + 2 Thruster each" },
+      { title: "When to Use ILS", phase: "late",
+        desc: "ILS is for cross-planet and cross-system logistics, but also works better than PLS for on-planet use because of higher throughput and more item slots.",
+        tips: ["ILS replaces PLS in late game — higher capacity, more slots", "Always keep a stock of warpers in ILS that do interstellar routes", "Use ILS even on single planets for the 10-slot advantage over PLS 5-slot", "Remote Demand + Remote Supply is the core loop — master the settings"],
+        ratios: "ILS cost: 1 PLS + 40 Ti Alloy + 20 Particle Container\nVessel cost: 10 Ti Alloy + 10 Processor + 2 Reinforced Thruster each" },
+    ]
+  },
+  {
+    id: "prolif", name: "Proliferator Integration", color: "var(--neon-magenta)",
+    entries: [
+      { title: "Spray Coater Basics", phase: "mid",
+        desc: "Spray Coaters apply Proliferator to items on belts. Place them inline before assemblers. Each sprayed item gets +12.5%/+20%/+25% production bonus (Mk.I/II/III).",
+        tips: ["Place the coater ON the belt, not next to it", "One coater can spray a full Mk.III belt", "Feed proliferator from a side belt into the coater", "Spray the INPUTS to assemblers, not the outputs"],
+        ratios: "Mk.I: +12.5% extra products (or +25% speed)\nMk.II: +20% extra products (or +50% speed)\nMk.III: +25% extra products (or +100% speed)" },
+      { title: "What to Proliferate First", phase: "mid",
+        desc: "Proliferator is expensive — prioritize spraying items where the bonus has the biggest impact on your bottleneck.",
+        tips: ["Science matrices first — direct research speed boost", "Then spray high-value intermediates: Processors, Plane Filters, Quantum Chips", "Don't spray raw ores or basic ingots early — the cost exceeds the benefit", "In late game with Mk.III proliferator, spray everything"],
+        ratios: "Priority order:\n1. Science Matrices (direct research boost)\n2. Quantum Chip / Plane Filter (expensive crafts)\n3. Processor / Particle Broadband\n4. Everything else once Mk.III is flowing" },
+    ]
+  },
+  {
+    id: "science", name: "Science Matrix Blueprints", color: "var(--neon-pink)",
+    entries: [
+      { title: "EM Matrix Line", phase: "early",
+        desc: "The simplest matrix. 1 Magnetic Coil + 1 Circuit Board → 1 EM Matrix in 3 seconds.",
+        tips: ["This is your first science — rush it", "1 Matrix Lab at 1x does 20/min", "You need surprisingly little — 2-3 labs handles early research fine"],
+        ratios: "30/min EM Matrix:\n  2 Matrix Labs\n  30/min Magnetic Coil (1 Assembler Mk.II)\n  30/min Circuit Board (1 Assembler Mk.II)\n  60/min Iron Ore + 30/min Copper Ore + 30/min Iron Ore (magnets)" },
+      { title: "Energy Matrix Line", phase: "early",
+        desc: "2 Energetic Graphite + 2 Hydrogen → 1 Energy Matrix in 6 seconds. The hydrogen requirement is the main challenge.",
+        tips: ["Get hydrogen from oil refining (byproduct) or gas giant orbital collectors", "Energetic Graphite comes from smelting Coal — easy to automate", "Plan hydrogen logistics early — it's needed for many late-game items too"],
+        ratios: "30/min Energy Matrix:\n  3 Matrix Labs\n  60/min Energetic Graphite (2 Smelters, 120/min Coal)\n  60/min Hydrogen (from Oil Refining or Gas Giant)" },
+      { title: "Universe Matrix Line", phase: "end",
+        desc: "The ultimate science. Requires 1 of every other matrix + 1 Antimatter → 1 Universe Matrix in 15 seconds. This is the endgame production challenge.",
+        tips: ["You need ALL five other matrix production lines running simultaneously", "Antimatter from Particle Collider (2 Hydrogen → 2 Antimatter)", "This is where multi-planet production becomes essential", "Target 10-30/min Universe Matrix for reasonable endgame research speed"],
+        ratios: "10/min Universe Matrix:\n  3 Matrix Labs\n  10/min each: EM, Energy, Structure, Info, Gravity Matrix\n  10/min Antimatter (1 Particle Collider)\n  Gravity Matrix alone needs Graviton Lens + Quantum Chip chains" },
+    ]
+  },
+];
+
+// Render the Dark Forest encyclopedia
+function renderEncyclopedia() {
+  const sidebar = document.getElementById("forest-sidebar");
+  const content = document.getElementById("ency-content");
+
+  // Build sidebar
+  sidebar.innerHTML = ENCYCLOPEDIA.map((cat, i) =>
+    `<button class="forest-sidebar-btn${i === 0 ? ' active' : ''}" data-cat="${cat.id}" style="border-left-color: ${i === 0 ? cat.color : 'transparent'}" data-color="${cat.color}">${cat.name}</button>`
+  ).join('');
+
+  function renderCategory(catId) {
+    const cat = ENCYCLOPEDIA.find(c => c.id === catId);
+    if (!cat) return;
+
+    // Update sidebar active state
+    sidebar.querySelectorAll('.forest-sidebar-btn').forEach(btn => {
+      const isActive = btn.dataset.cat === catId;
+      btn.classList.toggle('active', isActive);
+      btn.style.borderLeftColor = isActive ? btn.dataset.color : 'transparent';
+    });
+
+    let html = `<h3 class="ency-header">${cat.name}</h3>`;
+    for (const entry of cat.entries) {
+      const phaseClass = entry.phase === 'early' ? 'phase-early' : entry.phase === 'mid' ? 'phase-mid' : entry.phase === 'late' ? 'phase-late' : 'phase-end';
+      const phaseLabel = entry.phase.charAt(0).toUpperCase() + entry.phase.slice(1) + ' Game';
+      const tipsHtml = entry.tips.length > 0 ? `<ul class="ency-tips">${entry.tips.map(t => `<li>${t}</li>`).join('')}</ul>` : '';
+      const ratiosHtml = entry.ratios ? `<div class="ency-ratios">${entry.ratios.replace(/\n/g, '<br>')}</div>` : '';
+
+      html += `
+        <div class="ency-card">
+          <div class="ency-card-header" onclick="this.parentElement.classList.toggle('open')">
+            <div><span class="ency-card-title">${entry.title}</span><span class="ency-card-phase ${phaseClass}">${phaseLabel}</span></div>
+            <span class="ency-card-toggle">&#9660;</span>
+          </div>
+          <div class="ency-card-body">
+            <p>${entry.desc}</p>
+            ${tipsHtml}
+            ${ratiosHtml}
+          </div>
+        </div>
+      `;
+    }
+    content.innerHTML = html;
+  }
+
+  // Sidebar click
+  sidebar.addEventListener('click', (e) => {
+    const btn = e.target.closest('.forest-sidebar-btn');
+    if (btn) renderCategory(btn.dataset.cat);
+  });
+
+  // Initial render
+  renderCategory(ENCYCLOPEDIA[0].id);
+}
+
+// Dark Forest tab switching
+function setupForestTabs() {
+  document.querySelectorAll('.forest-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.forest-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.forest-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`forest-${btn.dataset.ftab}`).classList.add('active');
+    });
+  });
+}
+
+// Save Analyzer
+function setupAnalyzer() {
+  const browseBtn = document.getElementById('analyzer-browse');
+  const runBtn = document.getElementById('analyzer-run');
+  const pathEl = document.getElementById('analyzer-path');
+  const resultsEl = document.getElementById('analyzer-results');
+  let selectedPath = null;
+
+  if (!browseBtn || !runBtn) return;
+
+  browseBtn.addEventListener('click', async () => {
+    if (window.electronAPI?.openSaveFile) {
+      const path = await window.electronAPI.openSaveFile();
+      if (path) {
+        selectedPath = path;
+        pathEl.textContent = path;
+        pathEl.style.color = 'var(--text-primary)';
+      }
+    } else {
+      resultsEl.innerHTML = '<div class="analyzer-error">Save file browsing requires the Electron desktop app. Open this in <code>npm start</code> instead of a browser.</div>';
+    }
+  });
+
+  runBtn.addEventListener('click', async () => {
+    if (!selectedPath) {
+      resultsEl.innerHTML = '<div class="analyzer-error">Please select a save file first.</div>';
+      return;
+    }
+    if (!window.electronAPI?.analyzeSave) {
+      resultsEl.innerHTML = '<div class="analyzer-error">Save analysis requires the Electron desktop app.</div>';
+      return;
+    }
+
+    resultsEl.innerHTML = '<div class="analyzer-loading">Scanning the dark forest...</div>';
+
+    try {
+      const data = await window.electronAPI.analyzeSave(selectedPath);
+
+      if (data.error) {
+        let errorHtml = `<div class="analyzer-error">${data.error}`;
+        if (data.detail) errorHtml += `<br><br>${data.detail}`;
+        if (data.setup) errorHtml += `<code>${data.setup}</code>`;
+        if (data.stderr) errorHtml += `<code>${data.stderr}</code>`;
+        errorHtml += '</div>';
+        resultsEl.innerHTML = errorHtml;
+        return;
+      }
+
+      let html = '';
+
+      // Next Resource to Automate
+      if (data.recommendations?.next_resources?.length > 0) {
+        html += '<div class="rec-card"><h4 style="color:var(--neon-gold)">Next Resource to Automate</h4><ul class="rec-list">';
+        for (const r of data.recommendations.next_resources) {
+          const pClass = r.priority === 'high' ? 'high' : r.priority === 'medium' ? 'med' : 'low';
+          html += `<li><span class="rec-priority ${pClass}">${r.priority}</span>${r.name}${r.reason ? ' — <span style="color:var(--text-muted)">' + r.reason + '</span>' : ''}</li>`;
+        }
+        html += '</ul></div>';
+      }
+
+      // Next Building to Automate
+      if (data.recommendations?.next_buildings?.length > 0) {
+        html += '<div class="rec-card"><h4 style="color:var(--neon-purple)">Next Building to Automate</h4><ul class="rec-list">';
+        for (const b of data.recommendations.next_buildings) {
+          const pClass = b.priority === 'high' ? 'high' : b.priority === 'medium' ? 'med' : 'low';
+          html += `<li><span class="rec-priority ${pClass}">${b.priority}</span>${b.name}${b.reason ? ' — <span style="color:var(--text-muted)">' + b.reason + '</span>' : ''}</li>`;
+        }
+        html += '</ul></div>';
+      }
+
+      // Next Research
+      if (data.recommendations?.next_research?.length > 0) {
+        html += '<div class="rec-card"><h4 style="color:var(--neon-green)">Next Research to Queue</h4><ul class="rec-list">';
+        for (const t of data.recommendations.next_research) {
+          const pClass = t.priority === 'high' ? 'high' : t.priority === 'medium' ? 'med' : 'low';
+          html += `<li><span class="rec-priority ${pClass}">${t.priority}</span>${t.name}${t.reason ? ' — <span style="color:var(--text-muted)">' + t.reason + '</span>' : ''}</li>`;
+        }
+        html += '</ul></div>';
+      }
+
+      // Next Upgrade
+      if (data.recommendations?.next_upgrades?.length > 0) {
+        html += '<div class="rec-card"><h4 style="color:var(--neon-cyan)">Next Upgrade to Research</h4><ul class="rec-list">';
+        for (const u of data.recommendations.next_upgrades) {
+          const pClass = u.priority === 'high' ? 'high' : u.priority === 'medium' ? 'med' : 'low';
+          html += `<li><span class="rec-priority ${pClass}">${u.priority}</span>${u.name}${u.reason ? ' — <span style="color:var(--text-muted)">' + u.reason + '</span>' : ''}</li>`;
+        }
+        html += '</ul></div>';
+      }
+
+      if (!html) {
+        html = '<div class="analyzer-error" style="border-color:rgba(165,255,144,0.2);color:var(--neon-green)">Save file parsed successfully but no specific recommendations generated. You may be further along than the analyzer expects!</div>';
+      }
+
+      // Summary stats if available
+      if (data.summary) {
+        html = `<div class="rec-card"><h4 style="color:var(--text-muted)">Save Summary</h4><p style="color:var(--text-muted);font-size:1.05rem;line-height:1.7">${data.summary}</p></div>` + html;
+      }
+
+      resultsEl.innerHTML = html;
+
+    } catch (err) {
+      resultsEl.innerHTML = `<div class="analyzer-error">Analysis failed: ${err.message || err}</div>`;
+    }
+  });
+}
+
+// Mode switching
+function setupModes() {
+  const modeBtns = document.querySelectorAll('.mode-btn');
+  const modeContents = document.querySelectorAll('.mode-content');
+
+  modeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.mode;
+      modeBtns.forEach(b => b.classList.remove('active'));
+      modeContents.forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(`mode-${mode}`).classList.add('active');
+    });
+  });
+}
+
+// =====================================================
+// SECTION 7: INITIALIZATION
 // =====================================================
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -3529,6 +4280,10 @@ document.addEventListener("DOMContentLoaded", () => {
   setupTierButtons();
   setupTabs();
   setupCalculate();
+  setupModes();
+  renderEncyclopedia();
+  setupForestTabs();
+  setupAnalyzer();
 
   // Mouse tracking glow on result cards
   document.addEventListener("mousemove", (e) => {
