@@ -1,2 +1,4 @@
 node_modules/
 dist/
+.venv/
+dsp_save_parser_lib/

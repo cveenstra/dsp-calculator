@@ -15,6 +15,11 @@ import signal
 import sys
 import traceback
 
+# Add the bundled dsp_save_parser_lib to the import path
+_lib_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dsp_save_parser_lib")
+if os.path.isdir(_lib_dir) and _lib_dir not in sys.path:
+    sys.path.insert(0, _lib_dir)
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------

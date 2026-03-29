@@ -88,18 +88,35 @@ ipcMain.handle('save:analyze', async (event, filePath) => {
       return;
     }
 
-    // Try python3 first, then python
-    const tryPython = (cmd) => {
+    // Search for Python in common locations since Electron doesn't inherit shell PATH
+    const pythonCandidates = [
+      '/opt/homebrew/bin/python3',
+      '/usr/local/bin/python3',
+      '/usr/bin/python3',
+      'python3',
+      'python',
+    ];
+
+    const tryNext = (idx) => {
+      if (idx >= pythonCandidates.length) {
+        resolve({
+          error: 'Python not found',
+          detail: 'Could not find Python at any of: ' + pythonCandidates.join(', '),
+          setup: 'Install Python 3 via: brew install python3',
+        });
+        return;
+      }
+      const cmd = pythonCandidates[idx];
       execFile(cmd, [pythonScript, filePath], {
         maxBuffer: 50 * 1024 * 1024,
         timeout: 120000,
         cwd: __dirname,
       }, (error, stdout, stderr) => {
+        if (error && (error.code === 'ENOENT' || error.message.includes('ENOENT'))) {
+          tryNext(idx + 1);
+          return;
+        }
         if (error) {
-          if (cmd === 'python3') {
-            tryPython('python');
-            return;
-          }
           resolve({
             error: 'Python execution failed',
             detail: error.message,
@@ -115,7 +132,7 @@ ipcMain.handle('save:analyze', async (event, filePath) => {
       });
     };
 
-    tryPython('python3');
+    tryNext(0);
   });
 });
 
