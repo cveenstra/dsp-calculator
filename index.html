@@ -3114,19 +3114,32 @@ function renderBuildTimeline(buildOrder) {
   // Circuit Board, you get two separate smelter steps — one for each.
   // Same for miners, assemblers, everything.
   const expandedSteps = [];
-  const itemDemands = {}; // itemId -> [ { label, rate } ]
+  const itemDemands = {}; // itemId -> [ { label, rate, depth, chainDepth } ]
 
-  function walkTree(itemId, rate, parentLabel, visited) {
+  // Compute max depth below each node (chainDepth = how deep the subtree goes)
+  function getChainDepth(itemId, visited) {
+    const entry = buildOrder.find(e => e.itemId === itemId);
+    if (!entry || !entry.recipe || entry.recipe.inputs.length === 0) return 0;
+    if (visited.has(itemId)) return 0;
+    const newVisited = new Set(visited);
+    newVisited.add(itemId);
+    let maxChild = 0;
+    for (const inp of entry.recipe.inputs) {
+      maxChild = Math.max(maxChild, getChainDepth(inp.item, newVisited));
+    }
+    return 1 + maxChild;
+  }
+
+  function walkTree(itemId, rate, parentLabel, depth, visited) {
     const entry = buildOrder.find(e => e.itemId === itemId);
     if (!entry) return;
     const recipe = entry.recipe;
     if (!recipe) return;
 
-    // Record this demand
+    const chainDepth = getChainDepth(itemId, new Set());
     if (!itemDemands[itemId]) itemDemands[itemId] = [];
-    itemDemands[itemId].push({ label: parentLabel, rate });
+    itemDemands[itemId].push({ label: parentLabel, rate, depth, chainDepth });
 
-    // Don't recurse into items we've already visited on this path (cycle protection)
     if (recipe.inputs.length === 0) return;
     if (visited.has(itemId)) return;
     const newVisited = new Set(visited);
@@ -3136,31 +3149,42 @@ function renderBuildTimeline(buildOrder) {
     const myName = ITEMS[itemId]?.name || itemId;
     for (const inp of recipe.inputs) {
       const inputRate = (inp.qty / outputQty) * rate;
-      walkTree(inp.item, inputRate, myName, newVisited);
+      walkTree(inp.item, inputRate, myName, depth + 1, newVisited);
     }
   }
 
   const targetRate = parseFloat(document.getElementById("rate-input").value);
-  walkTree(state.selectedItem, targetRate, '', new Set());
+  walkTree(state.selectedItem, targetRate, '', 0, new Set());
 
-  // Build expanded steps: for each item in build order, emit one step per demand
   for (const entry of buildOrder) {
     const demands = itemDemands[entry.itemId];
     if (demands && demands.length > 1) {
-      // Multiple consumers — split into separate steps
       for (const demand of demands) {
-        expandedSteps.push({ ...entry, rate: demand.rate, splitFor: demand.label });
+        expandedSteps.push({ ...entry, rate: demand.rate, splitFor: demand.label, depth: demand.depth, chainDepth: demand.chainDepth });
       }
     } else if (demands && demands.length === 1 && demands[0].label) {
-      expandedSteps.push({ ...entry, rate: demands[0].rate, splitFor: demands[0].label });
+      expandedSteps.push({ ...entry, rate: demands[0].rate, splitFor: demands[0].label, depth: demands[0].depth, chainDepth: demands[0].chainDepth });
+    } else if (demands && demands.length === 1) {
+      expandedSteps.push({ ...entry, rate: demands[0].rate, depth: demands[0].depth, chainDepth: demands[0].chainDepth });
     } else {
       expandedSteps.push(entry);
     }
   }
 
   // Split into Blueprints (non-raw) and Raw Resource Connections (raw)
-  const blueprintSteps = expandedSteps.filter(e => ITEMS[e.itemId] && e.recipe.inputs.length > 0);
+  let blueprintSteps = expandedSteps.filter(e => ITEMS[e.itemId] && e.recipe.inputs.length > 0);
   const rawSteps = expandedSteps.filter(e => ITEMS[e.itemId] && e.recipe.inputs.length === 0);
+
+  // Sort blueprints: deepest chain first (longest path from this node to a leaf),
+  // then by depth descending (deepest in the tree first within same chain length)
+  blueprintSteps.sort((a, b) => {
+    const aChain = a.chainDepth || 0;
+    const bChain = b.chainDepth || 0;
+    if (aChain !== bChain) return bChain - aChain; // longest chain first
+    const aDepth = a.depth || 0;
+    const bDepth = b.depth || 0;
+    return bDepth - aDepth; // deepest in tree first
+  });
   const allSteps = [...blueprintSteps, ...rawSteps];
   const totalSteps = allSteps.length;
 
