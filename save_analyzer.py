@@ -295,6 +295,45 @@ def main():
             if len(result["recommendations"]["next_buildings"]) >= 5:
                 break
 
+        # --- Export raw data for client-side use ---
+        # Map all known item proto IDs to names
+        ITEM_ID_TO_NAME = {
+            1101: "Iron Ingot", 1102: "Copper Ingot", 1104: "Magnet",
+            1105: "Titanium Ingot", 1106: "Steel", 1108: "Stone Brick",
+            1109: "Glass", 1110: "Energetic Graphite", 1112: "High-Purity Silicon",
+            1113: "Diamond", 1114: "Crystal Silicon", 1115: "Titanium Alloy",
+            1120: "Refined Oil", 1121: "Sulfuric Acid",
+            1201: "Gear", 1202: "Magnetic Coil", 1203: "Electric Motor",
+            1204: "Electromagnetic Turbine", 1205: "Super-Magnetic Ring",
+            1206: "Particle Container", 1207: "Strange Matter",
+            1208: "Graviton Lens", 1209: "Space Warper",
+            1301: "Circuit Board", 1302: "Processor", 1303: "Quantum Chip",
+            1304: "Microcrystalline Component", 1305: "Plane Filter",
+            1401: "Plastic", 1402: "Graphene", 1403: "Carbon Nanotube",
+            1404: "Organic Crystal", 1405: "Titanium Crystal", 1406: "Casimir Crystal",
+            1501: "Prism", 1502: "Plasma Exciter", 1503: "Photon Combiner",
+            1141: "Particle Broadband", 1142: "Titanium Glass",
+            1143: "Annihilation Constraint Sphere",
+            1601: "Proliferator Mk.I", 1602: "Proliferator Mk.II", 1603: "Proliferator Mk.III",
+            1801: "Hydrogen Fuel Rod", 1802: "Deuteron Fuel Rod", 1803: "Antimatter Fuel Rod",
+            1804: "Foundation",
+            1901: "Electromagnetic Matrix", 1902: "Energy Matrix", 1903: "Structure Matrix",
+            1904: "Information Matrix", 1905: "Gravity Matrix", 1906: "Universe Matrix",
+            5001: "Solar Sail", 5002: "Small Carrier Rocket",
+            5003: "Frame Material", 5004: "Dyson Sphere Component",
+        }
+        # Merge building IDs
+        ITEM_ID_TO_NAME.update(BUILDING_ITEM_IDS)
+
+        automated_names = sorted(set(
+            ITEM_ID_TO_NAME.get(pid, f"Unknown ({pid})")
+            for pid in automated_product_ids
+            if pid in ITEM_ID_TO_NAME
+        ))
+        result["automated_product_ids"] = sorted(list(automated_product_ids))
+        result["automated_product_names"] = automated_names
+        result["building_counts"] = building_counts
+
     except Exception as e:
         result["error_detail"] = f"Analysis partially failed: {str(e)}"
         result["traceback"] = traceback.format_exc()

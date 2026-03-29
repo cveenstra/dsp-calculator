@@ -2933,6 +2933,7 @@ const state = {
   smelterTier: "arcSmelter",
   chemicalTier: "chemicalPlant",
   deuteriumSource: "fractionator",
+  saveData: null, // populated when save analyzer runs
 };
 
 // Build the searchable item dropdown
@@ -3158,8 +3159,15 @@ function renderBlueprints(requirements) {
     }
   }
 
-  // Compute 1-building rate for each
+  // Check save data for automation status
+  const automatedNames = state.saveData?.automated_product_names
+    ? new Set(state.saveData.automated_product_names)
+    : null;
+
   let html = '';
+  if (automatedNames) {
+    html += `<div style="font-size:0.9rem;color:var(--text-muted);margin-bottom:12px;padding:8px 12px;background:rgba(105,67,255,0.06);border-radius:6px;border:1px solid rgba(105,67,255,0.1)">Save file loaded &mdash; <span style="color:var(--neon-green)">green</span> = automated in your save, <span style="color:var(--neon-pink)">red</span> = not yet automated</div>`;
+  }
 
   // Group by depth
   let currentDepth = -1;
@@ -3179,14 +3187,23 @@ function renderBlueprints(requirements) {
     const tierLabel = state.assemblerTier === 'assemblerMk1' ? 'T1' : state.assemblerTier === 'assemblerMk2' ? 'T2' : 'T3';
     const bpName = p.item.name.replace(/\s+/g, '-') + '_' + tierLabel + '_' + Math.round(rate) + 'pm';
 
-    // Recipe pills
+    // Save status
+    let saveStatus = '';
+    if (automatedNames) {
+      const isAutomated = automatedNames.has(p.item.name);
+      if (isAutomated) {
+        saveStatus = `<span style="font-family:var(--font-display);font-size:0.6rem;letter-spacing:1px;padding:2px 7px;border-radius:3px;background:rgba(165,255,144,0.12);color:var(--neon-green);border:1px solid rgba(165,255,144,0.2)">IN SAVE</span>`;
+      } else {
+        saveStatus = `<span style="font-family:var(--font-display);font-size:0.6rem;letter-spacing:1px;padding:2px 7px;border-radius:3px;background:rgba(255,44,112,0.1);color:var(--neon-pink);border:1px solid rgba(255,44,112,0.2)">NOT AUTOMATED</span>`;
+      }
+    }
+
     const inputPills = p.recipe.inputs.map(inp => {
       const iItem = ITEMS[inp.item];
       return `<span class="recipe-pill" style="margin:2px 0"><span class="pill-qty">${inp.qty}x</span>${iconImg(iItem ? iItem.name : inp.item, 16)}<span class="pill-name">${iItem ? iItem.name : inp.item}</span></span>`;
     }).join('<span class="recipe-pill pill-times">+</span>');
     const outputPill = `<span class="recipe-pill output-pill" style="margin:2px 0"><span class="pill-qty">${outputQty}x</span>${iconImg(p.item.name, 16)}<span class="pill-name">${p.item.name}</span></span>`;
 
-    // Composes into
     const composesInto = usedIn[p.itemId];
     let composesHtml = '';
     if (composesInto && composesInto.length > 0) {
@@ -3200,13 +3217,14 @@ function renderBlueprints(requirements) {
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
             ${iconImg(p.item.name, 24)}
             <span class="ency-card-title" style="font-size:1.05rem">${p.item.name}</span>
+            ${saveStatus}
             <span style="font-family:var(--font-display);font-size:0.7rem;color:var(--neon-purple);letter-spacing:1px">${Math.round(rate)}/min</span>
             <span style="font-family:var(--font-display);font-size:0.65rem;color:var(--text-muted);letter-spacing:1px">1x ${buildingName}</span>
           </div>
           <span class="ency-card-toggle">&#9660;</span>
         </div>
         <div class="ency-card-body">
-          <div style="font-family:Monaco,monospace;font-size:13px;color:var(--neon-purple);margin-bottom:8px">Save as: <span style="color:var(--text-primary)">${bpName}</span></div>
+          <div style="font-family:Monaco,monospace;font-size:14px;color:var(--neon-purple);margin-bottom:8px">${bpName}</div>
           <div class="recipe-pills" style="margin:8px 0">${inputPills}<span class="recipe-arrow">&rarr;</span>${outputPill}<span style="color:var(--text-muted);font-size:0.85rem;margin-left:8px">${iconImg(buildingName, 14)}${buildingName} (${p.recipe.time}s)</span></div>
           ${composesHtml}
           <div style="margin-top:8px"><a href="#" class="bp-calc-link" data-item="${p.itemId}" style="color:var(--neon-gold);text-decoration:underline;cursor:pointer;font-size:0.95rem">View full build sequence &rarr;</a></div>
@@ -4477,6 +4495,7 @@ function setupAnalyzer() {
 
     try {
       const data = await window.electronAPI.analyzeSave(selectedPath);
+      if (data.success) state.saveData = data;
 
       if (data.error) {
         let errorHtml = `<div class="analyzer-error">${data.error}`;
