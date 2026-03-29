@@ -4587,6 +4587,11 @@ function setupAnalyzer() {
         });
       });
 
+      // Re-render Happy Little Trees results if they exist, so badges appear
+      if (state.selectedItem && document.getElementById('results-section').style.display !== 'none') {
+        document.getElementById('calc-btn').click();
+      }
+
     } catch (err) {
       resultsEl.innerHTML = `<div class="analyzer-error">Analysis failed: ${err.message || err}</div>`;
     }
