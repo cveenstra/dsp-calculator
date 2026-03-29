@@ -3049,7 +3049,7 @@ function renderResults(requirements) {
   document.getElementById("empty-state").style.display = "none";
 
   renderChainCards(buildOrder);
-  renderBlueprints();
+  renderBlueprints(requirements);
   renderBuildTimeline(buildOrder);
   renderRawSummary(buildOrder);
   renderDepTree(buildOrder);
@@ -3111,13 +3111,15 @@ function renderChainCards(buildOrder) {
   });
 }
 
-function renderBlueprints() {
+function renderBlueprints(requirements) {
   const container = document.getElementById("blueprints-list");
+  const reqItemIds = new Set(Object.keys(requirements));
 
-  // Gather all non-raw producible items (everything that has a recipe with inputs)
+  // Only show items that are in the current production chain (non-raw)
   const allProducible = [];
   for (const [itemId, item] of Object.entries(ITEMS)) {
     if (item.category === 'raw') continue;
+    if (!reqItemIds.has(itemId)) continue;
     const recipe = getActiveRecipe(itemId);
     if (!recipe || recipe.inputs.length === 0) continue;
     allProducible.push({ itemId, item, recipe });
