@@ -3000,7 +3000,7 @@ function renderResults(requirements) {
   renderChainCards(buildOrder);
   renderBuildTimeline(buildOrder);
   renderRawSummary(buildOrder);
-  renderDepTree(requirements);
+  renderDepTree(buildOrder);
   renderMathBreakdown(buildOrder);
 }
 
@@ -3232,7 +3232,7 @@ function renderRawSummary(buildOrder) {
   container.innerHTML = html;
 }
 
-function renderDepTree(requirements) {
+function renderDepTree(buildOrder) {
   const canvas = document.getElementById("dep-tree-canvas");
   const ctx = canvas.getContext("2d");
   const dpr = window.devicePixelRatio || 1;
@@ -3240,91 +3240,70 @@ function renderDepTree(requirements) {
   const targetRate = parseFloat(document.getElementById("rate-input").value);
   const depthColors = ['#FAD000', '#B362FF', '#A5FF90', '#9EFFFF', '#FB94FF', '#FF2C70'];
 
-  // Layout constants
   const NODE_W = 190, NODE_H = 72, H_GAP = 40, V_GAP = 90;
   const FONT_NAME = '15px Nunito, sans-serif';
   const FONT_RATE = '12px Orbitron, sans-serif';
   const FONT_BUILD = '11px Orbitron, sans-serif';
 
-  // Build tree as a DAG — each item appears only once, with its total
-  // rate from the calculator. Children are the recipe's direct inputs.
-  const builtNodes = {}; // itemId -> node (deduplication)
-
-  function buildTree(itemId, depth) {
-    if (builtNodes[itemId]) return builtNodes[itemId];
-
+  // Build the tree the same way the build sequence does — full recursive
+  // expansion where shared items appear once per consumer branch.
+  function buildTree(itemId, rate, depth, visited) {
     const item = ITEMS[itemId];
     if (!item) return null;
-    const req = requirements[itemId];
-    if (!req) return null;
-    const recipe = req.recipe;
-    const building = req.building;
-    const buildingsNeeded = Math.ceil(req.buildings);
+    const entry = buildOrder.find(e => e.itemId === itemId);
+    if (!entry) return null;
+    const recipe = entry.recipe;
+    const building = entry.building;
     const isRaw = !recipe || recipe.inputs.length === 0;
 
-    const node = { itemId, item, rate: req.rate, depth, recipe, building, buildingsNeeded, isRaw, children: [], x: 0, y: 0, subtreeWidth: 0 };
-    builtNodes[itemId] = node; // register before recursing to prevent cycles
+    // Compute building count from this branch's rate
+    const outputQty = recipe ? (recipe.outputs.find(o => o.item === itemId)?.qty || 1) : 1;
+    const buildingSpeed = building ? building.speed : 1;
+    const craftsPerMin = rate / outputQty;
+    const craftsPerBuilding = (60 / recipe.time) * buildingSpeed;
+    const buildingsNeeded = Math.ceil(craftsPerMin / craftsPerBuilding);
 
-    if (!isRaw && recipe.inputs.length > 0) {
+    const node = { itemId, item, rate, depth, building, buildingsNeeded, isRaw, children: [], x: 0, y: 0, subtreeWidth: 0 };
+
+    if (!isRaw && recipe.inputs.length > 0 && !visited.has(itemId)) {
+      const newVisited = new Set(visited);
+      newVisited.add(itemId);
       for (const inp of recipe.inputs) {
-        const child = buildTree(inp.item, depth + 1);
+        const childRate = (inp.qty / outputQty) * rate;
+        const child = buildTree(inp.item, childRate, depth + 1, newVisited);
         if (child) node.children.push(child);
       }
     }
     return node;
   }
 
-  const tree = buildTree(targetItem, 0);
+  const tree = buildTree(targetItem, targetRate, 0, new Set());
   if (!tree) return;
 
-  // Pass 1: compute subtree widths bottom-up (DAG-safe)
-  const widthDone = new Set();
+  // Layout pass 1: subtree widths
   function computeWidths(node) {
-    if (widthDone.has(node.itemId)) {
-      // Already computed — this is a shared node, don't count width again
-      node.subtreeWidth = 0;
-      return;
-    }
-    widthDone.add(node.itemId);
-    if (node.children.length === 0) {
-      node.subtreeWidth = NODE_W;
-      return;
-    }
+    if (node.children.length === 0) { node.subtreeWidth = NODE_W; return; }
     for (const child of node.children) computeWidths(child);
-    const activeChildren = node.children.filter(c => c.subtreeWidth > 0);
-    if (activeChildren.length === 0) {
-      node.subtreeWidth = NODE_W;
-      return;
-    }
-    const childrenWidth = activeChildren.reduce((s, c) => s + c.subtreeWidth, 0) + H_GAP * (activeChildren.length - 1);
-    node.subtreeWidth = Math.max(NODE_W, childrenWidth);
+    const cw = node.children.reduce((s, c) => s + c.subtreeWidth, 0) + H_GAP * (node.children.length - 1);
+    node.subtreeWidth = Math.max(NODE_W, cw);
   }
   computeWidths(tree);
 
-  // Pass 2: assign x, y positions (DAG-safe)
-  const posDone = new Set();
+  // Layout pass 2: positions
   function assignPositions(node, left, top) {
-    if (posDone.has(node.itemId)) return;
-    posDone.add(node.itemId);
     node.y = top;
     node.x = left + node.subtreeWidth / 2 - NODE_W / 2;
-
     let childLeft = left;
     for (const child of node.children) {
-      if (child.subtreeWidth > 0 && !posDone.has(child.itemId)) {
-        assignPositions(child, childLeft, top + NODE_H + V_GAP);
-        childLeft += child.subtreeWidth + H_GAP;
-      }
+      assignPositions(child, childLeft, top + NODE_H + V_GAP);
+      childLeft += child.subtreeWidth + H_GAP;
     }
   }
   assignPositions(tree, 0, 0);
 
-  // Compute canvas size from tree bounds (DAG-safe)
-  const boundsDone = new Set();
+  // Canvas bounds
   function findBounds(node) {
     let maxX = node.x + NODE_W, maxY = node.y + NODE_H;
-    if (boundsDone.has(node.itemId)) return { maxX, maxY };
-    boundsDone.add(node.itemId);
     for (const child of node.children) {
       const b = findBounds(child);
       maxX = Math.max(maxX, b.maxX);
@@ -3344,13 +3323,10 @@ function renderDepTree(requirements) {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.clearRect(0, 0, canvasW, canvasH);
 
-  const ox = PAD, oy = PAD; // offset
+  const ox = PAD, oy = PAD;
 
-  // Draw edges (DAG-safe — draw all edges but only recurse into unvisited)
-  const edgesDone = new Set();
+  // Draw edges
   function drawEdges(node) {
-    if (edgesDone.has(node.itemId)) return;
-    edgesDone.add(node.itemId);
     const px = ox + node.x + NODE_W / 2;
     const py = oy + node.y + NODE_H;
     for (const child of node.children) {
@@ -3360,25 +3336,14 @@ function renderDepTree(requirements) {
       const midY = (py + cy) / 2;
 
       ctx.strokeStyle = color;
-      ctx.globalAlpha = 0.08;
-      ctx.lineWidth = 6;
-      ctx.beginPath();
-      ctx.moveTo(px, py);
-      ctx.bezierCurveTo(px, midY, cx, midY, cx, cy);
-      ctx.stroke();
+      ctx.globalAlpha = 0.08; ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.moveTo(px, py); ctx.bezierCurveTo(px, midY, cx, midY, cx, cy); ctx.stroke();
 
-      ctx.globalAlpha = 0.6;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(px, py);
-      ctx.bezierCurveTo(px, midY, cx, midY, cx, cy);
-      ctx.stroke();
+      ctx.globalAlpha = 0.6; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(px, py); ctx.bezierCurveTo(px, midY, cx, midY, cx, cy); ctx.stroke();
 
-      ctx.globalAlpha = 0.5;
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.arc(cx, cy, 3, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.globalAlpha = 0.5; ctx.fillStyle = color;
+      ctx.beginPath(); ctx.arc(cx, cy, 3, 0, Math.PI * 2); ctx.fill();
 
       ctx.globalAlpha = 1;
       drawEdges(child);
@@ -3387,86 +3352,46 @@ function renderDepTree(requirements) {
   drawEdges(tree);
 
   // Draw nodes
-  function drawNode(node) {
-    const x = ox + node.x;
-    const y = oy + node.y;
-    const d = Math.min(node.depth, depthColors.length - 1);
-    const glowColor = depthColors[d];
-
-    // Card background
-    ctx.globalAlpha = 0.75;
-    ctx.fillStyle = '#12123a';
-    ctx.beginPath();
-    ctx.roundRect(x, y, NODE_W, NODE_H, 8);
-    ctx.fill();
-
-    // Border
-    ctx.globalAlpha = 0.35;
-    ctx.strokeStyle = glowColor;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.roundRect(x, y, NODE_W, NODE_H, 8);
-    ctx.stroke();
-
-    // Top glow bar
-    ctx.globalAlpha = 0.9;
-    ctx.fillStyle = glowColor;
-    ctx.beginPath();
-    ctx.roundRect(x, y, NODE_W, 2.5, [8, 8, 0, 0]);
-    ctx.fill();
-
-    ctx.globalAlpha = 1;
-
-    // Dot
-    ctx.fillStyle = node.item.color;
-    ctx.shadowColor = node.item.color;
-    ctx.shadowBlur = 8;
-    ctx.beginPath();
-    ctx.arc(x + 14, y + 18, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-
-    // Name
-    ctx.font = 'bold ' + FONT_NAME;
-    ctx.fillStyle = node.depth === 0 ? '#FAD000' : '#EEEEFF';
-    ctx.textAlign = 'left';
-    ctx.fillText(truncate(node.item.name, 20), x + 26, y + 22);
-
-    // Rate
-    ctx.font = FONT_RATE;
-    ctx.fillStyle = '#FAD000';
-    ctx.fillText(node.rate.toFixed(1) + '/min', x + 14, y + 42);
-
-    // Buildings
-    ctx.font = FONT_BUILD;
-    ctx.fillStyle = '#B362FF';
-    const bldgText = node.buildingsNeeded + 'x ' + (node.building ? node.building.name : 'Extractor');
-    ctx.fillText(truncate(bldgText, 26), x + 14, y + 58);
-
-    // Raw indicator
-    if (node.isRaw) {
-      ctx.globalAlpha = 0.3;
-      ctx.setLineDash([4, 3]);
-      ctx.strokeStyle = '#FAD000';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.roundRect(x + 1, y + 1, NODE_W - 2, NODE_H - 2, 7);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.globalAlpha = 1;
-    }
-
-    if (!drawNodeDone.has(node.itemId)) {
-      drawNodeDone.add(node.itemId);
-      for (const child of node.children) drawNode(child);
-    }
-  }
-  const drawNodeDone = new Set();
-
   function truncate(str, max) {
     return str.length > max ? str.slice(0, max - 1) + '\u2026' : str;
   }
 
+  function drawNode(node) {
+    const x = ox + node.x, y = oy + node.y;
+    const d = Math.min(node.depth, depthColors.length - 1);
+    const glowColor = depthColors[d];
+
+    ctx.globalAlpha = 0.75; ctx.fillStyle = '#12123a';
+    ctx.beginPath(); ctx.roundRect(x, y, NODE_W, NODE_H, 8); ctx.fill();
+
+    ctx.globalAlpha = 0.35; ctx.strokeStyle = glowColor; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.roundRect(x, y, NODE_W, NODE_H, 8); ctx.stroke();
+
+    ctx.globalAlpha = 0.9; ctx.fillStyle = glowColor;
+    ctx.beginPath(); ctx.roundRect(x, y, NODE_W, 2.5, [8, 8, 0, 0]); ctx.fill();
+
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = node.item.color; ctx.shadowColor = node.item.color; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.arc(x + 14, y + 18, 5, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+
+    ctx.font = 'bold ' + FONT_NAME;
+    ctx.fillStyle = node.depth === 0 ? '#FAD000' : '#EEEEFF'; ctx.textAlign = 'left';
+    ctx.fillText(truncate(node.item.name, 20), x + 26, y + 22);
+
+    ctx.font = FONT_RATE; ctx.fillStyle = '#FAD000';
+    ctx.fillText(node.rate.toFixed(1) + '/min', x + 14, y + 42);
+
+    ctx.font = FONT_BUILD; ctx.fillStyle = '#B362FF';
+    ctx.fillText(truncate(node.buildingsNeeded + 'x ' + (node.building ? node.building.name : 'Extractor'), 26), x + 14, y + 58);
+
+    if (node.isRaw) {
+      ctx.globalAlpha = 0.3; ctx.setLineDash([4, 3]); ctx.strokeStyle = '#FAD000'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect(x + 1, y + 1, NODE_W - 2, NODE_H - 2, 7); ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha = 1;
+    }
+
+    for (const child of node.children) drawNode(child);
+  }
   drawNode(tree);
 }
 
