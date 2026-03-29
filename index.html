@@ -4046,21 +4046,59 @@ const ENCYCLOPEDIA = [
   {
     id: "science", name: "Science Matrix Blueprints", color: "var(--neon-pink)",
     entries: [
-      { title: "EM Matrix Line", phase: "early",
+      { title: "Electromagnetic Matrix", phase: "early", useIcons: true,
         desc: "The simplest matrix. 1 Magnetic Coil + 1 Circuit Board → 1 EM Matrix in 3 seconds.",
         tips: ["This is your first science — rush it", "1 Matrix Lab at 1x does 20/min", "You need surprisingly little — 2-3 labs handles early research fine"],
-        ratios: "30/min EM Matrix:\n  2 Matrix Labs\n  30/min Magnetic Coil (1 Assembler Mk.II)\n  30/min Circuit Board (1 Assembler Mk.II)\n  60/min Iron Ore + 30/min Copper Ore + 30/min Iron Ore (magnets)" },
-      { title: "Energy Matrix Line", phase: "early",
-        desc: "2 Energetic Graphite + 2 Hydrogen → 1 Energy Matrix in 6 seconds. The hydrogen requirement is the main challenge.",
-        tips: ["Get hydrogen from oil refining (byproduct) or gas giant orbital collectors", "Energetic Graphite comes from smelting Coal — easy to automate", "Plan hydrogen logistics early — it's needed for many late-game items too"],
-        ratios: "30/min Energy Matrix:\n  3 Matrix Labs\n  60/min Energetic Graphite (2 Smelters, 120/min Coal)\n  60/min Hydrogen (from Oil Refining or Gas Giant)" },
-      { title: "Universe Matrix Line", phase: "end",
-        desc: "The ultimate science. Requires 1 of every other matrix + 1 Antimatter → 1 Universe Matrix in 15 seconds. This is the endgame production challenge.",
-        tips: ["You need ALL five other matrix production lines running simultaneously", "Antimatter from Particle Collider (2 Hydrogen → 2 Antimatter)", "This is where multi-planet production becomes essential", "Target 10-30/min Universe Matrix for reasonable endgame research speed"],
-        ratios: "10/min Universe Matrix:\n  3 Matrix Labs\n  10/min each: EM, Energy, Structure, Info, Gravity Matrix\n  10/min Antimatter (1 Particle Collider)\n  Gravity Matrix alone needs Graviton Lens + Quantum Chip chains" },
+        recipe: { output: "Electromagnetic Matrix", inputs: ["Magnetic Coil", "Circuit Board"], time: 3, building: "Matrix Lab" },
+        ratios: "30/min Electromagnetic Matrix:\n  2 Matrix Labs\n  30/min Magnetic Coil → 1 Assembler (2 Magnet + 1 Copper Ingot per craft)\n  30/min Circuit Board → 1 Assembler (2 Iron Ingot + 1 Copper Ingot per craft)\n\nTotal raw for 30/min:\n  30/min Iron Ore (for Magnet)\n  30/min Iron Ore (for Iron Ingot → Circuit Board)\n  30/min Copper Ore (split between Coil + Board)" },
+      { title: "Energy Matrix", phase: "early", useIcons: true,
+        desc: "2 Energetic Graphite + 2 Hydrogen → 1 Energy Matrix in 6 seconds. The hydrogen supply is the main challenge.",
+        tips: ["Get Hydrogen from oil refining (byproduct) or gas giant orbital collectors", "Energetic Graphite comes from smelting Coal — easy", "Plan Hydrogen logistics early — many late-game items need it"],
+        recipe: { output: "Energy Matrix", inputs: ["Energetic Graphite", "Hydrogen"], time: 6, building: "Matrix Lab" },
+        ratios: "30/min Energy Matrix:\n  3 Matrix Labs\n  60/min Energetic Graphite → 2 Arc Smelters (120/min Coal)\n  60/min Hydrogen → Oil Refining (2 Crude Oil → 1 Hydrogen + 2 Refined Oil)\n    or Gas Giant Orbital Collector" },
+      { title: "Structure Matrix", phase: "mid", useIcons: true,
+        desc: "1 Diamond + 1 Titanium Crystal → 1 Structure Matrix in 8 seconds. This is the first matrix that requires a long production chain.",
+        tips: ["Diamond comes from smelting Energetic Graphite (same line as Energy Matrix)", "Titanium Crystal requires Organic Crystal + Titanium Ingot", "Organic Crystal is the bottleneck — needs Plastic + Refined Oil + Water from a Chemical Plant", "Set up your oil/chemical chain before attempting this"],
+        recipe: { output: "Structure Matrix", inputs: ["Diamond", "Titanium Crystal"], time: 8, building: "Matrix Lab" },
+        ratios: "30/min Structure Matrix:\n  4 Matrix Labs\n  30/min Diamond → 1 Arc Smelter (30/min Energetic Graphite → 1 Smelter from 60/min Coal)\n  30/min Titanium Crystal → 2 Assemblers\n    30/min Organic Crystal → 5 Chemical Plants\n      60/min Plastic → 3 Chemical Plants (60/min Refined Oil + 30/min E.Graphite)\n      30/min Refined Oil + 30/min Water\n    90/min Titanium Ingot → 3 Arc Smelters (180/min Titanium Ore)" },
+      { title: "Information Matrix", phase: "mid", useIcons: true,
+        desc: "2 Processor + 1 Particle Broadband → 1 Information Matrix in 10 seconds. Deep assembling chain required.",
+        tips: ["Processor = 2 Circuit Board + 2 Microcrystalline Component — set both up first", "Particle Broadband = 2 Carbon Nanotube + 2 Crystal Silicon + 1 Plastic", "Carbon Nanotube needs Graphene + Titanium Ingot from a Chemical Plant", "This matrix forces you to scale your silicon and chemical infrastructure"],
+        recipe: { output: "Information Matrix", inputs: ["Processor", "Particle Broadband"], time: 10, building: "Matrix Lab" },
+        ratios: "30/min Information Matrix:\n  5 Matrix Labs\n  60/min Processor → 3 Assemblers\n    60/min Circuit Board + 60/min Microcrystalline Component\n  30/min Particle Broadband → 4 Assemblers\n    60/min Carbon Nanotube → 2 Chemical Plants (90/min Graphene + 30/min Ti Ingot)\n    60/min Crystal Silicon → 2 Arc Smelters (60/min High-Purity Silicon)\n    30/min Plastic → 2 Chemical Plants" },
+      { title: "Gravity Matrix", phase: "late", useIcons: true,
+        desc: "1 Graviton Lens + 1 Quantum Chip → 2 Gravity Matrix in 24 seconds. The most expensive matrix before Universe.",
+        tips: ["Graviton Lens needs Strange Matter from a Particle Collider — plan Deuterium supply", "Quantum Chip needs Processor + Plane Filter — the deepest assembling chain in the game", "Plane Filter = Casimir Crystal + Titanium Glass — both are multi-step", "This is where multi-planet logistics becomes nearly mandatory"],
+        recipe: { output: "Gravity Matrix", inputs: ["Graviton Lens", "Quantum Chip"], time: 24, building: "Matrix Lab", outputQty: 2 },
+        ratios: "30/min Gravity Matrix:\n  12 Matrix Labs (outputs 2 per craft, 24s → 5/min per lab)\n  15/min Graviton Lens → 2 Assemblers\n    60/min Diamond + 15/min Strange Matter\n    Strange Matter: 2 Particle Colliders (2 Particle Container + 2 Iron Ingot + 10 Deuterium per craft)\n  15/min Quantum Chip → 2 Assemblers\n    30/min Processor + 30/min Plane Filter\n    Plane Filter: 6 Assemblers (1 Casimir Crystal + 2 Titanium Glass per craft, 12s)" },
+      { title: "Universe Matrix", phase: "end", useIcons: true,
+        desc: "1 of every other matrix + 1 Antimatter → 1 Universe Matrix in 15 seconds. The ultimate endgame production challenge.",
+        tips: ["You need ALL five other matrix production lines running simultaneously", "Antimatter from Particle Collider: 2 Hydrogen → 2 Antimatter + 2 Hydrogen (net zero H)", "This is where multi-planet, multi-system production becomes essential", "Target 10-30/min for reasonable endgame research speed"],
+        recipe: { output: "Universe Matrix", inputs: ["Electromagnetic Matrix", "Energy Matrix", "Structure Matrix", "Information Matrix", "Gravity Matrix", "Antimatter"], time: 15, building: "Matrix Lab" },
+        ratios: "10/min Universe Matrix:\n  3 Matrix Labs\n  10/min each of: EM, Energy, Structure, Information, Gravity Matrix\n  10/min Antimatter → 1 Particle Collider (20/min Hydrogen)\n\nTotal infrastructure for 10/min Universe Matrix:\n  ~3 Labs (Universe) + 1 Lab (EM) + 2 Labs (Energy) + 2 Labs (Structure)\n  + 2 Labs (Info) + 4 Labs (Gravity) = ~14 Matrix Labs\n  + dozens of assemblers, smelters, chemical plants, colliders\n  + Deuterium supply (Fractionators or Colliders)\n  + Oil/chemical chain for Plastic, Graphene, Organic Crystal\n  + Titanium chain for Ti Alloy, Ti Crystal, Ti Glass" },
     ]
   },
 ];
+
+// Render a visual recipe block with icons for encyclopedia entries
+function renderRecipeBlock(recipe) {
+  const inputPills = recipe.inputs.map(name =>
+    `<span class="recipe-pill" style="margin:3px 0">${iconImg(name, 20)}<span class="pill-name">${name}</span></span>`
+  ).join('<span class="recipe-pill pill-times">+</span>');
+
+  const outQty = recipe.outputQty || 1;
+  const qtyLabel = outQty > 1 ? `<span class="pill-qty">${outQty}x</span>` : '';
+  const outputPill = `<span class="recipe-pill output-pill" style="margin:3px 0">${qtyLabel}${iconImg(recipe.output, 20)}<span class="pill-name">${recipe.output}</span></span>`;
+
+  const buildingLabel = recipe.building ? `<span style="color:var(--text-muted);font-size:0.9rem;margin-left:8px">in ${iconImg(recipe.building, 18)}${recipe.building} (${recipe.time}s)</span>` : '';
+
+  return `<div class="recipe-pills" style="margin:12px 0;padding:10px 14px;background:rgba(0,0,0,0.2);border-radius:8px;border:1px solid rgba(105,67,255,0.08)">
+    ${inputPills}
+    <span class="recipe-arrow">&rarr;</span>
+    ${outputPill}
+    ${buildingLabel}
+  </div>`;
+}
 
 // Render the Dark Forest encyclopedia
 function renderEncyclopedia() {
@@ -4093,11 +4131,12 @@ function renderEncyclopedia() {
       html += `
         <div class="ency-card">
           <div class="ency-card-header" onclick="this.parentElement.classList.toggle('open')">
-            <div><span class="ency-card-title">${entry.title}</span><span class="ency-card-phase ${phaseClass}">${phaseLabel}</span></div>
+            <div><span class="ency-card-title">${entry.useIcons ? iconImg(entry.title, 24) : ''}${entry.title}</span><span class="ency-card-phase ${phaseClass}">${phaseLabel}</span></div>
             <span class="ency-card-toggle">&#9660;</span>
           </div>
           <div class="ency-card-body">
             <p>${entry.desc}</p>
+            ${entry.recipe ? renderRecipeBlock(entry.recipe) : ''}
             ${tipsHtml}
             ${ratiosHtml}
           </div>
