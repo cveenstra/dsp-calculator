@@ -2934,6 +2934,7 @@ const state = {
   chemicalTier: "chemicalPlant",
   deuteriumSource: "fractionator",
   saveData: null, // populated when save analyzer runs
+  blueprintNames: null, // set of blueprint filenames found on disk
 };
 
 // Build the searchable item dropdown
@@ -3159,14 +3160,12 @@ function renderBlueprints(requirements) {
     }
   }
 
-  // Check save data for automation status
-  const automatedNames = state.saveData?.automated_product_names
-    ? new Set(state.saveData.automated_product_names)
-    : null;
+  // Check for saved blueprints on disk
+  const bpNames = state.blueprintNames;
 
   let html = '';
-  if (automatedNames) {
-    html += `<div style="font-size:0.9rem;color:var(--text-muted);margin-bottom:12px;padding:8px 12px;background:rgba(105,67,255,0.06);border-radius:6px;border:1px solid rgba(105,67,255,0.1)">Save file loaded &mdash; <span style="color:var(--neon-green)">green</span> = automated in your save, <span style="color:var(--neon-pink)">red</span> = not yet automated</div>`;
+  if (bpNames) {
+    html += `<div style="font-size:0.9rem;color:var(--text-muted);margin-bottom:12px;padding:8px 12px;background:rgba(105,67,255,0.06);border-radius:6px;border:1px solid rgba(105,67,255,0.1)">Blueprint folder scanned &mdash; <span style="color:var(--neon-green)">green</span> = blueprint file exists, <span style="color:var(--neon-pink)">red</span> = blueprint not saved yet</div>`;
   }
 
   // Group by depth
@@ -3187,14 +3186,15 @@ function renderBlueprints(requirements) {
     const tierLabel = state.assemblerTier === 'assemblerMk1' ? 'T1' : state.assemblerTier === 'assemblerMk2' ? 'T2' : 'T3';
     const bpName = p.item.name.replace(/\s+/g, '-') + '_' + tierLabel + '_' + Math.round(rate) + 'pm';
 
-    // Save status
+    // Blueprint file status
     let saveStatus = '';
-    if (automatedNames) {
-      const isAutomated = automatedNames.has(p.item.name);
-      if (isAutomated) {
-        saveStatus = `<span style="font-family:var(--font-display);font-size:0.6rem;letter-spacing:1px;padding:2px 7px;border-radius:3px;background:rgba(165,255,144,0.12);color:var(--neon-green);border:1px solid rgba(165,255,144,0.2)">IN SAVE</span>`;
+    if (bpNames) {
+      // Check if any blueprint file contains this name (partial match)
+      const hasBlueprint = [...bpNames].some(n => n.includes(bpName) || n.includes(p.item.name.replace(/\s+/g, '-')));
+      if (hasBlueprint) {
+        saveStatus = `<span style="font-family:var(--font-display);font-size:0.6rem;letter-spacing:1px;padding:2px 7px;border-radius:3px;background:rgba(165,255,144,0.12);color:var(--neon-green);border:1px solid rgba(165,255,144,0.2)">BLUEPRINT SAVED</span>`;
       } else {
-        saveStatus = `<span style="font-family:var(--font-display);font-size:0.6rem;letter-spacing:1px;padding:2px 7px;border-radius:3px;background:rgba(255,44,112,0.1);color:var(--neon-pink);border:1px solid rgba(255,44,112,0.2)">NOT AUTOMATED</span>`;
+        saveStatus = `<span style="font-family:var(--font-display);font-size:0.6rem;letter-spacing:1px;padding:2px 7px;border-radius:3px;background:rgba(255,44,112,0.1);color:var(--neon-pink);border:1px solid rgba(255,44,112,0.2)">NO BLUEPRINT</span>`;
       }
     }
 
@@ -3341,7 +3341,7 @@ function renderBuildTimeline(buildOrder) {
   const targetShort = targetName.replace(/\s+/g, '-');
   const tierLabel = state.assemblerTier === 'assemblerMk1' ? 'T1' : state.assemblerTier === 'assemblerMk2' ? 'T2' : 'T3';
   const rateLabel = Math.round(parseFloat(document.getElementById("rate-input").value));
-  const automatedNames = state.saveData?.automated_product_names ? new Set(state.saveData.automated_product_names) : null;
+  const bpNames = state.blueprintNames;
 
   // Progress bar
   const progressDiv = document.createElement("div");
@@ -3429,11 +3429,11 @@ function renderBuildTimeline(buildOrder) {
       const bpItemRate = getOneBuildingRate(entry.itemId);
       const bpName = item.name.replace(/\s+/g, '-') + '_' + tierLabel + '_' + Math.round(bpItemRate) + 'pm';
       let saveTag = '';
-      if (automatedNames) {
-        const inSave = automatedNames.has(item.name);
-        saveTag = inSave
-          ? ` <span style="font-family:var(--font-display);font-size:0.58rem;letter-spacing:1px;padding:1px 6px;border-radius:3px;background:rgba(165,255,144,0.12);color:var(--neon-green);border:1px solid rgba(165,255,144,0.2)">IN SAVE</span>`
-          : ` <span style="font-family:var(--font-display);font-size:0.58rem;letter-spacing:1px;padding:1px 6px;border-radius:3px;background:rgba(255,44,112,0.1);color:var(--neon-pink);border:1px solid rgba(255,44,112,0.2)">NOT AUTOMATED</span>`;
+      if (bpNames) {
+        const hasBlueprint = [...bpNames].some(n => n.includes(bpName) || n.includes(item.name.replace(/\s+/g, '-')));
+        saveTag = hasBlueprint
+          ? ` <span style="font-family:var(--font-display);font-size:0.58rem;letter-spacing:1px;padding:1px 6px;border-radius:3px;background:rgba(165,255,144,0.12);color:var(--neon-green);border:1px solid rgba(165,255,144,0.2)">BLUEPRINT SAVED</span>`
+          : ` <span style="font-family:var(--font-display);font-size:0.58rem;letter-spacing:1px;padding:1px 6px;border-radius:3px;background:rgba(255,44,112,0.1);color:var(--neon-pink);border:1px solid rgba(255,44,112,0.2)">NO BLUEPRINT</span>`;
       }
       bpLine = `<div style="font-family:Monaco,monospace;font-size:12px;color:var(--neon-purple);margin-top:4px">${bpName}${saveTag}</div>`;
     }
@@ -4511,7 +4511,22 @@ function setupAnalyzer() {
 
     try {
       const data = await window.electronAPI.analyzeSave(selectedPath);
-      if (data.success) state.saveData = data;
+      if (data.success) {
+        state.saveData = data;
+        // Scan for blueprint files — blueprints folder is sibling of Save folder
+        if (window.electronAPI?.scanBlueprints && selectedPath) {
+          // selectedPath is like .../Dyson Sphere Program/Save/file.dsv
+          // blueprints are at .../Dyson Sphere Program/Blueprint/ or .../Blueprints/
+          const saveDir = selectedPath.replace(/[/\\][^/\\]+$/, ''); // strip filename
+          const dspRoot = saveDir.replace(/[/\\]Save$/i, '');       // strip /Save
+          const bpResults = await Promise.all([
+            window.electronAPI.scanBlueprints(dspRoot + '/Blueprint'),
+            window.electronAPI.scanBlueprints(dspRoot + '/Blueprints'),
+          ]);
+          const allNames = [...(bpResults[0]?.names || []), ...(bpResults[1]?.names || [])];
+          state.blueprintNames = new Set(allNames);
+        }
+      }
 
       if (data.error) {
         let errorHtml = `<div class="analyzer-error">${data.error}`;

@@ -136,6 +136,23 @@ ipcMain.handle('save:analyze', async (event, filePath) => {
   });
 });
 
+// Scan blueprints directory for saved blueprint filenames
+ipcMain.handle('blueprints:scan', async (event, blueprintDir) => {
+  try {
+    if (!blueprintDir || !fs.existsSync(blueprintDir)) {
+      return { names: [] };
+    }
+    const files = fs.readdirSync(blueprintDir);
+    // Blueprint files can be .txt or other formats, collect all names without extension
+    const names = files
+      .filter(f => !f.startsWith('.') && f !== 'steam_autocloud.vdf')
+      .map(f => f.replace(/\.[^.]+$/, '')); // strip extension
+    return { names };
+  } catch (e) {
+    return { names: [], error: e.message };
+  }
+});
+
 // Settings persistence
 ipcMain.handle('settings:get', async () => {
   try {

@@ -9,6 +9,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // Save file operations
   openSaveFile: () => ipcRenderer.invoke('dialog:open-save-file'),
   analyzeSave: (filePath) => ipcRenderer.invoke('save:analyze', filePath),
+  // Blueprints
+  scanBlueprints: (dir) => ipcRenderer.invoke('blueprints:scan', dir),
   // Settings
   getSettings: () => ipcRenderer.invoke('settings:get'),
   setSettings: (data) => ipcRenderer.invoke('settings:set', data),
