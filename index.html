@@ -3218,16 +3218,12 @@ function renderBuildTimeline(buildOrder) {
   const namingDiv = document.createElement("div");
   namingDiv.style.cssText = "margin-bottom:16px;padding:14px 18px;background:rgba(0,0,0,0.2);border:1px solid rgba(105,67,255,0.1);border-radius:8px;";
   namingDiv.innerHTML = `
-    <div style="font-family:var(--font-display);font-size:0.82rem;color:var(--neon-gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Blueprint Naming Convention</div>
-    <div style="font-family:Monaco,monospace;font-size:15px;color:var(--neon-purple);line-height:1.8">
-      <span style="color:var(--text-primary)">${targetShort}</span>_<span style="color:var(--neon-green)">${tierLabel}</span>_<span style="color:var(--neon-cyan)">${rateLabel}pm</span>_<span style="color:var(--text-muted)">[step]</span>
+    <div style="font-family:var(--font-display);font-size:0.82rem;color:var(--neon-gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Blueprint Name</div>
+    <div style="font-family:Monaco,monospace;font-size:17px;color:var(--neon-purple);line-height:1.8">
+      ${iconImg(targetName, 22)}<span style="color:var(--text-primary)">${targetShort}</span>_<span style="color:var(--neon-green)">${tierLabel}</span>_<span style="color:var(--neon-cyan)">${rateLabel}pm</span>
     </div>
     <div style="font-size:0.95rem;color:var(--text-muted);margin-top:6px;line-height:1.6">
-      Save each blueprint in-game using this pattern. Examples:<br>
-      <span style="color:var(--text-primary);font-family:Monaco,monospace;font-size:14px">
-        ${targetShort}_${tierLabel}_${rateLabel}pm_01-${blueprintSteps[0] ? ITEMS[blueprintSteps[0].itemId]?.name.replace(/\s+/g,'-') : 'Main'}<br>
-        ${targetShort}_${tierLabel}_${rateLabel}pm_02-${blueprintSteps[1] ? ITEMS[blueprintSteps[1].itemId]?.name.replace(/\s+/g,'-') : 'Sub'}<br>
-      </span>
+      Save your blueprint in-game as: <span style="color:var(--text-primary);font-family:Monaco,monospace;font-size:15px">${targetShort}_${tierLabel}_${rateLabel}pm</span>
     </div>
   `;
   timeline.appendChild(namingDiv);
@@ -3264,8 +3260,6 @@ function renderBuildTimeline(buildOrder) {
       const craftsPerBuilding = (60 / entry.recipe.time) * buildingSpeed;
       const buildingsNeeded = Math.ceil(craftsPerMin / craftsPerBuilding);
       const feedsLabel = entry.splitFor ? ` to feed <span class="highlight">${entry.splitFor}</span>` : '';
-      const bpName = `${targetShort}_${tierLabel}_${rateLabel}pm_${String(stepNum).padStart(2,'0')}-${item.name.replace(/\s+/g,'-')}`;
-
       const inputPills = entry.recipe.inputs.map(inp => {
         const inputItem = ITEMS[inp.item];
         const color = inputItem ? inputItem.color : '#888';
@@ -3278,7 +3272,6 @@ function renderBuildTimeline(buildOrder) {
       recipePills = `<div class="recipe-pills">${inputPills.join('<span class="recipe-pill pill-times">+</span>')}<span class="recipe-arrow">&rarr;</span>${outputPill}</div>`;
 
       detail = `Build <span class="highlight">${buildingsNeeded}x ${building ? building.name : "Building"}</span> for <span class="highlight">${item.name}</span> &mdash; <span class="highlight">${entry.rate.toFixed(1)}/min</span>${feedsLabel}`;
-      detail += `<div style="margin-top:6px;font-family:Monaco,monospace;font-size:12px;color:var(--text-muted)">Save as: <span style="color:var(--neon-purple)">${bpName}</span></div>`;
     }
 
     step.innerHTML = `
