@@ -3063,51 +3063,50 @@ function renderBuildTimeline(buildOrder) {
   const timeline = document.getElementById("build-timeline");
   timeline.innerHTML = "";
 
-  // Expand raw resources: walk the full dependency tree from the target
-  // to find every leaf-level raw resource occurrence with its chain path.
-  // Each occurrence becomes its own miner step.
+  // Walk the full dependency tree and collect every occurrence of every
+  // item as its own build step. If Iron Ingot is needed by both Gear and
+  // Circuit Board, you get two separate smelter steps — one for each.
+  // Same for miners, assemblers, everything.
   const expandedSteps = [];
-  const rawItemIds = new Set(buildOrder.filter(e => e.category === "raw").map(e => e.itemId));
+  const itemDemands = {}; // itemId -> [ { label, rate } ]
 
-  // Walk tree recursively to collect raw demands with their chain label
-  const rawDemands = {}; // rawItemId -> [ { label, rate } ]
-  function walkTree(itemId, rate, chainLabel, visited) {
+  function walkTree(itemId, rate, parentLabel, visited) {
     const entry = buildOrder.find(e => e.itemId === itemId);
     if (!entry) return;
     const recipe = entry.recipe;
     if (!recipe) return;
-    if (recipe.inputs.length === 0) {
-      // This is a raw resource — record it with the chain label
-      if (!rawDemands[itemId]) rawDemands[itemId] = [];
-      rawDemands[itemId].push({ label: chainLabel, rate });
-      return;
-    }
+
+    // Record this demand
+    if (!itemDemands[itemId]) itemDemands[itemId] = [];
+    itemDemands[itemId].push({ label: parentLabel, rate });
+
+    // Don't recurse into items we've already visited on this path (cycle protection)
+    if (recipe.inputs.length === 0) return;
     if (visited.has(itemId)) return;
     const newVisited = new Set(visited);
     newVisited.add(itemId);
+
     const outputQty = recipe.outputs.find(o => o.item === itemId)?.qty || 1;
+    const myName = ITEMS[itemId]?.name || itemId;
     for (const inp of recipe.inputs) {
       const inputRate = (inp.qty / outputQty) * rate;
-      const inputName = ITEMS[inp.item]?.name || inp.item;
-      const parentName = ITEMS[itemId]?.name || itemId;
-      const label = chainLabel ? chainLabel : parentName;
-      walkTree(inp.item, inputRate, label, newVisited);
+      walkTree(inp.item, inputRate, myName, newVisited);
     }
   }
 
   const targetRate = parseFloat(document.getElementById("rate-input").value);
   walkTree(state.selectedItem, targetRate, '', new Set());
 
+  // Build expanded steps: for each item in build order, emit one step per demand
   for (const entry of buildOrder) {
-    if (entry.category === "raw") {
-      const demands = rawDemands[entry.itemId];
-      if (demands && demands.length > 0) {
-        for (const demand of demands) {
-          expandedSteps.push({ ...entry, rate: demand.rate, splitFor: demand.label });
-        }
-      } else {
-        expandedSteps.push(entry);
+    const demands = itemDemands[entry.itemId];
+    if (demands && demands.length > 1) {
+      // Multiple consumers — split into separate steps
+      for (const demand of demands) {
+        expandedSteps.push({ ...entry, rate: demand.rate, splitFor: demand.label });
       }
+    } else if (demands && demands.length === 1 && demands[0].label) {
+      expandedSteps.push({ ...entry, rate: demands[0].rate, splitFor: demands[0].label });
     } else {
       expandedSteps.push(entry);
     }
@@ -3153,8 +3152,13 @@ function renderBuildTimeline(buildOrder) {
       const feedsLabel = entry.splitFor ? ` to feed <span class="highlight">${entry.splitFor}</span>` : '';
       detail = `Place <span class="highlight">${minersNeeded}x ${building ? building.name : "Extractor"}</span> for <span class="highlight">${item.name}</span> at <span class="highlight">${entry.rate.toFixed(1)}/min</span>${feedsLabel}`;
     } else {
-      const buildingsNeeded = Math.ceil(entry.buildings);
+      // Recalculate building count from the split rate (not the combined total)
       const outputQty = entry.recipe.outputs.find(o => o.item === entry.itemId)?.qty || 1;
+      const buildingSpeed = building ? building.speed : 1;
+      const craftsPerMin = entry.rate / outputQty;
+      const craftsPerBuilding = (60 / entry.recipe.time) * buildingSpeed;
+      const buildingsNeeded = Math.ceil(craftsPerMin / craftsPerBuilding);
+      const feedsLabel = entry.splitFor ? ` to feed <span class="highlight">${entry.splitFor}</span>` : '';
 
       const inputPills = entry.recipe.inputs.map(inp => {
         const inputItem = ITEMS[inp.item];
@@ -3167,7 +3171,7 @@ function renderBuildTimeline(buildOrder) {
 
       recipePills = `<div class="recipe-pills">${inputPills.join('<span class="recipe-pill pill-times">+</span>')}<span class="recipe-arrow">&rarr;</span>${outputPill}</div>`;
 
-      detail = `Build <span class="highlight">${buildingsNeeded}x ${building ? building.name : "Building"}</span> for <span class="highlight">${item.name}</span> &mdash; <span class="highlight">${entry.rate.toFixed(1)}/min</span>`;
+      detail = `Build <span class="highlight">${buildingsNeeded}x ${building ? building.name : "Building"}</span> for <span class="highlight">${item.name}</span> &mdash; <span class="highlight">${entry.rate.toFixed(1)}/min</span>${feedsLabel}`;
     }
 
     step.innerHTML = `
@@ -4196,16 +4200,6 @@ function setupAnalyzer() {
       }
 
       let html = '';
-
-      // Next Resource to Automate
-      if (data.recommendations?.next_resources?.length > 0) {
-        html += '<div class="rec-card"><h4 style="color:var(--neon-gold)">Next Resource to Automate</h4><ul class="rec-list">';
-        for (const r of data.recommendations.next_resources) {
-          const pClass = r.priority === 'high' ? 'high' : r.priority === 'medium' ? 'med' : 'low';
-          html += `<li><span class="rec-priority ${pClass}">${r.priority}</span>${r.name}${r.reason ? ' — <span style="color:var(--text-muted)">' + r.reason + '</span>' : ''}</li>`;
-        }
-        html += '</ul></div>';
-      }
 
       // Next Building to Automate
       if (data.recommendations?.next_buildings?.length > 0) {

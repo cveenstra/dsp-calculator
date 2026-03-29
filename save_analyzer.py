@@ -112,40 +112,6 @@ BUILDING_NAMES = {
     2316: "Re-composing Assembler",
 }
 
-# Resources progression (what to automate, in order)
-RESOURCE_MILESTONES = [
-    ("Iron Ingot", [1, 6]),       # recipe IDs that produce it
-    ("Copper Ingot", [2, 7]),
-    ("Magnet", [3]),
-    ("Stone Brick", [4]),
-    ("Glass", [5]),
-    ("Circuit Board", [50]),
-    ("Magnetic Coil", [8]),
-    ("Gear", [57]),
-    ("Steel", [63]),
-    ("Energetic Graphite", [56]),
-    ("High-Purity Silicon", [59]),
-    ("Titanium Ingot", [65]),
-    ("Hydrogen (from refining)", [16]),
-    ("Plastic", [11]),
-    ("Graphene", [18, 121]),
-    ("Sulfuric Acid", [17]),
-    ("Carbon Nanotube", [12, 120]),
-    ("Diamond", [60, 108]),
-    ("Crystal Silicon", [69]),
-    ("Titanium Alloy", [67]),
-    ("Processor", [45]),
-    ("Organic Crystal", [15, 119]),
-    ("Titanium Crystal", [85]),
-    ("Casimir Crystal", [84]),
-    ("Particle Container", [86, 117]),
-    ("Plane Filter", [105]),
-    ("Quantum Chip", [34]),
-    ("Frame Material", [64]),
-    ("Dyson Sphere Component", [97]),
-    ("Solar Sail", [106]),
-    ("Small Carrier Rocket", [96]),
-]
 
 
 def output_json(data):
@@ -188,7 +154,6 @@ def main():
         "file_size_mb": round(file_size_mb, 1),
         "summary": "",
         "recommendations": {
-            "next_resources": [],
             "next_buildings": [],
             "next_research": [],
             "next_upgrades": [],
@@ -268,27 +233,6 @@ def main():
         # Check which resources have production buildings
         has_smelter = building_counts.get("Arc Smelter", 0) + building_counts.get("Plane Smelter", 0)
         has_assembler = sum(v for k, v in building_counts.items() if "Assembler" in k)
-        has_chemical = building_counts.get("Chemical Plant", 0) + building_counts.get("Quantum Chemical Plant", 0)
-        has_refinery = building_counts.get("Oil Refinery", 0)
-        has_lab = building_counts.get("Matrix Lab", 0)
-        has_collider = building_counts.get("Miniature Particle Collider", 0)
-
-        for milestone_name, recipe_ids in RESOURCE_MILESTONES:
-            # Check if the recipe is unlocked
-            has_recipe = any(rid in unlocked_recipes for rid in recipe_ids)
-            if not has_recipe:
-                continue
-            # Heuristic: if very few production buildings exist, recommend more
-            # This is approximate — we can't tell exactly what each building produces
-            result["recommendations"]["next_resources"].append({
-                "name": milestone_name,
-                "priority": "high" if len(result["recommendations"]["next_resources"]) < 2 else
-                            "medium" if len(result["recommendations"]["next_resources"]) < 4 else "low",
-                "reason": "Recipe unlocked — ensure production is automated"
-            })
-            if len(result["recommendations"]["next_resources"]) >= 6:
-                break
-
         # --- Recommendations: Next building to automate ---
         common_buildings = [
             "Mining Machine", "Arc Smelter", "Assembler Mk.I", "Tesla Tower",
