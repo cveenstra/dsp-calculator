@@ -3246,62 +3246,85 @@ function renderDepTree(requirements) {
   const FONT_RATE = '12px Orbitron, sans-serif';
   const FONT_BUILD = '11px Orbitron, sans-serif';
 
-  // Build tree data
-  function buildTree(itemId, rate, depth, visited) {
+  // Build tree as a DAG — each item appears only once, with its total
+  // rate from the calculator. Children are the recipe's direct inputs.
+  const builtNodes = {}; // itemId -> node (deduplication)
+
+  function buildTree(itemId, depth) {
+    if (builtNodes[itemId]) return builtNodes[itemId];
+
     const item = ITEMS[itemId];
     if (!item) return null;
     const req = requirements[itemId];
-    const recipe = req ? req.recipe : null;
-    const building = req ? req.building : null;
-    const buildingsNeeded = req ? Math.ceil(req.buildings) : 0;
+    if (!req) return null;
+    const recipe = req.recipe;
+    const building = req.building;
+    const buildingsNeeded = Math.ceil(req.buildings);
     const isRaw = !recipe || recipe.inputs.length === 0;
-    const isCircular = visited.has(itemId) && depth > 0;
-    const node = { itemId, item, rate, depth, recipe, building, buildingsNeeded, isRaw, children: [], x: 0, y: 0, subtreeWidth: 0 };
 
-    if (!isRaw && !isCircular && recipe.inputs.length > 0) {
-      const newVisited = new Set(visited);
-      newVisited.add(itemId);
-      const outputQty = recipe.outputs.find(o => o.item === itemId)?.qty || 1;
+    const node = { itemId, item, rate: req.rate, depth, recipe, building, buildingsNeeded, isRaw, children: [], x: 0, y: 0, subtreeWidth: 0 };
+    builtNodes[itemId] = node; // register before recursing to prevent cycles
+
+    if (!isRaw && recipe.inputs.length > 0) {
       for (const inp of recipe.inputs) {
-        const child = buildTree(inp.item, (inp.qty / outputQty) * rate, depth + 1, newVisited);
+        const child = buildTree(inp.item, depth + 1);
         if (child) node.children.push(child);
       }
     }
     return node;
   }
 
-  const tree = buildTree(targetItem, targetRate, 0, new Set());
+  const tree = buildTree(targetItem, 0);
   if (!tree) return;
 
-  // Pass 1: compute subtree widths bottom-up
+  // Pass 1: compute subtree widths bottom-up (DAG-safe)
+  const widthDone = new Set();
   function computeWidths(node) {
+    if (widthDone.has(node.itemId)) {
+      // Already computed — this is a shared node, don't count width again
+      node.subtreeWidth = 0;
+      return;
+    }
+    widthDone.add(node.itemId);
     if (node.children.length === 0) {
       node.subtreeWidth = NODE_W;
       return;
     }
     for (const child of node.children) computeWidths(child);
-    const childrenWidth = node.children.reduce((s, c) => s + c.subtreeWidth, 0) + H_GAP * (node.children.length - 1);
+    const activeChildren = node.children.filter(c => c.subtreeWidth > 0);
+    if (activeChildren.length === 0) {
+      node.subtreeWidth = NODE_W;
+      return;
+    }
+    const childrenWidth = activeChildren.reduce((s, c) => s + c.subtreeWidth, 0) + H_GAP * (activeChildren.length - 1);
     node.subtreeWidth = Math.max(NODE_W, childrenWidth);
   }
   computeWidths(tree);
 
-  // Pass 2: assign x, y positions
+  // Pass 2: assign x, y positions (DAG-safe)
+  const posDone = new Set();
   function assignPositions(node, left, top) {
+    if (posDone.has(node.itemId)) return;
+    posDone.add(node.itemId);
     node.y = top;
-    // Center this node over its subtree span
     node.x = left + node.subtreeWidth / 2 - NODE_W / 2;
 
     let childLeft = left;
     for (const child of node.children) {
-      assignPositions(child, childLeft, top + NODE_H + V_GAP);
-      childLeft += child.subtreeWidth + H_GAP;
+      if (child.subtreeWidth > 0 && !posDone.has(child.itemId)) {
+        assignPositions(child, childLeft, top + NODE_H + V_GAP);
+        childLeft += child.subtreeWidth + H_GAP;
+      }
     }
   }
   assignPositions(tree, 0, 0);
 
-  // Compute canvas size from tree bounds
+  // Compute canvas size from tree bounds (DAG-safe)
+  const boundsDone = new Set();
   function findBounds(node) {
     let maxX = node.x + NODE_W, maxY = node.y + NODE_H;
+    if (boundsDone.has(node.itemId)) return { maxX, maxY };
+    boundsDone.add(node.itemId);
     for (const child of node.children) {
       const b = findBounds(child);
       maxX = Math.max(maxX, b.maxX);
@@ -3323,8 +3346,11 @@ function renderDepTree(requirements) {
 
   const ox = PAD, oy = PAD; // offset
 
-  // Draw edges first (behind nodes)
+  // Draw edges (DAG-safe — draw all edges but only recurse into unvisited)
+  const edgesDone = new Set();
   function drawEdges(node) {
+    if (edgesDone.has(node.itemId)) return;
+    edgesDone.add(node.itemId);
     const px = ox + node.x + NODE_W / 2;
     const py = oy + node.y + NODE_H;
     for (const child of node.children) {
@@ -3333,7 +3359,6 @@ function renderDepTree(requirements) {
       const color = depthColors[Math.min(node.depth, depthColors.length - 1)];
       const midY = (py + cy) / 2;
 
-      // Glow
       ctx.strokeStyle = color;
       ctx.globalAlpha = 0.08;
       ctx.lineWidth = 6;
@@ -3342,7 +3367,6 @@ function renderDepTree(requirements) {
       ctx.bezierCurveTo(px, midY, cx, midY, cx, cy);
       ctx.stroke();
 
-      // Main line
       ctx.globalAlpha = 0.6;
       ctx.lineWidth = 2;
       ctx.beginPath();
@@ -3350,7 +3374,6 @@ function renderDepTree(requirements) {
       ctx.bezierCurveTo(px, midY, cx, midY, cx, cy);
       ctx.stroke();
 
-      // Dot at child
       ctx.globalAlpha = 0.5;
       ctx.fillStyle = color;
       ctx.beginPath();
@@ -3433,8 +3456,12 @@ function renderDepTree(requirements) {
       ctx.globalAlpha = 1;
     }
 
-    for (const child of node.children) drawNode(child);
+    if (!drawNodeDone.has(node.itemId)) {
+      drawNodeDone.add(node.itemId);
+      for (const child of node.children) drawNode(child);
+    }
   }
+  const drawNodeDone = new Set();
 
   function truncate(str, max) {
     return str.length > max ? str.slice(0, max - 1) + '\u2026' : str;
