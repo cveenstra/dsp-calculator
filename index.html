@@ -3324,15 +3324,14 @@ function renderBuildTimeline(buildOrder) {
   let blueprintSteps = expandedSteps.filter(e => ITEMS[e.itemId] && e.recipe.inputs.length > 0);
   const rawSteps = expandedSteps.filter(e => ITEMS[e.itemId] && e.recipe.inputs.length === 0);
 
-  // Sort blueprints: deepest chain first (longest path from this node to a leaf),
-  // then by depth descending (deepest in the tree first within same chain length)
+  // Sort blueprints: simplest first (least chain depth), most complex last
   blueprintSteps.sort((a, b) => {
-    const aChain = a.chainDepth || 0;
-    const bChain = b.chainDepth || 0;
-    if (aChain !== bChain) return bChain - aChain; // longest chain first
     const aDepth = a.depth || 0;
     const bDepth = b.depth || 0;
-    return bDepth - aDepth; // deepest in tree first
+    if (aDepth !== bDepth) return bDepth - aDepth; // deepest in tree first (simplest ingredients)
+    const aChain = a.chainDepth || 0;
+    const bChain = b.chainDepth || 0;
+    return aChain - bChain; // shorter chain first within same depth
   });
   const allSteps = [...blueprintSteps, ...rawSteps];
   const totalSteps = allSteps.length;
@@ -3342,6 +3341,7 @@ function renderBuildTimeline(buildOrder) {
   const targetShort = targetName.replace(/\s+/g, '-');
   const tierLabel = state.assemblerTier === 'assemblerMk1' ? 'T1' : state.assemblerTier === 'assemblerMk2' ? 'T2' : 'T3';
   const rateLabel = Math.round(parseFloat(document.getElementById("rate-input").value));
+  const automatedNames = state.saveData?.automated_product_names ? new Set(state.saveData.automated_product_names) : null;
 
   // Progress bar
   const progressDiv = document.createElement("div");
@@ -3423,6 +3423,21 @@ function renderBuildTimeline(buildOrder) {
       detail = `Build <span class="highlight">${buildingsNeeded}x ${building ? building.name : "Building"}</span> for <span class="highlight">${item.name}</span> &mdash; <span class="highlight">${entry.rate.toFixed(1)}/min</span>${feedsLabel}`;
     }
 
+    // Blueprint name and save status for non-raw steps
+    let bpLine = '';
+    if (entry.recipe.inputs.length > 0) {
+      const bpItemRate = getOneBuildingRate(entry.itemId);
+      const bpName = item.name.replace(/\s+/g, '-') + '_' + tierLabel + '_' + Math.round(bpItemRate) + 'pm';
+      let saveTag = '';
+      if (automatedNames) {
+        const inSave = automatedNames.has(item.name);
+        saveTag = inSave
+          ? ` <span style="font-family:var(--font-display);font-size:0.58rem;letter-spacing:1px;padding:1px 6px;border-radius:3px;background:rgba(165,255,144,0.12);color:var(--neon-green);border:1px solid rgba(165,255,144,0.2)">IN SAVE</span>`
+          : ` <span style="font-family:var(--font-display);font-size:0.58rem;letter-spacing:1px;padding:1px 6px;border-radius:3px;background:rgba(255,44,112,0.1);color:var(--neon-pink);border:1px solid rgba(255,44,112,0.2)">NOT AUTOMATED</span>`;
+      }
+      bpLine = `<div style="font-family:Monaco,monospace;font-size:12px;color:var(--neon-purple);margin-top:4px">${bpName}${saveTag}</div>`;
+    }
+
     step.innerHTML = `
       <div class="step-number">${stepNum}</div>
       <div class="step-content">
@@ -3430,6 +3445,7 @@ function renderBuildTimeline(buildOrder) {
         <div class="step-text">
           <div class="step-title" style="color: ${item.color}">${iconImg(item.name, 22)}${item.name}${entry.splitFor ? ' <span style="color:var(--text-muted);font-size:0.85rem">\u2192 ' + entry.splitFor + '</span>' : ''}</div>
           <div class="step-detail">${detail}</div>
+          ${bpLine}
           ${recipePills}
         </div>
       </div>
