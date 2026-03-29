@@ -2275,7 +2275,7 @@ select:focus {
         </div>
       </div>
       <div class="input-group">
-        <label>Production Rate (items/min)</label>
+        <label>Production Rate (items/min — auto-fills for 1 building)</label>
         <div class="number-input-wrapper">
           <input type="number" id="rate-input" value="30" min="0.1" step="0.1">
           <div class="spin-btns">
@@ -2755,6 +2755,23 @@ function getBuilding(recipe) {
   return BUILDINGS[recipe.building];
 }
 
+// Compute items/min that 1 building produces for a given item
+function getOneBuildingRate(itemId) {
+  let recipe;
+  if (itemId === "deuterium") {
+    recipe = state.deuteriumSource === "fractionator" ? RECIPES["deuteriumFrac"] : RECIPES["deuteriumCollider"];
+  } else {
+    recipe = getActiveRecipe(itemId);
+  }
+  if (!recipe) return 30;
+  const outputEntry = recipe.outputs.find(o => o.item === itemId);
+  if (!outputEntry) return 30;
+  const building = getBuilding(recipe);
+  const speed = building ? building.speed : 1;
+  const craftsPerMin = (60 / recipe.time) * speed;
+  return craftsPerMin * outputEntry.qty;
+}
+
 function calculateChain(targetItem, targetRate) {
   const requirements = {};
   const queue = [{ item: targetItem, rate: targetRate }];
@@ -2963,6 +2980,9 @@ function buildDropdown() {
           state.selectedItem = item.id;
           input.value = item.name;
           dropdown.classList.remove("active");
+          // Auto-fill rate to 1 building's output
+          const rate = getOneBuildingRate(item.id);
+          document.getElementById("rate-input").value = parseFloat(rate.toFixed(2));
         });
         dropdown.appendChild(div);
       }
@@ -3723,10 +3743,11 @@ function setupCalculate() {
       alert("Please select a target item.");
       return;
     }
-    const rate = parseFloat(document.getElementById("rate-input").value);
+    let rate = parseFloat(document.getElementById("rate-input").value);
+    // Auto-fill to 1 building's output if empty or invalid
     if (!rate || rate <= 0) {
-      alert("Please enter a valid production rate.");
-      return;
+      rate = getOneBuildingRate(state.selectedItem);
+      document.getElementById("rate-input").value = parseFloat(rate.toFixed(2));
     }
 
     const requirements = calculateChain(state.selectedItem, rate);
@@ -3742,7 +3763,7 @@ function setupCalculate() {
   document.getElementById("reset-btn").addEventListener("click", () => {
     state.selectedItem = null;
     document.getElementById("item-search").value = "";
-    document.getElementById("rate-input").value = "30";
+    document.getElementById("rate-input").value = "";
     document.getElementById("results-section").style.display = "none";
     document.getElementById("empty-state").style.display = "";
     // Reset to first tab
@@ -4275,6 +4296,7 @@ function setupAnalyzer() {
           // Set the item and calculate
           state.selectedItem = itemId;
           document.getElementById('item-search').value = buildingName;
+          document.getElementById('rate-input').value = parseFloat(getOneBuildingRate(itemId).toFixed(2));
           document.getElementById('calc-btn').click();
         });
       });
