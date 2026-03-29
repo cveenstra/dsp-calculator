@@ -3158,7 +3158,17 @@ function renderBuildTimeline(buildOrder) {
     }
   }
 
-  const totalSteps = expandedSteps.filter(e => ITEMS[e.itemId]).length;
+  // Split into Blueprints (non-raw) and Raw Resource Connections (raw)
+  const blueprintSteps = expandedSteps.filter(e => ITEMS[e.itemId] && e.recipe.inputs.length > 0);
+  const rawSteps = expandedSteps.filter(e => ITEMS[e.itemId] && e.recipe.inputs.length === 0);
+  const allSteps = [...blueprintSteps, ...rawSteps];
+  const totalSteps = allSteps.length;
+
+  // Target item name for blueprint naming convention
+  const targetName = ITEMS[state.selectedItem]?.name || 'Item';
+  const targetShort = targetName.replace(/\s+/g, '-');
+  const tierLabel = state.assemblerTier === 'assemblerMk1' ? 'T1' : state.assemblerTier === 'assemblerMk2' ? 'T2' : 'T3';
+  const rateLabel = Math.round(parseFloat(document.getElementById("rate-input").value));
 
   // Progress bar
   const progressDiv = document.createElement("div");
@@ -3180,31 +3190,57 @@ function renderBuildTimeline(buildOrder) {
     document.getElementById("progress-text").textContent = `${checked} / ${totalSteps}`;
   }
 
-  expandedSteps.forEach((entry, index) => {
+  // --- Blueprint Naming Convention ---
+  const namingDiv = document.createElement("div");
+  namingDiv.style.cssText = "margin-bottom:16px;padding:14px 18px;background:rgba(0,0,0,0.2);border:1px solid rgba(105,67,255,0.1);border-radius:8px;";
+  namingDiv.innerHTML = `
+    <div style="font-family:var(--font-display);font-size:0.82rem;color:var(--neon-gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Blueprint Naming Convention</div>
+    <div style="font-family:Monaco,monospace;font-size:15px;color:var(--neon-purple);line-height:1.8">
+      <span style="color:var(--text-primary)">${targetShort}</span>_<span style="color:var(--neon-green)">${tierLabel}</span>_<span style="color:var(--neon-cyan)">${rateLabel}pm</span>_<span style="color:var(--text-muted)">[step]</span>
+    </div>
+    <div style="font-size:0.95rem;color:var(--text-muted);margin-top:6px;line-height:1.6">
+      Save each blueprint in-game using this pattern. Examples:<br>
+      <span style="color:var(--text-primary);font-family:Monaco,monospace;font-size:14px">
+        ${targetShort}_${tierLabel}_${rateLabel}pm_01-${blueprintSteps[0] ? ITEMS[blueprintSteps[0].itemId]?.name.replace(/\s+/g,'-') : 'Main'}<br>
+        ${targetShort}_${tierLabel}_${rateLabel}pm_02-${blueprintSteps[1] ? ITEMS[blueprintSteps[1].itemId]?.name.replace(/\s+/g,'-') : 'Sub'}<br>
+      </span>
+    </div>
+  `;
+  timeline.appendChild(namingDiv);
+
+  // --- Section: Blueprints ---
+  const bpHeader = document.createElement("div");
+  bpHeader.style.cssText = "font-family:var(--font-display);font-size:0.95rem;color:var(--neon-gold);letter-spacing:2px;text-transform:uppercase;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid rgba(250,208,0,0.15)";
+  bpHeader.textContent = `Blueprints (${blueprintSteps.length} production setups)`;
+  timeline.appendChild(bpHeader);
+
+  let stepNum = 0;
+
+  function renderStep(entry) {
+    stepNum++;
     const item = ITEMS[entry.itemId];
     if (!item) return;
     const building = entry.building;
 
     const step = document.createElement("div");
     step.className = "build-step";
-    step.style.animationDelay = `${index * 0.06}s`;
+    step.style.animationDelay = `${stepNum * 0.04}s`;
 
     let detail = "";
     let recipePills = "";
     if (entry.recipe.inputs.length === 0) {
-      // Raw resource — compute miners for this split rate
       const buildingSpeed = building ? building.speed : 1;
       const minersNeeded = Math.ceil(entry.rate / ((60 / entry.recipe.time) * buildingSpeed));
       const feedsLabel = entry.splitFor ? ` to feed <span class="highlight">${entry.splitFor}</span>` : '';
       detail = `Place <span class="highlight">${minersNeeded}x ${building ? building.name : "Extractor"}</span> for <span class="highlight">${item.name}</span> at <span class="highlight">${entry.rate.toFixed(1)}/min</span>${feedsLabel}`;
     } else {
-      // Recalculate building count from the split rate (not the combined total)
       const outputQty = entry.recipe.outputs.find(o => o.item === entry.itemId)?.qty || 1;
       const buildingSpeed = building ? building.speed : 1;
       const craftsPerMin = entry.rate / outputQty;
       const craftsPerBuilding = (60 / entry.recipe.time) * buildingSpeed;
       const buildingsNeeded = Math.ceil(craftsPerMin / craftsPerBuilding);
       const feedsLabel = entry.splitFor ? ` to feed <span class="highlight">${entry.splitFor}</span>` : '';
+      const bpName = `${targetShort}_${tierLabel}_${rateLabel}pm_${String(stepNum).padStart(2,'0')}-${item.name.replace(/\s+/g,'-')}`;
 
       const inputPills = entry.recipe.inputs.map(inp => {
         const inputItem = ITEMS[inp.item];
@@ -3218,12 +3254,13 @@ function renderBuildTimeline(buildOrder) {
       recipePills = `<div class="recipe-pills">${inputPills.join('<span class="recipe-pill pill-times">+</span>')}<span class="recipe-arrow">&rarr;</span>${outputPill}</div>`;
 
       detail = `Build <span class="highlight">${buildingsNeeded}x ${building ? building.name : "Building"}</span> for <span class="highlight">${item.name}</span> &mdash; <span class="highlight">${entry.rate.toFixed(1)}/min</span>${feedsLabel}`;
+      detail += `<div style="margin-top:6px;font-family:Monaco,monospace;font-size:12px;color:var(--text-muted)">Save as: <span style="color:var(--neon-purple)">${bpName}</span></div>`;
     }
 
     step.innerHTML = `
-      <div class="step-number">${index + 1}</div>
+      <div class="step-number">${stepNum}</div>
       <div class="step-content">
-        <input type="checkbox" class="step-check" id="step-check-${index}">
+        <input type="checkbox" class="step-check" id="step-check-${stepNum}">
         <div class="step-text">
           <div class="step-title" style="color: ${item.color}">${iconImg(item.name, 22)}${item.name}${entry.splitFor ? ' <span style="color:var(--text-muted);font-size:0.85rem">\u2192 ' + entry.splitFor + '</span>' : ''}</div>
           <div class="step-detail">${detail}</div>
@@ -3239,7 +3276,20 @@ function renderBuildTimeline(buildOrder) {
     });
 
     timeline.appendChild(step);
-  });
+  }
+
+  // Render blueprint steps
+  for (const entry of blueprintSteps) renderStep(entry);
+
+  // --- Section: Raw Resource Connections ---
+  if (rawSteps.length > 0) {
+    const rawHeader = document.createElement("div");
+    rawHeader.style.cssText = "font-family:var(--font-display);font-size:0.95rem;color:var(--neon-orange);letter-spacing:2px;text-transform:uppercase;margin:24px 0 10px;padding-bottom:6px;border-bottom:1px solid rgba(255,157,0,0.15)";
+    rawHeader.textContent = `Raw Resource Connections (${rawSteps.length} mining setups)`;
+    timeline.appendChild(rawHeader);
+
+    for (const entry of rawSteps) renderStep(entry);
+  }
 }
 
 function renderRawSummary(buildOrder) {
