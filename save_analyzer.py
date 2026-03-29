@@ -229,11 +229,48 @@ def main():
                 if len(result["recommendations"]["next_upgrades"]) >= 5:
                     break
 
-        # --- Recommendations: Next resource to automate ---
-        # Check which resources have production buildings
-        has_smelter = building_counts.get("Arc Smelter", 0) + building_counts.get("Plane Smelter", 0)
-        has_assembler = sum(v for k, v in building_counts.items() if "Assembler" in k)
+        # --- Collect what's actually being produced by assemblers/smelters ---
+        # Product item IDs that have an active production building
+        automated_product_ids = set()
+        for factory in gd.factories:
+            try:
+                fs = factory.factory_system
+                for asm in fs.assembler_pool:
+                    try:
+                        if asm.products:
+                            for pid in asm.products:
+                                if pid and pid > 0:
+                                    automated_product_ids.add(pid)
+                    except:
+                        pass
+            except:
+                pass
+
+        # Map building names to the item proto IDs that represent them
+        # (these are what shows up in assembler .products when you craft the building)
+        BUILDING_ITEM_IDS = {
+            "Tesla Tower": 2201, "Wireless Power Tower": 2202,
+            "Satellite Substation": 2203, "Wind Turbine": 2204,
+            "Thermal Power Station": 2211, "Solar Panel": 2205,
+            "Accumulator": 2206, "Mini Fusion Power Station": 2212,
+            "Energy Exchanger": 2208, "Ray Receiver": 2209,
+            "Conveyor Belt Mk.I": 2001, "Conveyor Belt Mk.II": 2002, "Conveyor Belt Mk.III": 2003,
+            "Sorter Mk.I": 2011, "Sorter Mk.II": 2012, "Sorter Mk.III": 2013,
+            "Splitter": 2020, "Spray Coater": 2030, "Traffic Monitor": 2040,
+            "Storage Mk.I": 2101, "Storage Mk.II": 2102, "Storage Tank": 2106,
+            "Planetary Logistics Station": 2103, "Interstellar Logistics Station": 2104,
+            "Orbital Collector": 2105,
+            "Mining Machine": 2301, "Water Pump": 2303, "Oil Extractor": 2304,
+            "Arc Smelter": 2305, "Plane Smelter": 2315,
+            "Assembler Mk.I": 2306, "Assembler Mk.II": 2307, "Assembler Mk.III": 2318,
+            "Chemical Plant": 2309, "Oil Refinery": 2308,
+            "Fractionator": 2310, "Miniature Particle Collider": 2311,
+            "Matrix Lab": 2312, "EM-Rail Ejector": 2313,
+            "Vertical Launching Silo": 2314,
+        }
+
         # --- Recommendations: Next building to automate ---
+        # Buildings you're placing but NOT producing in any assembler
         common_buildings = [
             "Mining Machine", "Arc Smelter", "Assembler Mk.I", "Tesla Tower",
             "Conveyor Belt Mk.I", "Sorter Mk.I", "Splitter",
@@ -243,20 +280,17 @@ def main():
             "Planetary Logistics Station", "Interstellar Logistics Station",
             "Mini Fusion Power Station", "EM-Rail Ejector", "Vertical Launching Silo",
         ]
-        # If a building is being placed (count > 0) but in small numbers, suggest automating
         for bname in common_buildings:
+            item_id = BUILDING_ITEM_IDS.get(bname)
+            is_automated = item_id and item_id in automated_product_ids
+            if is_automated:
+                continue  # Already being produced — skip
             count = building_counts.get(bname, 0)
-            if count > 0 and count < 50:
+            if count > 0:
                 result["recommendations"]["next_buildings"].append({
                     "name": bname,
-                    "priority": "medium",
-                    "reason": f"You have {count} placed — consider automating production"
-                })
-            elif count == 0:
-                result["recommendations"]["next_buildings"].append({
-                    "name": bname,
-                    "priority": "low",
-                    "reason": "Not yet placed — may need soon"
+                    "priority": "high" if count >= 10 else "medium",
+                    "reason": f"You have {count} placed but no assembler producing them"
                 })
             if len(result["recommendations"]["next_buildings"]) >= 5:
                 break
